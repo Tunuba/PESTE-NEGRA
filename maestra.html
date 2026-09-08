@@ -126,6 +126,9 @@ button.fuerte{border-color:var(--pergamino)}
 .pin.enfermo{animation:late 1.6s ease-in-out infinite}
 @keyframes late{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.11)}}
 
+.pin.medico .cera{fill:var(--bilis); fill-opacity:.92}
+.pin.medico .trazo{stroke:#1a1410}
+
 .pin.muerto .cera{fill:#100c0a; fill-opacity:.92; stroke:rgba(207,198,176,.5)}
 .pin.muerto .trazo{stroke:var(--hueso)}
 .pin.muerto{animation:cae 900ms ease both}
@@ -318,20 +321,6 @@ button.fuerte{border-color:var(--pergamino)}
     <button class="enlace" id="btnAConfig">Atras</button>
   </div>
   <input type="file" id="ficheroFoto" accept="image/*" hidden>
-</section>
-
-<section class="paso" id="medicos">
-  <div class="cabecera">
-    <h1>Los medicos</h1>
-    <p class="epigrafe">Que cada uno escanee el suyo</p>
-  </div>
-  <div class="listaMedicos" id="listaMedicos"></div>
-  <p class="tenue" style="text-align:center; max-width:520px">Les abre su mesa con las cuatro
-    botellas. No lleva instrucciones a proposito, se explican antes.</p>
-  <div class="botones">
-    <button class="fuerte" id="btnAReparto3">Siguiente</button>
-    <button class="enlace" id="btnAFoto3">Atras</button>
-  </div>
 </section>
 
 <section class="paso" id="reparto">
@@ -548,22 +537,27 @@ function acotarCampos(){
   var total = Math.max(1, Math.min(200, num("nTotal", 24)));
   if ($("nTotal").value !== "" && num("nTotal", 24) !== total) $("nTotal").value = total;
 
-  fijar("nEnfermos", total, total);
-  var enfermos = Math.max(0, Math.min(total, num("nEnfermos", 0)));
+  // los medicos salen del mismo grupo, asi que ocupan sitio
+  var topeMedicos = Math.max(1, Math.min(total - 1, num("nEnfermos", 1)));
+  fijar("nMedicos", topeMedicos, topeMedicos);
+  var medicos = Math.max(1, Math.min(topeMedicos, num("nMedicos", 1)));
+  if ($("nMedicos").value !== "" && num("nMedicos", 1) < 1) $("nMedicos").value = 1;
+
+  var topeEnfermos = Math.max(0, total - medicos);
+  fijar("nEnfermos", topeEnfermos, topeEnfermos);
+  var enfermos = Math.max(0, Math.min(topeEnfermos, num("nEnfermos", 0)));
 
   fijar("nOleada1", enfermos, enfermos);
-  var topeMedicos = Math.max(1, enfermos);
-  fijar("nMedicos", topeMedicos, topeMedicos);
-  if (num("nMedicos", 1) < 1 && $("nMedicos").value !== "") $("nMedicos").value = 1;
 }
 
 function pintarCuenta(){
   acotarCampos();
   var c = leerConfig();
-  var sanos = c.total - c.enfermos;
+  var sanos = c.total - c.enfermos - c.medicos;
   var seg = c.enfermos - c.oleada1;
   $("cuenta").innerHTML =
-    '<div class="fila"><span>Se salvan</span><span>' + Math.max(0, sanos) + '</span></div>' +
+    '<div class="fila"><span>Salen medicos y no lo saben</span><span>' + c.medicos + '</span></div>' +
+    '<div class="fila"><span>Se salvan sin ser nada</span><span>' + Math.max(0, sanos) + '</span></div>' +
     '<div class="fila"><span>Caen en la primera oleada, al minuto 0.55</span><span>' + c.oleada1 + '</span></div>' +
     '<div class="fila"><span>Caen en la segunda, al 1.40</span><span>' + Math.max(0, seg) + '</span></div>' +
     '<div class="fila"><span>Acaban muertos</span><span>' + c.enfermos + '</span></div>' +
@@ -584,41 +578,19 @@ function pintarCuenta(){
   return !mal;
 }
 
-/* ---------- los medicos ---------- */
-
-function montarMedicos(){
-  var base = location.origin + location.pathname.replace(/maestra[.]html$/, "") + "medico.html";
-  var caja = $("listaMedicos");
-  caja.innerHTML = "";
-  for (var i=1; i<=estado.cfg.medicos; i++){
-    var url = base + "?n=" + i;
-    var div = document.createElement("div");
-    div.className = "unMedico";
-    var cajaQr = document.createElement("div");
-    cajaQr.className = "cajaqr";
-    try {
-      var qr = qrcode(0, "M");
-      qr.addData(url);
-      qr.make();
-      cajaQr.innerHTML = qr.createSvgTag({ scalable:true, margin:1 });
-    } catch(e){ cajaQr.textContent = url; }
-    var nom = document.createElement("div");
-    nom.className = "nombre";
-    nom.textContent = "Medico " + i;
-    div.appendChild(cajaQr);
-    div.appendChild(nom);
-    caja.appendChild(div);
-  }
-}
-
 /* ---------- el reparto de papeles ---------- */
 
-// 0 sano, 1 fiebre, 2 buba, 3 tos, 4 enfermo al azar, 5 enfermo en la segunda oleada
+/* 0 sano, 1 fiebre, 2 buba, 3 tos, 4 enfermo al azar, 5 enfermo en la segunda
+   oleada, y 9 medico. Los medicos salen del mismo sorteo que los demas y nadie
+   sabe cual le toco hasta que escanea su codigo. */
+var PAPEL_MEDICO = 9;
+
 function repartirPapeles(c){
   var lista = [], i;
+  for (i=0;i<c.medicos;i++) lista.push(PAPEL_MEDICO);
   for (i=0;i<c.oleada1;i++) lista.push(1 + (i % 3));
   for (i=0;i<c.enfermos - c.oleada1;i++) lista.push(5);
-  for (i=0;i<c.total - c.enfermos;i++) lista.push(0);
+  for (i=0;i<c.total - c.enfermos - c.medicos;i++) lista.push(0);
   for (i=lista.length-1;i>0;i--){          // barajar
     var j = Math.floor(Math.random() * (i+1));
     var t = lista[i]; lista[i] = lista[j]; lista[j] = t;
@@ -629,14 +601,24 @@ function repartirPapeles(c){
   });
 }
 
+// que numero de medico le toca a este, contando los medicos que van antes
+function numeroDeMedico(indice){
+  var n = 0;
+  for (var i=0;i<=indice && i<estado.pins.length;i++){
+    if (estado.pins[i].papel === PAPEL_MEDICO) n++;
+  }
+  return n;
+}
+
 function enfermaEn(p){
-  if (p.papel === 0) return Infinity;
+  if (p.papel === 0 || p.papel === PAPEL_MEDICO) return Infinity;
   return p.papel === 5 ? T_OLEADA2 : T_OLEADA1;
 }
 function muereEn(p){
-  return p.papel === 0 ? Infinity : T_MUERTE + p.demora;
+  return (p.papel === 0 || p.papel === PAPEL_MEDICO) ? Infinity : T_MUERTE + p.demora;
 }
 function estadoDe(p, s){
+  if (p.papel === PAPEL_MEDICO) return "medico";
   if (s >= muereEn(p)) return "muerto";
   if (s >= enfermaEn(p)) return "enfermo";
   return "sano";
@@ -661,7 +643,10 @@ var CAMINO_SELLO = (function(){
 
 function dibujarSello(numero, como){
   var marca;
-  if (como === "muerto"){
+  if (como === "medico"){
+    // la cruz de botica, para que se vea de un vistazo quien atiende
+    marca = '<path class="trazo" d="M50,28 L50,72 M28,50 L72,50"/>';
+  } else if (como === "muerto"){
     marca = '<path class="trazo" d="M32,32 L68,68 M68,32 L32,68"/>';
   } else if (como === "enfermo"){
     // la cruz que se pintaba en las puertas de las casas apestadas
@@ -766,7 +751,12 @@ function pintarReparto(){
     $("instruccion").textContent = "Pulsa Ya estan todos para seguir";
   } else {
     $("quienQr").textContent = "Persona " + (i+1) + " de " + estado.pins.length;
-    var url = location.origin + location.pathname.replace(/maestra\.html$/, "") + "index.html?k=" + estado.pins[i].llave;
+    var base = location.origin + location.pathname.replace(/maestra\.html$/, "");
+    // al medico su codigo le abre la mesa de las botellas. No se dice aqui quien
+    // es, se entera al escanear
+    var url = estado.pins[i].papel === PAPEL_MEDICO
+      ? base + "medico.html?n=" + numeroDeMedico(i)
+      : base + "index.html?k=" + estado.pins[i].llave;
     $("ligaQr").textContent = url;
     try {
       var qr = qrcode(0, "M");
@@ -1028,16 +1018,9 @@ $("btnAConfig").addEventListener("click", function(){ pararCamara(); verPaso("co
 
 $("btnAReparto").addEventListener("click", function(){
   pararCamara();
-  montarMedicos();
-  verPaso("medicos");
-});
-
-$("btnAReparto3").addEventListener("click", function(){
   verPaso("reparto");
   setTimeout(pintarReparto, 30);
 });
-
-$("btnAFoto3").addEventListener("click", function(){ verPaso("foto"); });
 
 $("tablaReparto").addEventListener("click", ponerSello);
 

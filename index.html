@@ -258,6 +258,50 @@ body.enfermo .opcion.elegida{background:rgba(255,235,230,.18); border-color:#fff
 .plazo{font-size:14px; color:var(--humo); margin-top:15px}
 body.enfermo .plazo{color:#e0a09a}
 
+/* El momento en que llega la cura. Es lo unico bueno que le pasa al enfermo en
+   toda la estacion, asi que se nota: el rojo se va, entra una onda de alivio y
+   la pantalla respira. Dura poco a proposito, porque tampoco le sirve de nada. */
+#alivio{position:fixed; inset:0; z-index:52; pointer-events:none; opacity:0}
+#alivio.va{animation:alivioFondo 2600ms ease-out both}
+@keyframes alivioFondo{
+  0%{opacity:0; background:radial-gradient(circle at 50% 50%, rgba(190,255,205,.0) 0%, transparent 60%)}
+  12%{opacity:1; background:radial-gradient(circle at 50% 50%, rgba(214,255,224,.92) 0%, rgba(150,230,170,.5) 40%, transparent 72%)}
+  45%{opacity:.8; background:radial-gradient(circle at 50% 50%, rgba(198,246,208,.5) 0%, rgba(120,200,140,.22) 55%, transparent 85%)}
+  100%{opacity:0; background:radial-gradient(circle at 50% 50%, rgba(198,246,208,0) 0%, transparent 90%)}
+}
+#alivio .onda{
+  position:absolute; left:50%; top:50%; width:20px; height:20px; margin:-10px 0 0 -10px;
+  border-radius:50%; border:3px solid rgba(230,255,236,.95); opacity:0;
+}
+#alivio.va .onda{animation:alivioOnda 1500ms cubic-bezier(.16,.7,.3,1) both}
+#alivio.va .onda.dos{animation-delay:200ms}
+#alivio.va .onda.tres{animation-delay:420ms}
+@keyframes alivioOnda{
+  0%{transform:scale(.2); opacity:.95; border-width:4px}
+  100%{transform:scale(34); opacity:0; border-width:1px}
+}
+#alivio .frase{
+  position:absolute; left:0; right:0; top:44%; text-align:center; padding:0 24px;
+  font-family:var(--alto); font-size:clamp(30px,10vw,52px); line-height:1.05; color:#123c1c;
+  opacity:0;
+}
+#alivio.va .frase{animation:alivioFrase 2400ms ease both}
+@keyframes alivioFrase{
+  0%{opacity:0; transform:scale(.86)}
+  16%{opacity:1; transform:scale(1)}
+  62%{opacity:1; transform:scale(1)}
+  100%{opacity:0; transform:scale(1.06)}
+}
+#alivio .cual{
+  position:absolute; left:0; right:0; top:57%; text-align:center; padding:0 30px;
+  font-family:var(--cuerpo); font-style:italic; font-size:clamp(17px,5vw,23px); color:#20512a;
+  opacity:0;
+}
+#alivio.va .cual{animation:alivioFrase 2400ms ease 220ms both}
+/* mientras dura el alivio el temblor y el palpito se paran */
+body.alivio #infectado, body.alivio #juego{animation:none !important; transform:none !important}
+body.alivio #pulsoPantalla{animation:none !important; opacity:0 !important}
+
 /* la camara con la que se recibe la cura del medico */
 .camara{position:relative; width:100%; aspect-ratio:1/1; max-height:38vh; margin:4px auto 10px;
   border:1px solid rgba(255,235,230,.45); overflow:hidden; background:rgba(0,0,0,.35); cursor:pointer}
@@ -541,6 +585,11 @@ body.enfermo .plazo{color:#e0a09a}
   <p class="url" id="textoUrl"></p>
 </section>
 
+<div id="alivio">
+  <div class="onda"></div><div class="onda dos"></div><div class="onda tres"></div>
+  <p class="frase">Te sientes mejor</p>
+  <p class="cual" id="alivioCual"></p>
+</div>
 <div id="pulsoPantalla"></div>
 <p id="susurro"></p>
 <div id="vineta"></div>
@@ -11370,21 +11419,27 @@ function elegirHumor(i){
 
 /* ---------- recibir la cura del medico ---------- */
 
-// El codigo del medico son siete caracteres que empiezan por c. La cura es la
-// suma de los seis siguientes. Tiene que cuadrar con medico.html.
+// El codigo del medico son siete caracteres que empiezan por c. Los cuatro
+// primeros son relleno y los dos ultimos verifican. Tiene que cuadrar con
+// medico.html. Antes solo se sumaba, asi que cualquier tecleo de seis letras
+// curaba y no hacia falta ningun medico.
 function curaDeCodigo(txt){
   var t = String(txt || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
   // por la camara llegan los siete con la c delante. Tecleado a mano llegan solo
   // los seis de datos, que es lo que se le ensena al enfermo en la pantalla
   if (t.length === 6) t = "c" + t;
   if (t.length !== 7 || t.charAt(0) !== "c") return -1;
-  var suma = 0;
+  var d = [];
   for (var i=1;i<7;i++){
     var v = ALFABETO.indexOf(t.charAt(i));
     if (v < 0) return -1;
-    suma += v;
+    d.push(v);
   }
-  return suma % TRATAMIENTOS.length;
+  var s = d[0] + d[1]*2 + d[2]*3 + d[3]*4;
+  for (var c=0;c<TRATAMIENTOS.length;c++){
+    if (d[4] === (s + c*7) % 36 && d[5] === (s*3 + c*11 + 5) % 36) return c;
+  }
+  return -1;
 }
 
 var camara = { flujo:null, lienzo:null, ctx:null, raf:0, viendo:false };
@@ -11453,9 +11508,24 @@ function aplicarCura(i){
   estado.tratamiento = i;
   estado.atendido = transcurrido();
   guardar();
-  campana(330, 3, 0.3);
-  vibrar([60, 60, 60]);
+  soltarAlivio(i);
   pintar();
+}
+
+// lo unico bueno que le pasa al enfermo en toda la estacion
+function soltarAlivio(i){
+  var caja = $("alivio");
+  $("alivioCual").textContent = TRATAMIENTOS[i].que + ". " + TRATAMIENTOS[i].porque + ".";
+  caja.classList.remove("va");
+  void caja.offsetWidth;
+  caja.classList.add("va");
+  cuerpo.classList.add("alivio");
+  setTimeout(function(){ cuerpo.classList.remove("alivio"); }, 2400);
+  setTimeout(function(){ caja.classList.remove("va"); }, 2700);
+  vibrar([40, 60, 40, 60, 220]);
+  campana(523, 2.4, 0.34);
+  setTimeout(function(){ campana(659, 2.2, 0.28); }, 150);
+  setTimeout(function(){ campana(784, 3.4, 0.32); }, 320);
 }
 
 function elegirTratamiento(i){

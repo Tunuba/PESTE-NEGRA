@@ -221,6 +221,26 @@ Probado en trece tamanos de pantalla, de 360x640 a 2560x1440, comprobando que na
 desborda, que nada se solapa, que todo queda centrado y que el codigo QR nunca baja de los
 130 pixeles en que deja de leerse bien.
 
+## Quien es medico no lo sabe hasta que escanea
+
+Los medicos ya no se dan aparte. Salen del mismo sorteo que todos, con su papel
+propio, y la maestra pregunta cuantos quieres. Al repartir, a quien le toco le sale un
+codigo que abre otra cosa, pero por fuera todos los codigos son iguales.
+
+El que abre el suyo ve **la misma portada que los demas**, con su 1348 y su boton de
+Comenzar. Solo despues de pulsarlo le sale que no va a enfermar, que va con el medico de
+negro y que sale cuando caigan los primeros.
+
+Y entonces ve las cuatro botellas, pero **apagadas y sin poder darlas**, con la cuenta
+atras encima. Ese rato es para que le expliquen cual es cual antes de meterse en la calle.
+A la 1.10, que es cuando el guion dice que entra el medico, se encienden solas.
+
+El medico corre el mismo reloj que toda la sala, asi que sale cuando toca y no cuando le
+apetece, y a las 2.05 se le cierra la mesa y le dice a cuantos atendio.
+
+En la foto de la maestra, los medicos llevan un sello con la cruz de botica y nunca
+enferman ni mueren.
+
 ## La mesa del medico
 
 `medico.html` es lo que llevan los medicos. Se les da escaneando su codigo desde la

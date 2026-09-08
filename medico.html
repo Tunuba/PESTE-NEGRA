@@ -56,6 +56,37 @@ button:active{transform:scale(.98); background:rgba(228,215,182,.12)}
 .enlace{background:none; border:none; padding:9px; font-family:var(--cuerpo); font-size:15px;
   letter-spacing:0; text-transform:none; color:var(--humo); text-decoration:underline}
 
+/* la portada, igual que la de todos los demas para que nadie sepa quien es */
+#portada{justify-content:center}
+#portada .marco{border:1px solid rgba(228,215,182,.2); padding:32px 24px; max-width:420px; width:100%;
+  text-align:center}
+.anio{font-family:var(--alto); font-size:56px; color:var(--sangre-viva); line-height:1; margin-bottom:8px}
+.titulo{font-family:var(--alto); font-weight:400; font-size:clamp(38px,12vw,62px); line-height:.98; margin:0}
+.rayita{width:56px; height:1px; background:var(--humo); opacity:.6; margin:20px auto}
+#sincro{justify-content:center}
+.numero{font-family:var(--alto); font-size:clamp(70px,22vw,120px); line-height:1}
+#espera{justify-content:center}
+#espera .numero{color:var(--bilis)}
+
+/* la revelacion, que solo ve el que le toco */
+#revelacion{justify-content:center}
+#revelacion .lineas{display:flex; flex-direction:column; gap:18px; text-align:center; max-width:380px}
+#revelacion p{font-family:var(--alto); font-size:clamp(23px,7.5vw,34px); line-height:1.12; opacity:0}
+#revelacion .l1{animation:sale 1400ms ease 300ms both}
+#revelacion .l2{animation:sale 1400ms ease 1900ms both; color:var(--sangre-viva)}
+#revelacion .l3{animation:sale 1400ms ease 3600ms both}
+@keyframes sale{from{opacity:0; transform:translateY(12px)}to{opacity:1; transform:none}}
+
+#fin{justify-content:center}
+
+/* Mientras no le toca salir ve las botellas pero no puede darlas. Le hace falta
+   ese rato para que le expliquen cual es cual antes de meterse en la calle. */
+.reloj{width:100%; max-width:520px; text-align:center; font-family:var(--alto);
+  font-size:17px; color:var(--bilis); margin-bottom:12px; flex:none}
+.reloj.ya{color:#9fe8b0}
+.botellas.bloqueadas .botella{opacity:.45; cursor:default}
+.botellas.bloqueadas .botella:active{transform:none}
+
 /* Las cuatro botellas y nada mas. Para que sirve cada una no se lee aqui, se
    aprende antes. El medico las reconoce por el color, como en una botica. */
 .botellas{
@@ -91,11 +122,38 @@ button:active{transform:scale(.98); background:rgba(228,215,182,.12)}
 </head>
 <body>
 
-<section class="vista activa" id="elegir">
+<section class="vista activa" id="portada">
+  <div class="marco">
+    <p class="epigrafe">Museo viviente medieval</p>
+    <div class="anio">1348</div>
+    <h1 class="titulo">La peste<br>negra</h1>
+    <div class="rayita"></div>
+    <p class="tenue">Sube el volumen y no bloquees el telefono.</p>
+    <p style="margin-top:26px"><button id="btnComenzar">Comenzar</button></p>
+    <p class="tenue" style="margin-top:14px; font-size:14px">Presiona cuando lo diga el expositor.</p>
+  </div>
+</section>
+
+<section class="vista" id="sincro">
+  <p class="epigrafe">Empieza en</p>
+  <div class="numero" id="cuentaAtras">15</div>
+  <p class="tenue">Baja el telefono.</p>
+</section>
+
+<section class="vista" id="revelacion">
+  <div class="lineas">
+    <p class="l1">Tu no vas a enfermar</p>
+    <p class="l2">Vas con el medico de negro</p>
+    <p class="l3">Cuando salgan los primeros, sales tu</p>
+  </div>
+</section>
+
+<section class="vista" id="elegir">
   <div class="cabecera">
-    <h1 id="quienSoy">El medico</h1>
+    <h1 id="quienSoy">La mesa</h1>
     <span class="cuantos" id="cuantos">Nadie atendido</span>
   </div>
+  <p class="reloj" id="relojMesa"></p>
   <div class="botellas" id="botellas"></div>
 </section>
 
@@ -109,6 +167,13 @@ button:active{transform:scale(.98); background:rgba(228,215,182,.12)}
     <button class="enlace" id="btnSuma">Marcar uno atendido</button>
   </div>
   <p class="aviso" id="avisoDando"></p>
+</section>
+
+<section class="vista" id="fin">
+  <p class="epigrafe">Florencia, 1348</p>
+  <h1 class="titulo" style="text-align:center">Ya no puedes<br>hacer nada</h1>
+  <p class="tenue" style="text-align:center; margin-top:18px" id="cuantosFin"></p>
+  <p class="tenue" style="text-align:center; margin-top:10px">Deja el baston y el frasco en la mesa.</p>
 </section>
 
 <div id="grano"></div>
@@ -136,18 +201,19 @@ var BOTELLAS = [
 
 var ALFABETO = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-/* El codigo de una cura son siete caracteres que empiezan por c. La cura es la
-   suma de los seis siguientes, no una posicion fija, para que dos codigos de la
-   misma cura no se parezcan en nada. Igual que las llaves de los papeles. */
-function codigoDeCura(i){
-  var d = [], suma = 0, k;
-  for (k=0;k<6;k++){ d.push(Math.floor(Math.random() * 36)); suma += d[k]; }
-  var falta = (((i - suma) % BOTELLAS.length) + BOTELLAS.length) % BOTELLAS.length;
-  var donde = Math.floor(Math.random() * 6);
-  d[donde] = (d[donde] + falta) % 36;
-  var s = "c";
-  for (k=0;k<6;k++) s += ALFABETO.charAt(d[k]);
-  return s;
+/* El codigo de una cura son siete caracteres que empiezan por c. Los cuatro
+   primeros son relleno al azar y los dos ultimos son de verificacion, calculados
+   a partir de ellos y de la cura. Sin esos dos, cualquier tecleo de seis letras
+   valia como cura y el enfermo podia curarse solo, sin medico. */
+function codigoDeCura(c){
+  var d = [], k;
+  for (k=0;k<4;k++) d.push(Math.floor(Math.random() * 36));
+  var s = d[0] + d[1]*2 + d[2]*3 + d[3]*4;
+  d.push((s + c*7) % 36);
+  d.push((s*3 + c*11 + 5) % 36);
+  var t = "c";
+  for (k=0;k<6;k++) t += ALFABETO.charAt(d[k]);
+  return t;
 }
 
 /* ---------- el codigo QR, dibujado a mano para que no parezca un tramite ---------- */
@@ -215,7 +281,10 @@ function montarBotellas(){
       var b = document.createElement("button");
       b.className = "botella";
       b.innerHTML = dibujarBotella(BOTELLAS[i]) + '<span class="nombre">' + BOTELLAS[i].nombre + '</span>';
-      b.addEventListener("click", function(){ dar(i); });
+      b.addEventListener("click", function(){
+        if ($("botellas").classList.contains("bloqueadas")) return;
+        dar(i);
+      });
       caja.appendChild(b);
     })(i);
   }
@@ -252,9 +321,85 @@ $("btnSuma").addEventListener("click", function(){
   $("avisoDando").textContent = "Van " + atendidos;
 });
 
+/* ---------- el mismo reloj que toda la sala ---------- */
+
+/* Estos numeros son los de index.html y maestra.html. El medico corre el mismo
+   reloj que todos, asi que sale exactamente cuando lo dice el guion y no cuando
+   le apetezca. */
+var T_OLEADA1 = 55;
+var T_MEDICO  = 70;
+var T_MUERTE  = 125;
+var REJILLA   = 30;
+
+var escala = 1;
+var desde  = 0;
+var inicio = 0;
+var revelado = 0;
+
+function ahora(){ return Date.now(); }
+function transcurrido(){ return inicio ? (ahora() - inicio) / 1000 * escala : -1; }
+
+// la marca de rejilla mas cercana, igual que en index.html, para caer en la
+// misma tanda que los enfermos sin hablarse con ellos
+function proximaRejilla(){
+  var paso = REJILLA * 1000;
+  if (desde > 0) return ahora() - Math.round(desde * 1000 / escala);
+  return Math.round(ahora() / paso) * paso;
+}
+
+function arrancar(){
+  inicio = proximaRejilla();
+  revelado = ahora();
+  try { localStorage.setItem("medico-viva", inicio + "-" + escala); } catch(e){}
+  pintarReloj();
+}
+
+function pintarReloj(){
+  if (!inicio) return;
+  var s = transcurrido();
+
+  if (s < 0){
+    $("cuentaAtras").textContent = Math.ceil((inicio - ahora()) / 1000);
+    verVista("sincro");
+    return;
+  }
+  // primero se entera de quien es, y eso dura lo suyo
+  var desdeRevelado = (ahora() - revelado) / 1000;
+  if (desdeRevelado < 6 && s < T_MEDICO){ verVista("revelacion"); return; }
+
+  var falta = Math.max(0, Math.ceil(T_MEDICO - s));
+  var bloqueado = s < T_MEDICO;
+  $("botellas").classList.toggle("bloqueadas", bloqueado);
+  $("relojMesa").classList.toggle("ya", !bloqueado);
+  if (bloqueado){
+    $("relojMesa").textContent = s < T_OLEADA1
+      ? "Mirate bien las botellas. Sales en " + falta
+      : "Ya estan cayendo. Sales en " + falta;
+  } else if (s < T_MUERTE){
+    $("relojMesa").textContent = "Sal a la calle. Te quedan " + Math.ceil(T_MUERTE - s);
+  }
+  if (s >= T_MUERTE){
+    $("cuantosFin").textContent = atendidos === 0 ? "No te dio tiempo de atender a nadie"
+      : (atendidos === 1 ? "Atendiste a una persona" : "Atendiste a " + atendidos + " personas");
+    verVista("fin");
+    return;
+  }
+  // del 1.10 al 2.05 es su rato, y no se le saca de las botellas
+  var puesta = document.querySelector(".vista.activa");
+  if (puesta && puesta.id !== "elegir" && puesta.id !== "dando") verVista("elegir");
+}
+
+setInterval(pintarReloj, 200);
+
+$("btnComenzar").addEventListener("click", arrancar);
+
 (function(){
-  var n = parseInt(new URLSearchParams(location.search).get("n"), 10);
-  if (n > 0) $("quienSoy").textContent = "Medico " + n;
+  var p = new URLSearchParams(location.search);
+  var n = parseInt(p.get("n"), 10);
+  if (n > 0) $("quienSoy").textContent = "Mesa del medico " + n;
+  if (p.get("ensayo")) escala = parseFloat(p.get("ensayo")) || 6;
+  if (p.get("desde")) desde = parseFloat(p.get("desde")) || 0;
+  if (escala > 1) REJILLA = 5;
   montarBotellas();
   pintarCuantos();
 })();
