@@ -111,6 +111,102 @@ button:active{transform:scale(.97); background:rgba(228,215,182,.12)}
 #infectado .levanta{color:#e6b0aa; font-size:15px}
 body.tratado #infectado .ficha{opacity:.35}
 
+/* La tension. Va de 0 al caer a 1 al morir, y de ella cuelgan el temblor, el
+   latido de la pantalla y lo que se cierra la vista. El color lo pone el guion
+   en JS, que interpolar en CSS no cabe en todos los telefonos. */
+body.enfermo{--tension:0}
+body.enfermo #infectado, body.enfermo #juego{
+  animation:tiembla-cuerpo calc(0.9s - var(--tension) * 0.55s) steps(2,end) infinite;
+}
+@keyframes tiembla-cuerpo{
+  0%{transform:translate(0,0)}
+  50%{transform:translate(calc(var(--tension) * -2.5px), calc(var(--tension) * 1.6px))}
+  100%{transform:translate(calc(var(--tension) * 1.8px), calc(var(--tension) * -2.1px))}
+}
+body.enfermo #vineta{
+  background:radial-gradient(ellipse at 50% 44%,
+    transparent calc(30% - var(--tension) * 22%),
+    rgba(0,0,0,calc(.72 + var(--tension) * .26)) 100%);
+}
+/* el corazon de la pantalla, cada vez mas rapido */
+#pulsoPantalla{
+  position:fixed; inset:0; z-index:8; pointer-events:none; opacity:0;
+  background:radial-gradient(ellipse at 50% 45%, rgba(255,60,40,.30), transparent 62%);
+}
+body.enfermo #pulsoPantalla{
+  animation:palpita calc(1.7s - var(--tension) * 1.15s) ease-in-out infinite;
+}
+@keyframes palpita{
+  0%,100%{opacity:0}
+  8%{opacity:calc(.25 + var(--tension) * .6)}
+  20%{opacity:calc(.06 + var(--tension) * .2)}
+  30%{opacity:calc(.18 + var(--tension) * .45)}
+  46%{opacity:0}
+}
+body.muerto #pulsoPantalla{animation:none; opacity:0}
+
+/* los susurros de que te estas yendo */
+#susurro{
+  position:fixed; left:0; right:0; bottom:calc(15% + env(safe-area-inset-bottom)); z-index:22;
+  text-align:center; pointer-events:none;
+  font-family:var(--alto); font-size:clamp(19px,6vw,26px); color:#ffd9d2;
+  text-shadow:0 2px 24px rgba(0,0,0,.7); opacity:0;
+}
+#susurro.dice{animation:susurra 3.4s ease both}
+@keyframes susurra{0%{opacity:0; transform:translateY(10px)}
+  18%{opacity:.96; transform:translateY(0)}
+  72%{opacity:.96}100%{opacity:0}}
+
+/* ---------- los mini juegos ---------- */
+
+#juego{justify-content:flex-start; padding-top:calc(20px + env(safe-area-inset-top))}
+#juego .parteMedico{
+  flex:none; width:100%; max-width:360px; text-align:center;
+  border-bottom:1px solid rgba(255,235,230,.28); padding-bottom:9px; margin-bottom:10px;
+}
+#juego .parteMedico .cual{font-family:var(--alto); font-size:19px; color:#fff2ee}
+#juego .parteMedico .humor{font-size:14px; color:#e6b0aa; font-style:italic}
+#juego .orden{font-family:var(--alto); font-size:clamp(21px,7vw,28px); color:#fff2ee; margin-bottom:4px}
+#juego .pista{font-size:15px; color:#e6b0aa; margin-bottom:10px; min-height:1.3em}
+#juego .lienzo{
+  position:relative; flex:1; width:100%; max-width:380px; min-height:0;
+  border:1px solid rgba(255,235,230,.2); overflow:hidden; touch-action:manipulation;
+}
+#juego .abajo{flex:none; width:100%; max-width:380px; padding:10px 0 4px}
+#juego .barra{height:9px; background:rgba(0,0,0,.4); overflow:hidden}
+#juego .barra .lleno{height:100%; width:0%; background:#ffd9d2; transition:width 140ms linear}
+#juego .barra.mal .lleno{background:var(--sangre-viva)}
+#juego .cuenta{display:flex; justify-content:space-between; margin-top:7px;
+  font-size:14px; color:#e6b0aa}
+#juego .cuenta b{font-family:var(--alto); font-size:18px; color:#fff2ee; font-weight:400}
+
+/* fiebre, el termometro */
+.termo{position:absolute; left:50%; top:6%; transform:translateX(-50%);
+  width:52px; height:88%; border:2px solid rgba(255,235,230,.5); border-radius:26px; overflow:hidden}
+.termo .liquido{position:absolute; left:0; right:0; bottom:0; height:30%;
+  background:linear-gradient(#ff6a4d,#c22b21); transition:height 120ms linear}
+.termo .raya{position:absolute; left:0; right:0; height:1px; background:rgba(255,235,230,.45)}
+.pano{position:absolute; border-radius:50%; pointer-events:none;
+  border:2px solid #cfe6ff; opacity:.9; animation:panoSube 620ms ease-out both}
+@keyframes panoSube{from{width:14px;height:14px;opacity:.95}to{width:120px;height:120px;opacity:0}}
+
+/* bubas */
+.buba{position:absolute; border-radius:50%; transform:translate(-50%,-50%);
+  background:radial-gradient(circle at 35% 32%, #e86a5c, #7d1410);
+  border:2px solid rgba(255,220,214,.55); cursor:pointer;
+  animation:crece 400ms ease both}
+@keyframes crece{from{transform:translate(-50%,-50%) scale(.2)}to{transform:translate(-50%,-50%) scale(1)}}
+.buba.rota{animation:revienta 340ms ease both; pointer-events:none}
+@keyframes revienta{to{transform:translate(-50%,-50%) scale(1.9); opacity:0}}
+
+/* aliento */
+.aliento{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  border-radius:50%; border:3px solid rgba(255,235,230,.55)}
+.aliento.dentro{border-color:#9fe8b0; box-shadow:0 0 34px rgba(120,230,150,.35)}
+.aliento.fuera{border-color:var(--sangre-viva); box-shadow:0 0 34px rgba(194,43,33,.4)}
+.guia{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  border-radius:50%; border:1px dashed rgba(255,235,230,.32)}
+
 /* sano */
 #sano .marca{font-family:var(--alto); font-size:15px; letter-spacing:.3em; text-transform:uppercase; color:var(--humo)}
 
@@ -301,6 +397,23 @@ body.enfermo .plazo{color:#e0a09a}
   </div>
 </section>
 
+<section class="pantalla" id="juego">
+  <div class="parteMedico">
+    <div class="cual" id="juegoSintoma"></div>
+    <div class="humor" id="juegoTratado"></div>
+  </div>
+  <p class="orden" id="juegoOrden"></p>
+  <p class="pista" id="juegoPista"></p>
+  <div class="lienzo" id="juegoLienzo"></div>
+  <div class="abajo">
+    <div class="barra" id="juegoBarra"><div class="lleno" id="juegoLleno"></div></div>
+    <div class="cuenta">
+      <span id="juegoIzq"></span>
+      <span id="juegoDer"></span>
+    </div>
+  </div>
+</section>
+
 <section class="pantalla" id="sano">
   <p class="marca" id="sanoMarca">Sigues sano</p>
   <div class="rayita" style="margin:24px auto"></div>
@@ -392,6 +505,8 @@ body.enfermo .plazo{color:#e0a09a}
   <p class="url" id="textoUrl"></p>
 </section>
 
+<div id="pulsoPantalla"></div>
+<p id="susurro"></p>
 <div id="vineta"></div>
 <div id="grano"></div>
 
@@ -561,15 +676,56 @@ function golpe(retraso, volumen){
 }
 
 var pulso = null;
-function latido(encendido){
+var ritmoPulso = 0;
+
+function latido(encendido, ritmo){
+  ritmo = ritmo || 2400;
+  if (encendido && pulso && Math.abs(ritmo - ritmoPulso) > 60){
+    clearInterval(pulso); pulso = null;      // ha cambiado el ritmo, se rehace
+  }
   if (encendido && !pulso){
     if (ac && ac.state === "suspended") ac.resume();
-    golpe(0, 0.5); golpe(0.23, 0.3);
-    pulso = setInterval(function(){ golpe(0, 0.5); golpe(0.23, 0.3); }, 2400);
+    ritmoPulso = ritmo;
+    var uno = function(){ golpe(0, 0.5); golpe(ritmo > 900 ? 0.23 : 0.15, 0.3); };
+    uno();
+    pulso = setInterval(uno, ritmo);
   } else if (!encendido && pulso){
     clearInterval(pulso);
     pulso = null;
+    ritmoPulso = 0;
   }
+}
+
+// La alarma de cuando caes. Son dos tonos alternos como una sirena, pero tocados
+// con timbre de campana, que es como se avisaba de una desgracia en una ciudad
+// de 1348. Suena a emergencia sin sonar a ambulancia de hoy.
+function alarma(){
+  if (!ac) return;
+  try {
+    var t0 = ac.currentTime;
+    for (var i=0;i<6;i++){
+      var t = t0 + i * 0.46;
+      var f = (i % 2 === 0) ? 622 : 466;
+      var o = ac.createOscillator();
+      o.type = "triangle";
+      o.frequency.setValueAtTime(f, t);
+      var o2 = ac.createOscillator();
+      o2.type = "sine";
+      o2.frequency.setValueAtTime(f * 2.02, t);
+      var g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.42, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.44);
+      var g2 = ac.createGain();
+      g2.gain.setValueAtTime(0.0001, t);
+      g2.gain.linearRampToValueAtTime(0.12, t + 0.02);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(g); g.connect(maestro);
+      o2.connect(g2); g2.connect(maestro);
+      o.start(t); o.stop(t + 0.5);
+      o2.start(t); o2.stop(t + 0.35);
+    }
+  } catch(e){}
 }
 
 function chirrido(){
@@ -854,7 +1010,8 @@ function repartirRoles(){
     demora: aleatorio() * TARDANZA_MUERTE,
     atendido: 0,
     humorElegido: -1,       // lo que leyo en su frasco
-    tratamiento: -1         // lo que dejo que le hicieran
+    tratamiento: -1,        // lo que dejo que le hicieran
+    aciertos: 0             // lo que aguanto en el mini juego
   };
   var busca = new URLSearchParams(location.search);
   var forzado = busca.get("rol");
@@ -884,7 +1041,10 @@ function arrancar(marca){
   arranqueEn = Math.max(0, (ahora() - marca) / 1000 * escala);
   estado = recuperar(marca) || repartirRoles();
   guardar();
-  try { localStorage.setItem("peste-viva", marca + "-" + escala); } catch(e){}
+  try {
+    var mia = (new URLSearchParams(location.search).get("k") || "").trim().toLowerCase();
+    localStorage.setItem("peste-viva", marca + "-" + escala + "-" + mia);
+  } catch(e){}
   abrirAudio();
   pedirCandado();
   pintar();
@@ -945,9 +1105,13 @@ function pintar(){
 
   if (fase === "calma" || fase === "oleada1" || fase === "medico" || fase === "oleada2" || fase === "muerte"){
     if (enfermo){
-      if (muerto) verPantalla("muerte");
-      else if (s >= T_MUERTE) verPantalla("agonia");
-      else { pintarFicha(s); verPantalla("infectado"); }
+      if (muerto){ cerrarJuego(); verPantalla("muerte"); }
+      else if (s >= momentoMuerte() - 7){ cerrarJuego(); verPantalla("agonia"); }
+      else if (estado.tratamiento !== -1 && s >= estado.atendido + 2){
+        abrirJuego(estado.sintoma);
+        verPantalla("juego");
+      }
+      else { cerrarJuego(); pintarFicha(s); verPantalla("infectado"); }
     } else if (s >= T_OLEADA1){
       pintarSano(s);
       verPantalla("sano");
@@ -964,7 +1128,13 @@ function pintar(){
     verPantalla(viendoExpediente ? "expediente" : "cierre");
   }
 
-  latido(s >= 0 && s < T_OLEADA1 && document.visibilityState === "visible");
+  var ten = pintarTension(s, enfermo && !muerto && s < T_REVELACION, muerto);
+  // en la calma late despacio. Si estas cayendo, el corazon se acelera contigo
+  if (enfermo && !muerto && s < T_REVELACION){
+    latido(document.visibilityState === "visible", Math.round(2000 - ten * 1250));
+  } else {
+    latido(s >= 0 && s < T_OLEADA1 && document.visibilityState === "visible", 2400);
+  }
   murmullo(s >= 0 && s < T_REVELACION && document.visibilityState === "visible");
   toserSiToca(s, enfermo && !muerto);
   disparar(s, enfermo);
@@ -1001,6 +1171,7 @@ function disparar(s, enfermo){
 function contagio(){
   vibrar([420, 130, 420, 130, 900]);
   campana(196, 5, 0.5);
+  alarma();
 }
 
 /* ---------- las elecciones ---------- */
@@ -1068,6 +1239,210 @@ function pintarSano(s){
   } else {
     $("sanoNota").textContent = "Por ahora.";
   }
+}
+
+/* ---------- lo que pasa mientras te mueres ---------- */
+
+// 0 al caer, 1 al morir
+function tensionEn(s){
+  if (!estado) return 0;
+  var a = cayoEn(), b = momentoMuerte();
+  if (b <= a) return 1;
+  return Math.max(0, Math.min(1, (s - a) / (b - a)));
+}
+
+var SUSURROS = [
+  { t:0.30, texto:"Te cuesta tragar" },
+  { t:0.44, texto:"Tiritas con la piel ardiendo" },
+  { t:0.57, texto:"Ves borroso" },
+  { t:0.68, texto:"Te pesan las piernas" },
+  { t:0.78, texto:"Ya casi no oyes la calle" },
+  { t:0.87, texto:"No te queda aire" },
+  { t:0.95, texto:"Frio" }
+];
+var susurrado = -1;
+
+function pintarTension(s, enfermo, muerto){
+  var caja = $("susurro");
+  if (!enfermo || muerto){
+    cuerpo.style.setProperty("--tension", "0");
+    if (susurrado !== -1){ susurrado = -1; caja.classList.remove("dice"); caja.textContent = ""; }
+    return 0;
+  }
+  var ten = tensionEn(s);
+  cuerpo.style.setProperty("--tension", ten.toFixed(3));
+
+  // el rojo se va cerrando y oscureciendo, no se queda plano
+  var r = Math.round(94 - ten * 46);
+  var v = Math.round(15 - ten * 12);
+  var a = Math.round(12 - ten * 10);
+  cuerpo.style.backgroundColor = "rgb(" + r + "," + v + "," + a + ")";
+
+  var cual = -1;
+  for (var i=0;i<SUSURROS.length;i++) if (ten >= SUSURROS[i].t) cual = i;
+  if (cual !== susurrado && cual >= 0){
+    susurrado = cual;
+    caja.textContent = SUSURROS[cual].texto;
+    caja.classList.remove("dice");
+    void caja.offsetWidth;              // reinicia la animacion
+    caja.classList.add("dice");
+    vibrar([26 + Math.round(ten * 90)]);
+  }
+  return ten;
+}
+
+/* ---------- los mini juegos, uno por enfermedad ---------- */
+
+var JUEGOS = [
+  { orden:"Bajale la fiebre",  pista:"Toca para ponerle un pano frio",
+    izq:"Fiebre", der:"Panos" },
+  { orden:"Revienta las bubas", pista:"Tocalas antes de que se llene",
+    izq:"Cuerpo", der:"Reventadas" },
+  { orden:"No pierdas el aire", pista:"Manten el dedo mientras el circulo crece",
+    izq:"Aliento", der:"Respiraciones" }
+];
+
+var jug = null;      // el juego en marcha
+var rafJuego = 0;
+
+function abrirJuego(cual){
+  if (jug && jug.cual === cual) return;
+  cerrarJuego();
+  var st = SINTOMAS[estado.sintoma];
+  jug = {
+    cual: cual,
+    lienzo: $("juegoLienzo"),
+    aguante: 1,          // 0 a 1, lo que te queda de control
+    aciertos: 0,
+    bubas: [],
+    proxima: 0,
+    faseAire: 0,
+    dentro: false,
+    ultimo: performance.now()
+  };
+  $("juegoSintoma").textContent = st.nombre;
+  $("juegoTratado").textContent = TRATAMIENTOS[estado.tratamiento].que + ", y no sirvio";
+  $("juegoOrden").textContent = JUEGOS[cual].orden;
+  $("juegoPista").textContent = JUEGOS[cual].pista;
+  $("juegoIzq").textContent = JUEGOS[cual].izq;
+  jug.lienzo.innerHTML = "";
+
+  if (cual === 0){
+    jug.lienzo.innerHTML = '<div class="termo"><div class="liquido" id="termoLiq"></div>' +
+      '<div class="raya" style="top:25%"></div><div class="raya" style="top:50%"></div>' +
+      '<div class="raya" style="top:75%"></div></div>';
+    jug.calor = 0.35;
+  } else if (cual === 2){
+    jug.lienzo.innerHTML = '<div class="guia" id="guiaAire"></div><div class="aliento" id="circAire"></div>';
+  }
+  rafJuego = requestAnimationFrame(pasoJuego);
+}
+
+function cerrarJuego(){
+  if (rafJuego){ cancelAnimationFrame(rafJuego); rafJuego = 0; }
+  if (jug){ jug.lienzo.innerHTML = ""; jug = null; }
+}
+
+function tocarJuego(ev){
+  if (!jug || !estado) return;
+  var r = jug.lienzo.getBoundingClientRect();
+  var x = (ev.clientX - r.left), y = (ev.clientY - r.top);
+  if (jug.cual === 0){
+    jug.calor = Math.max(0, jug.calor - 0.11);
+    jug.aciertos++;
+    jug.aguante = Math.min(1, jug.aguante + 0.05);
+    var p = document.createElement("div");
+    p.className = "pano";
+    p.style.left = (x - 7) + "px"; p.style.top = (y - 7) + "px";
+    jug.lienzo.appendChild(p);
+    setTimeout(function(){ if (p.parentNode) p.remove(); }, 640);
+    campana(760, 0.5, 0.14);
+  } else if (jug.cual === 1){
+    for (var i=jug.bubas.length-1;i>=0;i--){
+      var b = jug.bubas[i];
+      if (b.rota) continue;
+      var d = Math.sqrt((x-b.x)*(x-b.x) + (y-b.y)*(y-b.y));
+      if (d <= b.r + 12){
+        b.rota = true;
+        b.el.classList.add("rota");
+        (function(el){ setTimeout(function(){ if (el.parentNode) el.remove(); }, 360); })(b.el);
+        jug.bubas.splice(i,1);
+        jug.aciertos++;
+        jug.aguante = Math.min(1, jug.aguante + 0.06);
+        campana(520, 0.4, 0.16);
+        vibrar([18]);
+        break;
+      }
+    }
+  }
+}
+
+function pasoJuego(ahoraMs){
+  rafJuego = requestAnimationFrame(pasoJuego);
+  if (!jug || !estado) return;
+  var dt = Math.min(0.05, (ahoraMs - jug.ultimo) / 1000);
+  jug.ultimo = ahoraMs;
+  var s = transcurrido();
+  var ten = tensionEn(s);
+  // cuanto mas cerca del final, mas rapido va todo. Al final no se puede seguir
+  var prisa = 0.55 + ten * 2.6;
+
+  if (jug.cual === 0){
+    jug.calor = Math.min(1, jug.calor + dt * 0.085 * prisa);
+    var liq = $("termoLiq");
+    if (liq) liq.style.height = Math.round(jug.calor * 100) + "%";
+    jug.aguante = 1 - jug.calor;
+    $("juegoDer").textContent = jug.aciertos + " panos";
+
+  } else if (jug.cual === 1){
+    jug.proxima -= dt;
+    if (jug.proxima <= 0 && jug.bubas.length < 14){
+      jug.proxima = Math.max(0.24, 1.5 / prisa);
+      var an = jug.lienzo.clientWidth, al = jug.lienzo.clientHeight;
+      if (an > 20 && al > 20){
+        var rad = 17 + Math.random() * 13;
+        var b = { x: rad + Math.random() * (an - rad*2), y: rad + Math.random() * (al - rad*2), r: rad, rota:false };
+        var el = document.createElement("div");
+        el.className = "buba";
+        el.style.width = (rad*2) + "px"; el.style.height = (rad*2) + "px";
+        el.style.left = b.x + "px"; el.style.top = b.y + "px";
+        b.el = el;
+        jug.lienzo.appendChild(el);
+        jug.bubas.push(b);
+      }
+    }
+    jug.aguante = Math.max(0, 1 - jug.bubas.length / 12);
+    $("juegoDer").textContent = jug.aciertos + " reventadas";
+
+  } else {
+    jug.faseAire += dt * (0.75 + ten * 1.5);
+    var ciclo = Math.sin(jug.faseAire * Math.PI * 2);
+    var subiendo = ciclo > 0;
+    var an2 = jug.lienzo.clientWidth, al2 = jug.lienzo.clientHeight;
+    var maxr = Math.max(40, Math.min(an2, al2) * 0.42);
+    var rad2 = maxr * (0.34 + 0.66 * (ciclo * 0.5 + 0.5));
+    var c = $("circAire"), g = $("guiaAire");
+    if (c){
+      c.style.width = c.style.height = Math.round(rad2 * 2) + "px";
+      c.classList.toggle("dentro", subiendo === jug.dentro);
+      c.classList.toggle("fuera", subiendo !== jug.dentro);
+    }
+    if (g){ g.style.width = g.style.height = Math.round(maxr * 2) + "px"; }
+    // acierta quien tiene el dedo puesto justo mientras el circulo crece
+    if (subiendo === jug.dentro){
+      jug.aguante = Math.min(1, jug.aguante + dt * 0.28);
+      jug.buenSegundo = (jug.buenSegundo || 0) + dt;
+      if (jug.buenSegundo > 1){ jug.buenSegundo = 0; jug.aciertos++; campana(392, 0.5, 0.12); }
+    } else {
+      jug.aguante = Math.max(0, jug.aguante - dt * 0.5);
+    }
+    $("juegoDer").textContent = jug.aciertos + " respiraciones";
+  }
+
+  var lleno = $("juegoLleno");
+  if (lleno) lleno.style.width = Math.round(jug.aguante * 100) + "%";
+  $("juegoBarra").classList.toggle("mal", jug.aguante < 0.34);
+  if (jug.aciertos > (estado.aciertos || 0)){ estado.aciertos = jug.aciertos; }
 }
 
 function pintarFicha(s){
@@ -1237,6 +1612,11 @@ function pintarExpediente(){
         cuadra ? "Cuadra con lo que leiste. Se trataba con lo contrario."
                : "No cuadra con lo que leiste.",
         !cuadra);
+    }
+    if (estado.aciertos > 0){
+      h += fila("Peleaste", estado.aciertos + (estado.sintoma === 0 ? " panos frios"
+        : (estado.sintoma === 1 ? " bubas reventadas" : " respiraciones")),
+        "Y aun asi se te fue yendo, porque no dependia de ti.", false);
     }
   } else {
     h += fila("No caiste", "Ni en la primera ni en la segunda", "Mas de la mitad de la sala si.", false);
@@ -1434,6 +1814,17 @@ $("btnComenzar").addEventListener("click", function(){
   arrancar(proximaRejilla());
 });
 
+// el dedo sobre el lienzo del mini juego
+$("juegoLienzo").addEventListener("pointerdown", function(ev){
+  ev.preventDefault();
+  if (jug && jug.cual === 2){ jug.dentro = true; return; }
+  tocarJuego(ev);
+});
+$("juegoLienzo").addEventListener("pointerup", function(){ if (jug) jug.dentro = false; });
+$("juegoLienzo").addEventListener("pointercancel", function(){ if (jug) jug.dentro = false; });
+$("juegoLienzo").addEventListener("pointerleave", function(){ if (jug) jug.dentro = false; });
+$("juegoLienzo").addEventListener("contextmenu", function(ev){ ev.preventDefault(); });
+
 $("btnExpediente").addEventListener("click", function(){
   pintarExpediente();
   verPantalla("expediente");
@@ -1484,22 +1875,33 @@ leerModo();
 window.addEventListener("hashchange", function(){ location.reload(); });
 
 // si el telefono recarga la pagina a medio pase, se vuelve a donde estaba
+// Solo se vuelve a donde estaba si es LA MISMA persona en EL MISMO pase. Si el
+// enlace trae otra llave, es otro QR y por tanto otro papel, y hay que empezar
+// de cero. Si no, al escanear un codigo nuevo salia la partida anterior.
+function olvidarPase(){
+  try {
+    var v = localStorage.getItem("peste-viva");
+    if (v) localStorage.removeItem("peste-" + parseInt(v.split("-")[0], 10));
+    localStorage.removeItem("peste-viva");
+  } catch(e){}
+}
+
 function reanudar(){
   if (esSuelta) return;
   var p = new URLSearchParams(location.search);
-  if (p.get("rol") || p.get("ensayo") || p.get("desde") || p.get("nuevo")) return;
+  if (p.get("rol") || p.get("ensayo") || p.get("desde") || p.get("nuevo")){ olvidarPase(); return; }
   var crudo = null;
   try { crudo = localStorage.getItem("peste-viva"); } catch(e){}
   if (!crudo) return;
   var partes = crudo.split("-");
   var marca = parseInt(partes[0], 10);
   var esc = parseFloat(partes[1]) || 1;
-  if (!marca) return;
+  var llaveVieja = partes[2] || "";
+  var llaveAhora = (p.get("k") || "").trim().toLowerCase();
+  if (!marca){ olvidarPase(); return; }
+  if (llaveAhora !== llaveVieja){ olvidarPase(); return; }
   var s = (ahora() - marca) / 1000 * esc;
-  if (s < -60 || s > T_CIERRE + 120){
-    try { localStorage.removeItem("peste-viva"); } catch(e){}
-    return;
-  }
+  if (s < -60 || s > T_CIERRE + 45){ olvidarPase(); return; }
   escala = esc;
   arrancar(marca);
 }

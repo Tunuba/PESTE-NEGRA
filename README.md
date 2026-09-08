@@ -56,6 +56,36 @@ gente, con el 60 por ciento como caso normal. Eso no contradice el uno de cada t
 guion, que es Europa entera en cuatro anios. La estacion pasa en Florencia en 1348, que fue
 de las ciudades peor golpeadas y perdio mas de la mitad de su gente.
 
+## Lo que pasa mientras te mueres
+
+Al caer suena una alarma de dos tonos, como una sirena pero tocada con timbre de campana,
+que es como se avisaba de una desgracia en 1348. Y a partir de ahi la pantalla no se queda
+quieta.
+
+Hay una tension que va de cero al caer a uno al morir, y de ella cuelga todo. La pantalla
+palpita cada vez mas rapido, el rojo se va oscureciendo y cerrando sobre ti, el telefono
+tiembla un poco mas, el latido del sonido se acelera de dos segundos a menos de uno, y van
+saliendo frases de lo que te esta pasando. Te cuesta tragar. Ves borroso. Te pesan las
+piernas. Ya casi no oyes la calle. No te queda aire. Frio.
+
+## Los mini juegos
+
+Despues de que el medico te trate, en vez de mirar una pantalla parada, cada enfermedad
+tiene lo suyo.
+
+| Enfermedad | El juego |
+| --- | --- |
+| Fiebre y vomitos | Un termometro que sube solo. Tocas para ponerte panos frios |
+| Buba en el cuello | Salen bubas por la pantalla y las revientas tocandolas |
+| Tos con sangre | Un circulo que crece y encoge. Manten el dedo mientras crece |
+
+Los tres se aceleran con la tension, asi que empiezas pudiendo y acabas sin dar abasto. Esa
+es la idea, que no es que pierdas al final sino que te va ganando, que es de lo que trata
+la estacion entera. Al terminar, el expediente cuenta cuanto peleaste.
+
+Arriba del juego se queda siempre el sintoma y el tratamiento que te hicieron, porque el
+medico no lleva nada encima y lo unico que tiene para trabajar es lo que ve en tu pantalla.
+
 Al terminar, cada telefono abre **su expediente**. Que tuviste, que leiste en el frasco y que
 habria leido un medico de la epoca, que dejaste que te hicieran, que elegiste y como acabaste.
 Debajo, el sello de los cuarenta dias. La idea es que la frase final no la diga un cartel sino
