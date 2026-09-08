@@ -307,7 +307,7 @@ var escala = 1;                 // el modo ensayo comprime el tiempo
 var desde = 0;                  // arrancar con el reloj ya adelantado, para ensayar un tramo
 var inicio = 0;                 // marca de arranque compartida, en milisegundos
 var estado = null;              // rol y sintoma de este telefono
-var faseActual = "";
+var arranqueEn = 0;             // segundo del guion en el que se abrio esta pagina
 var tempranas = {};             // efectos ya disparados
 
 function aleatorio(){ return Math.random(); }
@@ -415,8 +415,8 @@ document.addEventListener("visibilitychange", function(){
 
 function proximaRejilla(){
   var paso = REJILLA * 1000;
-  var marca = Math.ceil((ahora() + ESPERA_MINIMA * 1000) / paso) * paso;
-  return marca - Math.round(desde * 1000 / escala);
+  if (desde > 0) return ahora() - Math.round(desde * 1000 / escala);
+  return Math.ceil((ahora() + ESPERA_MINIMA * 1000) / paso) * paso;
 }
 
 function codigoDe(marca){
@@ -450,6 +450,7 @@ function repartirRoles(){
 
 function arrancar(marca){
   inicio = marca;
+  arranqueEn = Math.max(0, (ahora() - marca) / 1000 * escala);
   estado = recuperar(marca) || repartirRoles();
   guardar();
   abrirAudio();
@@ -502,7 +503,7 @@ function pintar(){
     if (enfermo){
       if (muerto) verPantalla("muerte");
       else if (s >= 300) verPantalla("agonia");
-      else verPantalla("infectado");
+      else { pintarFicha(s); verPantalla("infectado"); }
     } else if (s >= 120){
       verPantalla("sano");
       $("sanoNota").textContent = (s >= 325)
@@ -524,18 +525,23 @@ function pintar(){
   disparar(s, enfermo);
 }
 
-function reciente(s, t){ return (s - t) < 6; }
-
 function disparar(s, enfermo){
   function una(clave, cuando, accion){
     if (tempranas[clave]) return;
     if (s < cuando) return;
+    // lo que ya habia pasado antes de abrir la pagina no suena
+    if (cuando < arranqueEn - 3 || s > cuando + 60){ tempranas[clave] = 1; return; }
+    // con el telefono bloqueado se guarda y suena al desbloquear
+    if (document.visibilityState !== "visible") return;
     tempranas[clave] = 1;
-    if (reciente(s, cuando) && document.visibilityState === "visible") accion();
+    accion();
   }
 
   if (enfermo && estado.o1) una("caida1", 120, contagio);
   if (enfermo && estado.o2) una("caida2", 215, contagio);
+  if (enfermo && estado.atendido) una("recaida", estado.atendido + 26, function(){
+    vibrar([300, 120, 300]); campana(196, 4, 0.4);
+  });
   if (enfermo) una("fin", momentoMuerte(), function(){ vibrar([1400]); campana(84, 8, 0.55); });
   una("rev", 340, function(){ campana(150, 6, 0.3); });
   una("rat", 378, function(){ soltarRatas(); chirrido(); vibrar([50,70,50,70,50,70,50]); });
@@ -545,18 +551,30 @@ function disparar(s, enfermo){
 function contagio(){
   vibrar([420, 130, 420, 130, 900]);
   campana(196, 5, 0.5);
-  var st = SINTOMAS[estado.sintoma];
-  $("sintomaNombre").textContent = st.nombre;
-  $("sintomaDetalle").textContent = st.detalle;
-  $("sintomaHumor").textContent = st.humor;
-  $("sintomaCura").textContent = st.cura;
 }
 
-function rellenarFicha(){
+function pintarFicha(s){
   if (!estado) return;
   var st = SINTOMAS[estado.sintoma];
-  $("sintomaNombre").textContent = st.nombre;
-  $("sintomaDetalle").textContent = st.detalle;
+  var tratado = estado.atendido > 0 && s >= estado.atendido;
+  var recaida = tratado && s >= estado.atendido + 26;
+  if (!tratado){
+    $("sintomaNombre").textContent = st.nombre;
+    $("sintomaDetalle").textContent = st.detalle;
+    $("levanta").textContent = "Levanta el telefono para que te vean.";
+    $("btnAtendido").style.display = "";
+  } else if (!recaida){
+    $("sintomaNombre").textContent = "Te sientes mejor";
+    $("sintomaDetalle").textContent = st.cura + ".";
+    $("levanta").textContent = "Baja el telefono.";
+    $("btnAtendido").style.display = "none";
+  } else {
+    $("sintomaNombre").textContent = "Vuelve la fiebre";
+    $("sintomaDetalle").textContent = "El tratamiento no sirvio de nada.";
+    $("levanta").textContent = "Levanta el telefono otra vez.";
+    $("btnAtendido").style.display = "none";
+  }
+  cuerpo.classList.toggle("tratado", tratado && !recaida);
   $("sintomaHumor").textContent = st.humor;
   $("sintomaCura").textContent = st.cura;
 }
@@ -701,23 +719,10 @@ $("btnTarde").addEventListener("click", function(){
 
 $("btnAtendido").addEventListener("click", function(){
   if (!estado || estado.atendido) return;
-  estado.atendido = 1; guardar();
-  cuerpo.classList.add("tratado");
-  var cura = SINTOMAS[estado.sintoma].cura;
-  $("sintomaNombre").textContent = "Te sientes mejor";
-  $("sintomaDetalle").textContent = cura + ".";
-  $("levanta").textContent = "Baja el telefono.";
-  $("btnAtendido").style.display = "none";
+  estado.atendido = transcurrido();
+  guardar();
   campana(330, 3, 0.3);
-  setTimeout(function(){
-    if (!estaEnfermo(transcurrido())) return;
-    cuerpo.classList.remove("tratado");
-    $("sintomaNombre").textContent = "Vuelve la fiebre";
-    $("sintomaDetalle").textContent = "El tratamiento no sirvio de nada.";
-    $("levanta").textContent = "Levanta el telefono otra vez.";
-    vibrar([300, 120, 300]);
-    campana(196, 4, 0.4);
-  }, 26000);
+  pintar();
 });
 
 $("btnArrancarGuion").addEventListener("click", function(){
@@ -741,12 +746,12 @@ function leerModo(){
 leerModo();
 window.addEventListener("hashchange", function(){ location.reload(); });
 
-rellenarFicha();
 setInterval(pintar, 200);
 pintar();
 
 /* pista para el expositor, el codigo de sala sale por consola y en el guion */
 window.codigoSala = function(){ return inicio ? codigoDe(inicio) : "sin arrancar"; };
+window.probarRatas = function(){ verPantalla("ratas"); soltarRatas(); chirrido(); };
 
 })();
 </script>
