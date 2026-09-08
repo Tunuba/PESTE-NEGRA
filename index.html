@@ -167,10 +167,6 @@ body.enfermo .plazo{color:#e0a09a}
 .frasco .vidrio{fill:rgba(255,255,255,.10); stroke:rgba(255,240,225,.55); stroke-width:2.4}
 .frasco .brillo{fill:rgba(255,255,255,.30)}
 
-/* eleccion de los sanos */
-#eleccion{justify-content:center}
-#eleccion .epigrafe{margin-bottom:16px}
-
 /* expediente */
 #expediente{justify-content:flex-start; text-align:left; overflow-y:auto;
   padding-top:calc(26px + env(safe-area-inset-top))}
@@ -202,6 +198,17 @@ body.enfermo .plazo{color:#e0a09a}
 .sello .dias{font-size:54px}
 .sello .txt{font-size:11px; letter-spacing:.26em; text-transform:uppercase; margin-top:8px}
 .sello .aro{position:absolute; inset:9px; border:1px solid var(--sangre); border-radius:50%; opacity:.6}
+
+/* repartir papeles */
+#llaves{justify-content:flex-start; text-align:left; overflow-y:auto;
+  padding-top:calc(24px + env(safe-area-inset-top))}
+#llaves h2{align-self:center}
+#llaves .epigrafe{align-self:center; margin:6px 0 18px}
+#llaves .papel{padding:12px 0; border-top:1px solid rgba(228,215,182,.16)}
+#llaves .quien{font-family:var(--alto); font-size:18px; margin-bottom:5px}
+#llaves .liga{display:block; font-size:14px; color:var(--humo); word-break:break-all;
+  line-height:1.5}
+#llaves .botones{display:flex; gap:18px; align-self:center; margin-top:8px}
 
 /* tabla del medico */
 #medico{justify-content:flex-start; text-align:left; overflow-y:auto;
@@ -288,13 +295,6 @@ body.enfermo .plazo{color:#e0a09a}
   </div>
 </section>
 
-<section class="pantalla" id="eleccion">
-  <p class="epigrafe">Ya cayeron los primeros</p>
-  <p class="pregunta">Te quedas o te vas</p>
-  <div class="opciones" id="opcionesHuida"></div>
-  <p class="plazo" id="plazoHuida"></p>
-</section>
-
 <section class="pantalla" id="sano">
   <p class="marca" id="sanoMarca">Sigues sano</p>
   <div class="rayita" style="margin:24px auto"></div>
@@ -365,6 +365,20 @@ body.enfermo .plazo{color:#e0a09a}
   <button class="enlace" id="btnArrancarGuion" style="align-self:center">Arrancar</button>
 </section>
 
+<section class="pantalla" id="llaves">
+  <h2>Repartir papeles</h2>
+  <p class="epigrafe">Cada enlace lleva su papel escondido</p>
+  <div class="tabla" id="listaLlaves"></div>
+  <p class="nota">Manda cada enlace por privado a quien le toque. El que lo abre no puede
+    saber que le va a pasar, y los que entran sin enlace siguen cayendo al azar. Si dos
+    personas van a llevar el mismo papel, dales enlaces distintos con el boton de abajo,
+    porque dos direcciones iguales una al lado de otra delatan el truco.</p>
+  <div class="botones">
+    <button class="enlace" id="btnCopiarLlaves">Copiar todos</button>
+    <button class="enlace" id="btnMasLlaves">Uno mas de cada uno</button>
+  </div>
+</section>
+
 <section class="pantalla" id="qr">
   <h2>Escanea</h2>
   <div class="caja" id="cajaQr"></div>
@@ -390,13 +404,11 @@ var T_RATAS      = 165;
 var T_CIERRE     = 180;
 var TARDANZA_MUERTE = 12;   // segundos en los que se escalonan las muertes
 var T_RECAIDA       = 13;   // lo que dura el alivio del tratamiento
-var T_CIERRA_HUIDA  = 96;   // cierran las puertas, ya no da tiempo de salir de la ciudad
 
 var GUION = [
   { t:0,            fase:"calma",      nota:"Companero 1 explica la estacion. El frasco, el baston y los cuatro humores." },
-  { t:T_OLEADA1,    fase:"oleada1",    nota:"Primera oleada. Los rojos leen su frasco y eligen tratamiento. Los sanos deciden si huyen." },
+  { t:T_OLEADA1,    fase:"oleada1",    nota:"Primera oleada. Los rojos leen su frasco y eligen tratamiento." },
   { t:T_MEDICO,     fase:"medico",     nota:"Entra el medico con la tabla abierta. Lee el color del frasco de cada pantalla roja." },
-  { t:T_CIERRA_HUIDA, fase:"medico",   nota:"Cierran las puertas de la ciudad. Ya nadie puede huir." },
   { t:T_OLEADA2,    fase:"oleada2",    nota:"Segunda oleada. Caen sobre todo los que se quedaron. El medico separa sanos de enfermos." },
   { t:T_MUERTE,     fase:"muerte",     nota:"Empiezan a morir. Estertores y campanas de muerto en toda la sala." },
   { t:T_REVELACION, fase:"revelacion", nota:"Silencio. La revelacion sale sola en todas las pantallas." },
@@ -434,14 +446,6 @@ var TRATAMIENTOS = [
   { que:"Abrirte la buba",     porque:"Sacar lo podrido y quemar tomillo",        humor:"Bilis negra" },
   { que:"Vinagre en la nariz", porque:"Filtrar el aire malo que respiras",        humor:"Flema" }
 ];
-
-var HUIDA = [
-  { que:"Quedarte",  porque:"Alguien tiene que enterrarlos", huye:false },
-  { que:"Huir",      porque:"Al campo, como hicieron los ricos", huye:true }
-];
-
-var PROB_QUEDARSE = 0.55;   // el que se queda entre enfermos cae mucho mas
-var PROB_HUIR     = 0.22;   // el que huye se salva mas, pero no siempre
 
 var AMBIENTE = [
   { t:16, texto:"Hace seis meses llegaron unos barcos al puerto." },
@@ -780,6 +784,50 @@ function proximaRejilla(){
   return Math.round(ahora() / paso) * paso;
 }
 
+/* ---------- las llaves ---------- */
+
+// Un enlace puede llevar el papel escondido, ?k=3f8kq2. Son seis letras y numeros
+// que no dicen nada a quien los mire. El papel es el resto de dividir entre seis,
+// y el resto del numero es relleno al azar para que dos llaves iguales no se
+// parezcan. No es un secreto de verdad, es que no se lea de un vistazo.
+var PAPELES = [
+  { p:0, nombre:"Sano" },
+  { p:1, nombre:"Fiebre y vomitos" },
+  { p:2, nombre:"Buba en el cuello" },
+  { p:3, nombre:"Tos con sangre" },
+  { p:4, nombre:"Enfermo, sintoma al azar" },
+  { p:5, nombre:"Enfermo en la segunda oleada" }
+];
+
+var ALFABETO = "0123456789abcdefghijklmnopqrstuvwxyz";
+var LARGO_LLAVE = 6;
+
+function llaveDe(p){
+  var d = [], suma = 0, i;
+  for (i=0;i<LARGO_LLAVE;i++){ d.push(Math.floor(Math.random() * 36)); suma += d[i]; }
+  // El papel es la suma de todas las letras, no una posicion fija. Si viviera en
+  // la ultima, dos enlaces puestos uno al lado del otro lo cantarian. Se corrige
+  // un caracter al azar, y como 36 es multiplo de 6 la vuelta no descuadra la suma.
+  var falta = (((p - suma) % PAPELES.length) + PAPELES.length) % PAPELES.length;
+  var donde = Math.floor(Math.random() * LARGO_LLAVE);
+  d[donde] = (d[donde] + falta) % 36;
+  var s = "";
+  for (i=0;i<LARGO_LLAVE;i++) s += ALFABETO.charAt(d[i]);
+  return s;
+}
+
+function papelDeLlave(llave){
+  var t = String(llave).trim().toLowerCase();
+  if (t.length !== LARGO_LLAVE) return -1;
+  var suma = 0;
+  for (var i=0;i<LARGO_LLAVE;i++){
+    var v = ALFABETO.indexOf(t.charAt(i));
+    if (v < 0) return -1;
+    suma += v;
+  }
+  return suma % PAPELES.length;
+}
+
 function repartirRoles(){
   var e = {
     o1: aleatorio() < PROB_OLEADA_1,
@@ -789,22 +837,27 @@ function repartirRoles(){
     demora: aleatorio() * TARDANZA_MUERTE,
     atendido: 0,
     humorElegido: -1,       // lo que leyo en su frasco
-    tratamiento: -1,        // lo que dejo que le hicieran
-    huyo: -1                // 0 se quedo, 1 huyo, -1 no eligio a tiempo
+    tratamiento: -1         // lo que dejo que le hicieran
   };
-  var forzado = new URLSearchParams(location.search).get("rol");
+  var busca = new URLSearchParams(location.search);
+  var forzado = busca.get("rol");
   if (forzado === "enfermo"){ e.o1 = true; e.dado2 = 1; }
   if (forzado === "sano"){ e.o1 = false; e.dado2 = 1; }
+
+  // el papel escondido en el enlace manda sobre el azar
+  var papel = busca.get("k") ? papelDeLlave(busca.get("k")) : -1;
+  if (papel === 0){ e.o1 = false; e.dado2 = 1; }
+  else if (papel === 5){ e.o1 = false; e.dado2 = -1; }   // cae en la segunda
+  else if (papel > 0){
+    e.o1 = true;
+    if (papel <= 3) e.sintoma = papel - 1;
+  }
   return e;
 }
 
-// la segunda oleada la decide lo que eligio, no un dado echado al principio
 function cayoEnLaSegunda(){
   if (!estado || estado.o1) return false;
-  var tope = PROB_OLEADA_2;
-  if (estado.huyo === 1) tope = PROB_HUIR;
-  else if (estado.huyo === 0) tope = PROB_QUEDARSE;
-  return estado.dado2 < tope;
+  return estado.dado2 < PROB_OLEADA_2;
 }
 
 function arrancar(marca){
@@ -848,7 +901,7 @@ function momentoMuerte(){
 }
 
 function pintar(){
-  if (esMedico){ return; }        // la tabla del medico no sigue el reloj
+  if (esSuelta){ return; }        // la tabla del medico y las llaves no siguen el reloj
   if (!inicio){ if (esGuion) pintarSemaforo(); return; }
   var s = transcurrido();
 
@@ -877,13 +930,8 @@ function pintar(){
       else if (s >= T_MUERTE) verPantalla("agonia");
       else { pintarFicha(s); verPantalla("infectado"); }
     } else if (s >= T_OLEADA1){
-      if (estado && estado.huyo === -1 && s < T_CIERRA_HUIDA){
-        pintarHuida(s);
-        verPantalla("eleccion");
-      } else {
-        pintarSano(s);
-        verPantalla("sano");
-      }
+      pintarSano(s);
+      verPantalla("sano");
     } else {
       verPantalla("calma");
       pintarAmbiente(s);
@@ -992,33 +1040,12 @@ function elegirTratamiento(i){
   pintar();
 }
 
-function elegirHuida(i){
-  if (!estado || estado.huyo !== -1) return;
-  estado.huyo = HUIDA[i].huye ? 1 : 0;
-  guardar();
-  campana(HUIDA[i].huye ? 262 : 220, 2.4, 0.26);
-  vibrar([70]);
-  pintar();
-}
-
-function pintarHuida(s){
-  montarOpciones($("opcionesHuida"), HUIDA, -1, elegirHuida);
-  var faltan = Math.max(0, Math.ceil(T_CIERRA_HUIDA - s));
-  $("plazoHuida").textContent = faltan > 0
-    ? faltan + " segundos para salir de la ciudad"
-    : "Cerraron las puertas";
-}
-
 function pintarSano(s){
-  var huyo = estado && estado.huyo === 1;
-  var quedo = estado && estado.huyo === 0;
-  $("sanoMarca").textContent = huyo ? "Saliste a tiempo" : (quedo ? "Te quedaste" : "Sigues sano");
+  $("sanoMarca").textContent = "Sigues sano";
   if (s >= T_MUERTE + TARDANZA_MUERTE + 3){
     $("sanoNota").textContent = "Mas de la mitad de esta sala acaba de morir.";
-  } else if (huyo){
-    $("sanoNota").textContent = "Los caminos van llenos de gente como tu.";
-  } else if (quedo){
-    $("sanoNota").textContent = "Te quedaste entre los enfermos.";
+  } else if (s >= T_MUERTE){
+    $("sanoNota").textContent = "Estan cayendo a tu alrededor.";
   } else {
     $("sanoNota").textContent = "Por ahora.";
   }
@@ -1196,14 +1223,6 @@ function pintarExpediente(){
     h += fila("No caiste", "Ni en la primera ni en la segunda", "Mas de la mitad de la sala si.", false);
   }
 
-  if (!estado.o1){
-    h += fila("Elegiste",
-      estado.huyo === 1 ? "Huir" : (estado.huyo === 0 ? "Quedarte" : "No elegir"),
-      estado.huyo === 1 ? "Como los ricos de Florencia. Boccaccio conto lo mismo."
-        : (estado.huyo === 0 ? "Te quedaste donde estaba la peste." : "Cerraron las puertas antes."),
-      false);
-  }
-
   h += fila("Acabaste", enfermo ? "Muerto" : "Vivo",
             enfermo ? "Florencia, 1348" : "Esta vez", enfermo);
 
@@ -1212,9 +1231,7 @@ function pintarExpediente(){
   var v;
   if (enfermo && estado.tratamiento === -1) v = "Ni siquiera te dio tiempo de elegir.";
   else if (enfermo) v = "Elegiste, y te moriste igual.";
-  else if (estado.huyo === 1) v = "Te salvaste, y llevaste la peste al pueblo de al lado.";
-  else if (estado.huyo === 0) v = "Te quedaste entre los enfermos y te salvaste. Nadie sabia por que.";
-  else v = "Te salvaste sin saber por que.";
+  else v = "Te salvaste, y nadie sabia por que.";
   $("veredicto").textContent = v;
 
   $("cola").textContent = "Nada de lo que habia en 1348 servia, porque la bacteria no se vio hasta 1894. "
@@ -1244,6 +1261,7 @@ function montarMedico(){
 
 var esGuion = false;
 var esMedico = false;
+var esSuelta = false;      // pantallas que no siguen el reloj, medico y llaves
 
 function montarGuion(){
   var lista = $("listaGuion");
@@ -1296,6 +1314,43 @@ function pintarGuion(s){
   $("btnArrancarGuion").style.display = "none";
 }
 
+/* ---------- repartir papeles ---------- */
+
+// uno por papel. Si dos personas reciben el mismo enlace y comparan pantallas,
+// veran la misma direccion, asi que el boton da mas por si hace falta uno por cabeza
+function montarLlaves(){
+  var caja = $("listaLlaves"), h = "";
+  for (var i=0;i<PAPELES.length;i++){
+    h += '<div class="papel"><div class="quien">' + PAPELES[i].nombre + '</div></div>';
+  }
+  caja.innerHTML = h;
+  agregarLlaves(1);
+}
+
+function agregarLlaves(cuantas){
+  var base = location.origin + location.pathname;
+  var papeles = $("listaLlaves").children;
+  for (var i=0;i<papeles.length;i++){
+    for (var j=0;j<cuantas;j++){
+      var sp = document.createElement("span");
+      sp.className = "liga";
+      sp.textContent = base + "?k=" + llaveDe(PAPELES[i].p);
+      papeles[i].appendChild(sp);
+    }
+  }
+}
+
+function textoLlaves(){
+  var lineas = [], papeles = $("listaLlaves").children;
+  for (var i=0;i<papeles.length;i++){
+    lineas.push(papeles[i].querySelector(".quien").textContent);
+    var ligas = papeles[i].querySelectorAll(".liga");
+    for (var j=0;j<ligas.length;j++) lineas.push(ligas[j].textContent);
+    lineas.push("");
+  }
+  return lineas.join("\n");
+}
+
 /* ---------- codigo qr ---------- */
 
 function montarQr(){
@@ -1332,6 +1387,18 @@ $("btnSello").addEventListener("click", function(){
   vibrar([180]);
 });
 
+$("btnMasLlaves").addEventListener("click", function(){ agregarLlaves(1); });
+
+$("btnCopiarLlaves").addEventListener("click", function(){
+  var b = $("btnCopiarLlaves");
+  try {
+    navigator.clipboard.writeText(textoLlaves()).then(function(){
+      b.textContent = "Copiados";
+      setTimeout(function(){ b.textContent = "Copiar todos"; }, 2000);
+    }).catch(function(){ b.textContent = "Copialos a mano"; });
+  } catch(e){ b.textContent = "Copialos a mano"; }
+});
+
 $("btnArrancarGuion").addEventListener("click", function(){
   abrirAudio();
   arrancar(proximaRejilla());
@@ -1343,10 +1410,11 @@ function leerModo(){
   var h = (location.hash || "").replace("#", "").toLowerCase();
   if (h === "guion"){ esGuion = true; montarGuion(); verPantalla("guion"); }
   else if (h === "qr"){ montarQr(); verPantalla("qr"); }
-  else if (h === "medico"){ esMedico = true; montarMedico(); verPantalla("medico"); }
+  else if (h === "medico"){ esMedico = true; esSuelta = true; montarMedico(); verPantalla("medico"); }
+  else if (h === "llaves"){ esSuelta = true; montarLlaves(); verPantalla("llaves"); }
   if (h === "ensayo"){ escala = 6; }
   var p = new URLSearchParams(location.search);
-  if (p.get("rol") === "medico"){ esMedico = true; montarMedico(); verPantalla("medico"); }
+  if (p.get("rol") === "medico"){ esMedico = true; esSuelta = true; montarMedico(); verPantalla("medico"); }
   if (p.get("ensayo")) escala = parseFloat(p.get("ensayo")) || 6;
   if (p.get("desde")) desde = parseFloat(p.get("desde")) || 0;
   if (escala > 1){ REJILLA = 5; }
@@ -1357,7 +1425,7 @@ window.addEventListener("hashchange", function(){ location.reload(); });
 
 // si el telefono recarga la pagina a medio pase, se vuelve a donde estaba
 function reanudar(){
-  if (esMedico) return;
+  if (esSuelta) return;
   var p = new URLSearchParams(location.search);
   if (p.get("rol") || p.get("ensayo") || p.get("desde") || p.get("nuevo")) return;
   var crudo = null;

@@ -15,8 +15,7 @@ presionan Comenzar y al minuto algunos se enferman solos. Todo dura tres minutos
    en cuando se oye toser a alguien de la sala.
 5. En el 0.55 se pone roja algo mas de una de cada tres pantallas y vibra. En el 1.40 caen
    mas. Entre las dos oleadas enferma cerca del 60 por ciento de la sala.
-6. A partir de ahi cada quien tiene algo que decidir, y lo que decide cambia lo que le pasa.
-   Ver la seccion de abajo.
+6. El que enferma lee su frasco y elige tratamiento. Ver la seccion de abajo.
 7. El companero 2 entra como medico con la tabla abierta en su telefono, lee el color del
    frasco de cada pantalla roja, aplica el tratamiento y separa a los sanos de los enfermos.
 8. En el 2.05 los enfermos mueren, uno por uno, con estertores y campanas de muerto.
@@ -26,7 +25,7 @@ presionan Comenzar y al minuto algunos se enferman solos. Todo dura tres minutos
 
 ## Lo que decide cada visitante
 
-Nadie mira la pantalla esperando. Los tres momentos son estos.
+El que enferma tiene dos cosas que decidir.
 
 **Si enfermas, lees tu frasco.** Sale tu orina con su color y eliges cual de los cuatro
 humores te sobra. El color es una pista de verdad, la misma rueda que usaba el medico, asi
@@ -57,11 +56,6 @@ gente, con el 60 por ciento como caso normal. Eso no contradice el uno de cada t
 guion, que es Europa entera en cuatro anios. La estacion pasa en Florencia en 1348, que fue
 de las ciudades peor golpeadas y perdio mas de la mitad de su gente.
 
-**Si sigues sano, decides si huyes.** Te quedas o te vas al campo, como hicieron los ricos.
-Tienes hasta el 1.36, que es cuando cierran las puertas. El que se queda cae en la segunda
-oleada mucho mas que el que huye, asi que la decision se paga. Y al final, al que huyo se le
-dice que llevo la peste al pueblo siguiente.
-
 Al terminar, cada telefono abre **su expediente**. Que tuviste, que leiste en el frasco y que
 habria leido un medico de la epoca, que dejaste que te hicieran, que elegiste y como acabaste.
 Debajo, el sello de los cuarenta dias. La idea es que la frase final no la diga un cartel sino
@@ -78,6 +72,30 @@ tu propia hoja, que nada de lo que elegiste cambio nada porque en 1348 no habia 
 - ?rol=enfermo y ?rol=sano fuerzan el papel para probar las pantallas. Sin esto te toca al
   azar, asi que puedes pasar varias pruebas seguidas sin enfermarte.
 - ?rol=medico hace lo mismo que #medico.
+- #llaves abre la pantalla para repartir papeles a mano. Ver la seccion de abajo.
+- ?k=hwaxd9 y parecidos son los papeles repartidos a mano.
+
+## Repartir papeles a mano
+
+Abre #llaves y salen seis enlaces, uno por papel. Sano, cada una de las tres enfermedades,
+enfermo con sintoma al azar, y enfermo que cae en la segunda oleada. Mandas por privado el
+que quieras a quien quieras, y el que entra por ahi lleva ese papel. El que entra por el QR
+normal sigue cayendo al azar como siempre.
+
+El papel va escondido en seis letras y numeros al final de la direccion, del tipo ?k=hwaxd9.
+No dicen nada a quien las mire. El papel es la suma de las seis letras, no una posicion fija,
+porque si viviera en la ultima dos enlaces puestos uno al lado del otro lo cantarian.
+
+No es un secreto de verdad, cualquiera con la pagina delante puede sacarlo. Es que no se lea
+de un vistazo, que es lo unico que hace falta.
+
+Si dos personas van a llevar el mismo papel, dales enlaces distintos con el boton de abajo,
+porque dos direcciones iguales una al lado de la otra tambien delatan el truco.
+
+Comprobado generando 600 llaves, cien por papel. Las 600 dan el papel correcto, ninguna sale
+repetida, y cada papel usa entre 33 y 36 caracteres distintos en la primera y en la ultima
+posicion, o sea que ninguna posicion lo delata. Comprobado tambien abriendo la pagina con 72
+de esas llaves, doce por papel, y leyendo el papel que quedo dentro del juego. Los 72 bien.
 
 ## El sonido
 
