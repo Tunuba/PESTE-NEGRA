@@ -90,9 +90,10 @@ button:active{transform:scale(.97); background:rgba(228,215,182,.12)}
 #calma{justify-content:center}
 #calma .pulso{
   width:16px; height:16px; border-radius:50%; background:var(--pergamino); opacity:.75;
-  animation:latido 3.4s ease-in-out infinite; margin-bottom:34px;
+  animation:latido 2.4s ease-in-out infinite; margin-bottom:34px;
 }
-@keyframes latido{0%,100%{transform:scale(1); opacity:.35}12%{transform:scale(1.9); opacity:.9}24%{transform:scale(1); opacity:.45}}
+@keyframes latido{0%{transform:scale(1); opacity:.35}6%{transform:scale(1.9); opacity:.95}16%{transform:scale(1.1); opacity:.5}
+  22%{transform:scale(1.6); opacity:.8}34%{transform:scale(1); opacity:.35}100%{transform:scale(1); opacity:.35}}
 #calma .epigrafe{color:#a2937c}
 #calma .ambiente{min-height:3.2em; max-width:340px; color:#8e816e; font-style:italic; font-size:17px; margin-top:14px}
 #calma .ambiente span{display:block; animation:aparece 2.2s ease both}
@@ -263,22 +264,32 @@ body.tratado #infectado .ficha{opacity:.35}
 
 /* ---------- ajustes ---------- */
 
+// el guion entero cabe en tres minutos
+var T_OLEADA1    = 55;
+var T_MEDICO     = 70;
+var T_OLEADA2    = 100;
+var T_MUERTE     = 125;
+var T_REVELACION = 145;
+var T_RATAS      = 165;
+var T_CIERRE     = 180;
+var TARDANZA_MUERTE = 12;   // segundos en los que se escalonan las muertes
+var T_RECAIDA       = 13;   // lo que dura el alivio del tratamiento
+
 var GUION = [
-  { t:0,   fase:"calma",      hora:"0.00", nota:"Companero 1 explica la estacion. El frasco, el baston y los cuatro humores." },
-  { t:120, fase:"oleada1",    hora:"2.00", nota:"Primera oleada. Se encienden en rojo las primeras pantallas." },
-  { t:150, fase:"medico",     hora:"2.30", nota:"Entra el medico. Lee el sintoma de cada pantalla roja y aplica el tratamiento." },
-  { t:215, fase:"oleada2",    hora:"3.35", nota:"Segunda oleada. Caen mas. El medico separa a los sanos de los enfermos." },
-  { t:300, fase:"muerte",     hora:"5.00", nota:"Empiezan a morir. Las pantallas rojas se apagan una por una." },
-  { t:340, fase:"revelacion", hora:"5.40", nota:"Silencio. La revelacion sale sola en todas las pantallas." },
-  { t:378, fase:"ratas",      hora:"6.18", nota:"Cruzan las ratas en las pantallas. Suelten las ratas de control remoto." },
-  { t:404, fase:"cierre",     hora:"6.44", nota:"Cierre sobre la cuarentena. Sellar el pasaporte." }
+  { t:0,            fase:"calma",      nota:"Companero 1 explica la estacion. El frasco, el baston y los cuatro humores." },
+  { t:T_OLEADA1,    fase:"oleada1",    nota:"Primera oleada. Se encienden en rojo las primeras pantallas." },
+  { t:T_MEDICO,     fase:"medico",     nota:"Entra el medico. Lee el sintoma de cada pantalla roja y aplica el tratamiento." },
+  { t:T_OLEADA2,    fase:"oleada2",    nota:"Segunda oleada. Caen mas. El medico separa a los sanos de los enfermos." },
+  { t:T_MUERTE,     fase:"muerte",     nota:"Empiezan a morir. Las pantallas rojas se apagan una por una." },
+  { t:T_REVELACION, fase:"revelacion", nota:"Silencio. La revelacion sale sola en todas las pantallas." },
+  { t:T_RATAS,      fase:"ratas",      nota:"Cruzan las ratas en las pantallas. Suelten las ratas de control remoto." },
+  { t:T_CIERRE,     fase:"cierre",     nota:"Cierre sobre la cuarentena. Sellar el pasaporte." }
 ];
 
 var PROB_OLEADA_1 = 0.20;   // uno de cada cinco
 var PROB_OLEADA_2 = 0.16;   // de los que quedaron sanos
 var REJILLA = 15;           // segundos de la rejilla de arranque comun
 var ESPERA_MINIMA = 5;      // segundos de margen antes de arrancar
-var TARDANZA_MUERTE = 22;   // segundos en los que se escalonan las muertes
 
 var SINTOMAS = [
   { nombre:"Bubas en el cuello", detalle:"Un bulto duro debajo de la oreja, del tamano de un huevo.", humor:"Sangre", cura:"Sangria en el brazo del mismo lado" },
@@ -293,16 +304,16 @@ var SINTOMAS = [
 ];
 
 var AMBIENTE = [
-  { t:30, texto:"Hace seis meses llegaron unos barcos al puerto." },
-  { t:72, texto:"Desde entonces se muere la gente mas rapido de lo que alcanzamos a enterrarla." }
+  { t:16, texto:"Hace seis meses llegaron unos barcos al puerto." },
+  { t:34, texto:"Desde entonces se muere la gente mas rapido de lo que alcanzamos a enterrarla." }
 ];
 
 var REVELACION = [
   { t:0,  texto:"No fue el aire." },
-  { t:5,  texto:"No fueron los planetas." },
-  { t:11, texto:"Fue una bacteria.", rojo:true },
-  { t:18, texto:"Nadie la vio hasta 1894." },
-  { t:26, texto:"Viajaba en las pulgas de las ratas de esos barcos." }
+  { t:4,  texto:"No fueron los planetas." },
+  { t:8,  texto:"Fue una bacteria.", rojo:true },
+  { t:12, texto:"Nadie la vio hasta 1894." },
+  { t:16, texto:"Viajaba en las pulgas de las ratas de esos barcos." }
 ];
 
 /* ---------- utilidades ---------- */
@@ -345,7 +356,7 @@ function abrirAudio(){
     if (!C) return;
     ac = new C();
     maestro = ac.createGain();
-    maestro.gain.value = 0.9;
+    maestro.gain.value = 1;
     maestro.connect(ac.destination);
     if (ac.state === "suspended") ac.resume();
     var o = ac.createOscillator(), g = ac.createGain();
@@ -377,6 +388,35 @@ function campana(base, duracion, volumen){
       o.start(t); o.stop(t + cola + 0.05);
     }
   } catch(e){}
+}
+
+function golpe(retraso, volumen){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime + retraso;
+    var o = ac.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(115, t);
+    o.frequency.exponentialRampToValueAtTime(40, t + 0.17);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(volumen, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.36);
+    o.connect(g); g.connect(maestro);
+    o.start(t); o.stop(t + 0.42);
+  } catch(e){}
+}
+
+var pulso = null;
+function latido(encendido){
+  if (encendido && !pulso){
+    if (ac && ac.state === "suspended") ac.resume();
+    golpe(0, 0.5); golpe(0.23, 0.3);
+    pulso = setInterval(function(){ golpe(0, 0.5); golpe(0.23, 0.3); }, 2400);
+  } else if (!encendido && pulso){
+    clearInterval(pulso);
+    pulso = null;
+  }
 }
 
 function chirrido(){
@@ -459,6 +499,7 @@ function arrancar(marca){
   arranqueEn = Math.max(0, (ahora() - marca) / 1000 * escala);
   estado = recuperar(marca) || repartirRoles();
   guardar();
+  try { localStorage.setItem("peste-viva", marca + "-" + escala); } catch(e){}
   abrirAudio();
   pedirCandado();
   pintar();
@@ -474,13 +515,13 @@ function faseDe(s){
 
 function estaEnfermo(s){
   if (!estado) return false;
-  if (estado.o1 && s >= 120) return true;
-  if (estado.o2 && s >= 215) return true;
+  if (estado.o1 && s >= T_OLEADA1) return true;
+  if (estado.o2 && s >= T_OLEADA2) return true;
   return false;
 }
 
 function momentoMuerte(){
-  return 300 + (estado ? estado.demora : 0);
+  return T_MUERTE + (estado ? estado.demora : 0);
 }
 
 function pintar(){
@@ -489,7 +530,7 @@ function pintar(){
 
   // el codigo deja ver de un vistazo si alguien arranco en otra tanda
   var sala = $("sala");
-  sala.hidden = !(s < 118);
+  sala.hidden = !(s < T_OLEADA1 - 2);
   if (!sala.hidden) sala.textContent = "Sala " + codigoDe(inicio);
 
   if (s < 0){
@@ -507,18 +548,18 @@ function pintar(){
 
   var fase = faseDe(s);
 
-  cuerpo.classList.toggle("enfermo", enfermo && !muerto && s < 340);
-  cuerpo.classList.toggle("muerto", muerto && s < 340);
+  cuerpo.classList.toggle("enfermo", enfermo && !muerto && s < T_REVELACION);
+  cuerpo.classList.toggle("muerto", muerto && s < T_REVELACION);
   cuerpo.classList.toggle("ratas", fase === "ratas");
 
   if (fase === "calma" || fase === "oleada1" || fase === "medico" || fase === "oleada2" || fase === "muerte"){
     if (enfermo){
       if (muerto) verPantalla("muerte");
-      else if (s >= 300) verPantalla("agonia");
+      else if (s >= T_MUERTE) verPantalla("agonia");
       else { pintarFicha(s); verPantalla("infectado"); }
-    } else if (s >= 120){
+    } else if (s >= T_OLEADA1){
       verPantalla("sano");
-      $("sanoNota").textContent = (s >= 325)
+      $("sanoNota").textContent = (s >= T_MUERTE + TARDANZA_MUERTE + 3)
         ? "Una de cada tres personas de esta sala acaba de morir."
         : "Por ahora.";
     } else {
@@ -527,13 +568,14 @@ function pintar(){
     }
   } else if (fase === "revelacion"){
     verPantalla("revelacion");
-    pintarRevelacion(s - 340);
+    pintarRevelacion(s - T_REVELACION);
   } else if (fase === "ratas"){
     verPantalla("ratas");
   } else if (fase === "cierre"){
     verPantalla("cierre");
   }
 
+  latido(s >= 0 && s < T_OLEADA1 && document.visibilityState === "visible");
   disparar(s, enfermo);
 }
 
@@ -549,15 +591,15 @@ function disparar(s, enfermo){
     accion();
   }
 
-  if (enfermo && estado.o1) una("caida1", 120, contagio);
-  if (enfermo && estado.o2) una("caida2", 215, contagio);
-  if (enfermo && estado.atendido) una("recaida", estado.atendido + 26, function(){
-    vibrar([300, 120, 300]); campana(196, 4, 0.4);
+  if (enfermo && estado.o1) una("caida1", T_OLEADA1, contagio);
+  if (enfermo && estado.o2) una("caida2", T_OLEADA2, contagio);
+  if (enfermo && estado.atendido) una("recaida", estado.atendido + T_RECAIDA, function(){
+    vibrar([300, 120, 300]); campana(196, 4, 0.5);
   });
-  if (enfermo) una("fin", momentoMuerte(), function(){ vibrar([1400]); campana(84, 8, 0.55); });
-  una("rev", 340, function(){ campana(150, 6, 0.3); });
-  una("rat", 378, function(){ soltarRatas(); chirrido(); vibrar([50,70,50,70,50,70,50]); });
-  una("cie", 404, function(){ campana(120, 7, 0.4); });
+  if (enfermo) una("fin", momentoMuerte(), function(){ vibrar([1400]); campana(84, 8, 0.7); });
+  una("rev", T_REVELACION, function(){ campana(150, 6, 0.4); });
+  una("rat", T_RATAS, function(){ soltarRatas(); chirrido(); vibrar([50,70,50,70,50,70,50]); });
+  una("cie", T_CIERRE, function(){ campana(120, 7, 0.5); });
 }
 
 function contagio(){
@@ -569,7 +611,7 @@ function pintarFicha(s){
   if (!estado) return;
   var st = SINTOMAS[estado.sintoma];
   var tratado = estado.atendido > 0 && s >= estado.atendido;
-  var recaida = tratado && s >= estado.atendido + 26;
+  var recaida = tratado && s >= estado.atendido + T_RECAIDA;
   if (!tratado){
     $("sintomaNombre").textContent = st.nombre;
     $("sintomaDetalle").textContent = st.detalle;
@@ -668,7 +710,7 @@ function montarGuion(){
   lista.innerHTML = "";
   for (var i=0;i<GUION.length;i++){
     var li = document.createElement("li");
-    li.innerHTML = '<span class="hora">' + GUION[i].hora + '</span><span>' + GUION[i].nota + '</span>';
+    li.innerHTML = '<span class="hora">' + reloj(GUION[i].t) + '</span><span>' + GUION[i].nota + '</span>';
     lista.appendChild(li);
   }
 }
@@ -757,6 +799,33 @@ function leerModo(){
 
 leerModo();
 window.addEventListener("hashchange", function(){ location.reload(); });
+
+// si el telefono recarga la pagina a medio pase, se vuelve a donde estaba
+function reanudar(){
+  var p = new URLSearchParams(location.search);
+  if (p.get("rol") || p.get("ensayo") || p.get("desde") || p.get("nuevo")) return;
+  var crudo = null;
+  try { crudo = localStorage.getItem("peste-viva"); } catch(e){}
+  if (!crudo) return;
+  var partes = crudo.split("-");
+  var marca = parseInt(partes[0], 10);
+  var esc = parseFloat(partes[1]) || 1;
+  if (!marca) return;
+  var s = (ahora() - marca) / 1000 * esc;
+  if (s < -60 || s > T_CIERRE + 120){
+    try { localStorage.removeItem("peste-viva"); } catch(e){}
+    return;
+  }
+  escala = esc;
+  arrancar(marca);
+}
+reanudar();
+
+// el sonido de un navegador solo se abre con un toque, asi que se aprovecha cualquiera
+document.addEventListener("pointerdown", function(){
+  if (!ac) abrirAudio();
+  else if (ac.state === "suspended") ac.resume();
+});
 
 setInterval(pintar, 200);
 pintar();
