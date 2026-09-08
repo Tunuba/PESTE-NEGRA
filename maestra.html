@@ -522,13 +522,43 @@ function leerConfig(){
   };
 }
 
-// del 1.10 al 2.05 hay 55 segundos, y es todo lo que tienen para atender la sala
+/* Del 1.10 al 2.05 hay 55 segundos y no hay mas. Los medicos trabajan a la vez,
+   asi que reparten esos 55 entre los enfermos, pero por muchos medicos que haya
+   nadie puede tener mas tiempo del que existe. Sin el tope, nueve medicos y un
+   enfermo daban 495 segundos, que es un numero que no significa nada. */
 function segundosPorPaciente(c){
   if (!c.enfermos) return 0;
-  return Math.round((T_MUERTE - T_MEDICO) * c.medicos / c.enfermos * 10) / 10;
+  var ventana = T_MUERTE - T_MEDICO;
+  return Math.round(Math.min(ventana, ventana * c.medicos / c.enfermos) * 10) / 10;
+}
+
+/* Los numeros se sujetan entre ellos. No puede enfermar mas gente de la que hay,
+   ni caer en la primera oleada mas de la que enferma, ni haber mas medicos que
+   enfermos que atender. Al bajar uno, los de abajo bajan con el. */
+function acotarCampos(){
+  function num(id, porDefecto){
+    var v = parseInt($(id).value, 10);
+    return isNaN(v) ? porDefecto : v;
+  }
+  function fijar(id, valor, tope){
+    $(id).max = tope;
+    if ($(id).value === "") return;          // lo esta escribiendo, no le estorbes
+    if (num(id, 0) > tope) $(id).value = valor;
+  }
+  var total = Math.max(1, Math.min(200, num("nTotal", 24)));
+  if ($("nTotal").value !== "" && num("nTotal", 24) !== total) $("nTotal").value = total;
+
+  fijar("nEnfermos", total, total);
+  var enfermos = Math.max(0, Math.min(total, num("nEnfermos", 0)));
+
+  fijar("nOleada1", enfermos, enfermos);
+  var topeMedicos = Math.max(1, enfermos);
+  fijar("nMedicos", topeMedicos, topeMedicos);
+  if (num("nMedicos", 1) < 1 && $("nMedicos").value !== "") $("nMedicos").value = 1;
 }
 
 function pintarCuenta(){
+  acotarCampos();
   var c = leerConfig();
   var sanos = c.total - c.enfermos;
   var seg = c.enfermos - c.oleada1;
@@ -537,7 +567,7 @@ function pintarCuenta(){
     '<div class="fila"><span>Caen en la primera oleada, al minuto 0.55</span><span>' + c.oleada1 + '</span></div>' +
     '<div class="fila"><span>Caen en la segunda, al 1.40</span><span>' + Math.max(0, seg) + '</span></div>' +
     '<div class="fila"><span>Acaban muertos</span><span>' + c.enfermos + '</span></div>' +
-    '<div class="fila"><span>Segundos por paciente para cada medico</span><span>' +
+    '<div class="fila"><span>Segundos que le tocan a cada enfermo</span><span>' +
       segundosPorPaciente(c) + '</span></div>';
 
   var mal = "";
