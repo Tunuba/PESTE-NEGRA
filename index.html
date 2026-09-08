@@ -1,1 +1,749 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0c0a09">
+<meta name="description" content="Estacion del museo viviente medieval sobre la peste negra y la medicina">
+<title>La peste negra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#0c0a09;
+  --tinta2:#15110e;
+  --pergamino:#e4d7b6;
+  --sangre:#8e1b16;
+  --sangre-viva:#c22b21;
+  --bilis:#b98f2c;
+  --humo:#7d7264;
+  --alto:'IM Fell English', Georgia, serif;
+  --cuerpo:'Cormorant Garamond', Georgia, serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0; position:fixed; inset:0; overflow:hidden;
+  background:var(--tinta); color:var(--pergamino);
+  font-family:var(--cuerpo); font-size:17px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  transition:background 900ms ease;
+  user-select:none;
+}
+body.enfermo{background:#5e0f0c}
+body.muerto{background:#000}
 
+/* grano y vineta */
+#grano{
+  position:fixed; inset:-40%; pointer-events:none; z-index:60; opacity:.16; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='220' height='220' filter='url(%23f)'/></svg>");
+  animation:tiembla 900ms steps(2,end) infinite;
+}
+@keyframes tiembla{0%{transform:translate(0,0)}50%{transform:translate(-14px,9px)}100%{transform:translate(7px,-11px)}}
+#vineta{position:fixed; inset:0; pointer-events:none; z-index:59;
+  background:radial-gradient(ellipse at 50% 42%, transparent 30%, rgba(0,0,0,.72) 100%)}
+
+/* pantallas */
+.pantalla{
+  position:absolute; inset:0; z-index:10;
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  padding:34px 26px calc(34px + env(safe-area-inset-bottom));
+  text-align:center;
+}
+.pantalla.activa{display:flex; animation:aparece 700ms ease both}
+@keyframes aparece{from{opacity:0}to{opacity:1}}
+
+h1{font-family:var(--alto); font-weight:400; font-size:clamp(40px,13vw,68px); line-height:.98; margin:0}
+h2{font-family:var(--alto); font-weight:400; font-size:clamp(30px,9vw,46px); line-height:1.02; margin:0}
+p{margin:0}
+.epigrafe{font-family:var(--alto); font-size:12px; letter-spacing:.34em; text-transform:uppercase; color:var(--humo)}
+.tenue{color:var(--humo); font-size:16px}
+.cursiva{font-style:italic}
+.rayita{width:56px; height:1px; background:var(--humo); opacity:.6; margin:22px 0}
+
+button{
+  font-family:var(--alto); font-size:20px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--pergamino); background:transparent;
+  border:1px solid rgba(228,215,182,.45); border-radius:0;
+  padding:18px 42px; margin:0; cursor:pointer;
+  transition:background 200ms, transform 120ms;
+}
+button:active{transform:scale(.97); background:rgba(228,215,182,.12)}
+.enlace{
+  background:none; border:none; padding:10px; font-family:var(--cuerpo); font-size:15px;
+  letter-spacing:0; text-transform:none; color:var(--humo); text-decoration:underline; cursor:pointer;
+}
+
+/* portada */
+#portada .marco{border:1px solid rgba(228,215,182,.2); padding:36px 26px; max-width:440px; width:100%}
+#portada h1{margin-bottom:6px}
+#portada .anio{font-family:var(--alto); font-size:60px; color:var(--sangre-viva); line-height:1; margin-bottom:10px}
+
+/* sincronizacion */
+#sincro .numero{font-family:var(--alto); font-size:120px; line-height:1; color:var(--pergamino)}
+
+/* calma */
+#calma{justify-content:center}
+#calma .pulso{
+  width:16px; height:16px; border-radius:50%; background:var(--pergamino); opacity:.75;
+  animation:latido 3.4s ease-in-out infinite; margin-bottom:34px;
+}
+@keyframes latido{0%,100%{transform:scale(1); opacity:.35}12%{transform:scale(1.9); opacity:.9}24%{transform:scale(1); opacity:.45}}
+#calma .ambiente{min-height:3.2em; max-width:340px; color:var(--humo); font-style:italic; font-size:17px}
+#calma .ambiente span{display:block; animation:aparece 2.2s ease both}
+
+/* infectado */
+#infectado{justify-content:flex-start; padding-top:calc(28px + env(safe-area-inset-top))}
+#infectado .aviso{font-family:var(--alto); letter-spacing:.3em; text-transform:uppercase; font-size:13px; color:#f0c9c4}
+#infectado h2{color:#fff2ee; margin:14px 0 6px; text-shadow:0 2px 30px rgba(0,0,0,.5)}
+#infectado .detalle{color:#f2cdc7; font-style:italic; max-width:330px; margin-bottom:26px}
+.ficha{width:100%; max-width:340px; border-top:1px solid rgba(255,235,230,.3); padding:16px 0; text-align:left}
+.ficha .campo{font-family:var(--alto); font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:#e0a09a}
+.ficha .valor{font-size:21px; color:#fff2ee; margin-top:2px}
+#infectado .abajo{margin-top:auto; padding-top:24px; width:100%; display:flex; flex-direction:column; align-items:center; gap:14px}
+#infectado button{border-color:rgba(255,235,230,.55); color:#fff2ee}
+#infectado .levanta{color:#e6b0aa; font-size:15px}
+body.tratado #infectado .ficha{opacity:.35}
+
+/* sano */
+#sano .marca{font-family:var(--alto); font-size:15px; letter-spacing:.3em; text-transform:uppercase; color:var(--humo)}
+
+/* agonia y muerte */
+#agonia{animation:respira 5s ease-in-out infinite}
+@keyframes respira{0%,100%{opacity:.28}50%{opacity:.85}}
+#muerte h2{color:#5c5347}
+#muerte .tenue{color:#3a352d}
+
+/* revelacion */
+#revelacion .lineas{max-width:380px; display:flex; flex-direction:column; gap:20px}
+#revelacion .linea{font-family:var(--alto); font-size:clamp(22px,7vw,32px); line-height:1.15; opacity:0}
+#revelacion .linea.puesta{animation:aparece 1600ms ease both}
+#revelacion .linea.roja{color:var(--sangre-viva)}
+
+/* ratas */
+#ratas{justify-content:center; overflow:hidden}
+#ratas .mira{font-family:var(--alto); font-size:clamp(26px,8vw,38px); opacity:0; animation:aparece 1400ms ease 2.4s both}
+#pista{position:absolute; inset:0; z-index:5; pointer-events:none; overflow:hidden}
+.rata{position:absolute; left:-160px; opacity:.92}
+.rata svg{display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+@keyframes cruza{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 260px))}}
+
+/* cierre */
+#cierre .grande{font-family:var(--alto); font-size:clamp(34px,11vw,52px); line-height:1.05}
+#cierre .cuenta{color:var(--sangre-viva)}
+
+/* guion del expositor */
+#guion{justify-content:flex-start; text-align:left; padding-top:calc(24px + env(safe-area-inset-top))}
+#guion .reloj{font-family:var(--alto); font-size:64px; line-height:1}
+#guion .falta{color:var(--bilis); font-size:16px; margin-bottom:18px}
+#guion ol{list-style:none; margin:0; padding:0; width:100%; max-width:460px; overflow-y:auto}
+#guion li{display:flex; gap:14px; padding:11px 0; border-top:1px solid rgba(228,215,182,.14); color:var(--humo); font-size:16px}
+#guion li .hora{font-family:var(--alto); min-width:46px; color:var(--humo)}
+#guion li.ahora{color:var(--pergamino)}
+#guion li.ahora .hora{color:var(--sangre-viva)}
+#guion li.pasada{opacity:.35}
+
+/* qr */
+#qr{justify-content:center; background:var(--pergamino); color:var(--tinta)}
+#qr h2{color:var(--tinta)}
+#qr .caja{background:#fff; padding:18px; line-height:0; margin:24px 0}
+#qr .url{font-size:19px; word-break:break-all; max-width:420px}
+
+.pie{position:absolute; bottom:calc(14px + env(safe-area-inset-bottom)); left:0; right:0; z-index:20;
+  text-align:center; font-size:13px; color:rgba(125,114,100,.75)}
+</style>
+</head>
+<body>
+
+<div id="pista"></div>
+
+<section class="pantalla activa" id="portada">
+  <div class="marco">
+    <p class="epigrafe">Museo viviente medieval</p>
+    <div class="anio">1348</div>
+    <h1>La peste<br>negra</h1>
+    <div class="rayita" style="margin:22px auto"></div>
+    <p class="tenue">Sube el volumen y no bloquees el telefono.</p>
+    <p style="margin-top:28px"><button id="btnComenzar">Comenzar</button></p>
+    <p class="tenue" style="margin-top:16px; font-size:14px">Presiona cuando lo diga el expositor.</p>
+  </div>
+  <button class="enlace" id="btnTarde" style="position:absolute;bottom:18px">Ya empezo sin mi</button>
+</section>
+
+<section class="pantalla" id="sincro">
+  <p class="epigrafe">Empieza en</p>
+  <div class="numero" id="cuentaAtras">15</div>
+  <p class="tenue">Baja el telefono.</p>
+</section>
+
+<section class="pantalla" id="calma">
+  <div class="pulso"></div>
+  <p class="epigrafe">Florencia</p>
+  <div class="ambiente" id="ambiente"></div>
+</section>
+
+<section class="pantalla" id="infectado">
+  <p class="aviso">Enfermaste</p>
+  <h2 id="sintomaNombre">Bubas</h2>
+  <p class="detalle" id="sintomaDetalle"></p>
+  <div class="ficha">
+    <p class="campo">Lo que te sobra</p>
+    <p class="valor" id="sintomaHumor"></p>
+  </div>
+  <div class="ficha">
+    <p class="campo">Lo que hara el medico</p>
+    <p class="valor" id="sintomaCura"></p>
+  </div>
+  <div class="abajo">
+    <p class="levanta" id="levanta">Levanta el telefono para que te vean.</p>
+    <button id="btnAtendido">El medico me atendio</button>
+  </div>
+</section>
+
+<section class="pantalla" id="sano">
+  <p class="marca">Sigues sano</p>
+  <div class="rayita" style="margin:24px auto"></div>
+  <p class="tenue cursiva" id="sanoNota">Por ahora.</p>
+</section>
+
+<section class="pantalla" id="agonia">
+  <h2>Ya no puedes<br>levantarte</h2>
+</section>
+
+<section class="pantalla" id="muerte">
+  <h2>Moriste</h2>
+  <div class="rayita" style="margin:26px auto"></div>
+  <p class="tenue">Florencia, 1348</p>
+</section>
+
+<section class="pantalla" id="revelacion">
+  <div class="lineas" id="lineas"></div>
+</section>
+
+<section class="pantalla" id="ratas">
+  <p class="mira">Mira al suelo</p>
+</section>
+
+<section class="pantalla" id="cierre">
+  <p class="epigrafe">Ragusa, 1377</p>
+  <div class="rayita" style="margin:20px auto"></div>
+  <p class="grande">Cuarenta dias<br>de espera</p>
+  <p class="grande cuenta" style="margin-top:26px">Cuarentena</p>
+  <p class="tenue" style="margin-top:30px">Todavia lo hacemos.</p>
+</section>
+
+<section class="pantalla" id="guion">
+  <p class="epigrafe">Guion del expositor</p>
+  <div class="reloj" id="relojGuion">0.00</div>
+  <p class="falta" id="faltaGuion">Sin arrancar</p>
+  <ol id="listaGuion"></ol>
+  <button class="enlace" id="btnArrancarGuion" style="align-self:center">Arrancar</button>
+</section>
+
+<section class="pantalla" id="qr">
+  <h2>Escanea</h2>
+  <div class="caja" id="cajaQr"></div>
+  <p class="url" id="textoUrl"></p>
+</section>
+
+<div id="vineta"></div>
+<div id="grano"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- ajustes ---------- */
+
+var GUION = [
+  { t:0,   fase:"calma",      hora:"0.00", nota:"Companero 1 explica la estacion. El frasco, el baston y los cuatro humores." },
+  { t:120, fase:"oleada1",    hora:"2.00", nota:"Primera oleada. Se encienden en rojo las primeras pantallas." },
+  { t:150, fase:"medico",     hora:"2.30", nota:"Entra el medico. Lee el sintoma de cada pantalla roja y aplica el tratamiento." },
+  { t:215, fase:"oleada2",    hora:"3.35", nota:"Segunda oleada. Caen mas. El medico separa a los sanos de los enfermos." },
+  { t:300, fase:"muerte",     hora:"5.00", nota:"Empiezan a morir. Las pantallas rojas se apagan una por una." },
+  { t:340, fase:"revelacion", hora:"5.40", nota:"Silencio. La revelacion sale sola en todas las pantallas." },
+  { t:378, fase:"ratas",      hora:"6.18", nota:"Cruzan las ratas en las pantallas. Suelten las ratas de control remoto." },
+  { t:404, fase:"cierre",     hora:"6.44", nota:"Cierre sobre la cuarentena. Sellar el pasaporte." }
+];
+
+var PROB_OLEADA_1 = 0.20;   // uno de cada cinco
+var PROB_OLEADA_2 = 0.16;   // de los que quedaron sanos
+var REJILLA = 15;           // segundos de la rejilla de arranque comun
+var ESPERA_MINIMA = 5;      // segundos de margen antes de arrancar
+var TARDANZA_MUERTE = 22;   // segundos en los que se escalonan las muertes
+
+var SINTOMAS = [
+  { nombre:"Bubas en el cuello", detalle:"Un bulto duro debajo de la oreja, del tamano de un huevo.", humor:"Sangre", cura:"Sangria en el brazo del mismo lado" },
+  { nombre:"Buba en la ingle",   detalle:"Un bulto caliente que no deja caminar.", humor:"Sangre", cura:"Abrirla y ponerle una cataplasma" },
+  { nombre:"Fiebre y escalofrios", detalle:"Tiritas de frio con la piel ardiendo.", humor:"Bilis amarilla", cura:"Quemar tomillo alrededor de la cama" },
+  { nombre:"Manchas negras",     detalle:"Manchas oscuras en los brazos que ayer no estaban.", humor:"Bilis negra", cura:"Sangria y dieta caliente" },
+  { nombre:"Tos con sangre",     detalle:"Toses y en el pano queda sangre.", humor:"Flema", cura:"Vinagre en la nariz y hablarte de lejos" },
+  { nombre:"Vomito",             detalle:"No retienes nada desde anoche.", humor:"Bilis amarilla", cura:"Dieta seca y caliente" },
+  { nombre:"Delirio",            detalle:"Hablas con gente que no esta en el cuarto.", humor:"Bilis negra", cura:"Panos frios en la frente y oracion" },
+  { nombre:"Sed y dolor de cabeza", detalle:"Bebes y sigues seco.", humor:"Bilis amarilla", cura:"Examinar tu orina en el frasco" },
+  { nombre:"Aliento pesado",     detalle:"El olor llena el cuarto entero.", humor:"Flema", cura:"Hierbas quemadas en la puerta" }
+];
+
+var AMBIENTE = [
+  { t:30, texto:"Hace seis meses llegaron unos barcos al puerto." },
+  { t:72, texto:"Desde entonces se muere la gente mas rapido de lo que alcanzamos a enterrarla." }
+];
+
+var REVELACION = [
+  { t:0,  texto:"No fue el aire." },
+  { t:5,  texto:"No fueron los planetas." },
+  { t:11, texto:"Fue una bacteria.", rojo:true },
+  { t:18, texto:"Nadie la vio hasta 1894." },
+  { t:26, texto:"Viajaba en las pulgas de las ratas de esos barcos." }
+];
+
+/* ---------- utilidades ---------- */
+
+var $ = function(id){ return document.getElementById(id); };
+var cuerpo = document.body;
+var escala = 1;                 // el modo ensayo comprime el tiempo
+var inicio = 0;                 // marca de arranque compartida, en milisegundos
+var estado = null;              // rol y sintoma de este telefono
+var faseActual = "";
+var tempranas = {};             // efectos ya disparados
+
+function aleatorio(){ return Math.random(); }
+function ahora(){ return Date.now(); }
+function transcurrido(){ return inicio ? (ahora() - inicio) / 1000 * escala : -1; }
+
+function verPantalla(id){
+  var todas = document.querySelectorAll(".pantalla");
+  for (var i=0;i<todas.length;i++) todas[i].classList.toggle("activa", todas[i].id === id);
+}
+
+function guardar(){
+  try { localStorage.setItem("peste-" + inicio, JSON.stringify(estado)); } catch(e){}
+}
+function recuperar(marca){
+  try {
+    var crudo = localStorage.getItem("peste-" + marca);
+    return crudo ? JSON.parse(crudo) : null;
+  } catch(e){ return null; }
+}
+
+/* ---------- sonido ---------- */
+
+var ac = null, maestro = null;
+
+function abrirAudio(){
+  try {
+    var C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return;
+    ac = new C();
+    maestro = ac.createGain();
+    maestro.gain.value = 0.9;
+    maestro.connect(ac.destination);
+    if (ac.state === "suspended") ac.resume();
+    var o = ac.createOscillator(), g = ac.createGain();
+    g.gain.value = 0.0001; o.connect(g); g.connect(maestro);
+    o.start(); o.stop(ac.currentTime + 0.05);
+  } catch(e){}
+}
+
+function campana(base, duracion, volumen){
+  if (!ac) return;
+  try {
+    if (ac.state === "suspended") ac.resume();
+    var t = ac.currentTime;
+    var salida = ac.createGain();
+    salida.gain.value = volumen;
+    salida.connect(maestro);
+    var parciales = [1, 2.02, 2.41, 3.03, 4.16, 5.43];
+    for (var i=0;i<parciales.length;i++){
+      var o = ac.createOscillator();
+      o.type = "sine";
+      o.frequency.value = base * parciales[i];
+      var g = ac.createGain();
+      var pico = 0.85 / (i + 1.6);
+      var cola = duracion * (1 - i * 0.12);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(pico, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + cola);
+      o.connect(g); g.connect(salida);
+      o.start(t); o.stop(t + cola + 0.05);
+    }
+  } catch(e){}
+}
+
+function chirrido(){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    for (var n=0;n<14;n++){
+      var largo = 0.05 + aleatorio() * 0.06;
+      var buffer = ac.createBuffer(1, Math.ceil(ac.sampleRate * largo), ac.sampleRate);
+      var datos = buffer.getChannelData(0);
+      for (var i=0;i<datos.length;i++) datos[i] = (Math.random()*2-1) * (1 - i/datos.length);
+      var f = ac.createBufferSource(); f.buffer = buffer;
+      var filtro = ac.createBiquadFilter();
+      filtro.type = "bandpass";
+      filtro.frequency.value = 2200 + aleatorio()*2600;
+      filtro.Q.value = 6;
+      var g = ac.createGain(); g.gain.value = 0.10 + aleatorio()*0.1;
+      f.connect(filtro); filtro.connect(g); g.connect(maestro);
+      f.start(t + n * (0.06 + aleatorio()*0.07));
+    }
+  } catch(e){}
+}
+
+function vibrar(patron){
+  try { if (navigator.vibrate) navigator.vibrate(patron); } catch(e){}
+}
+
+/* ---------- pantalla despierta ---------- */
+
+var candado = null;
+function pedirCandado(){
+  try {
+    if (!navigator.wakeLock) return;
+    navigator.wakeLock.request("screen").then(function(c){ candado = c; }).catch(function(){});
+  } catch(e){}
+}
+document.addEventListener("visibilitychange", function(){
+  if (document.visibilityState === "visible"){ pedirCandado(); pintar(); }
+});
+
+/* ---------- arranque compartido ---------- */
+
+function proximaRejilla(){
+  var paso = REJILLA * 1000;
+  return Math.ceil((ahora() + ESPERA_MINIMA * 1000) / paso) * paso;
+}
+
+function codigoDe(marca){
+  return (Math.round(marca / (REJILLA * 1000)) % 46656).toString(36).toUpperCase();
+}
+function marcaDeCodigo(codigo){
+  codigo = String(codigo).trim().toUpperCase();
+  var paso = REJILLA * 1000;
+  var base = Math.round(ahora() / paso);
+  for (var d=0; d<160; d++){
+    var candidata = (base - d) * paso;
+    if (codigoDe(candidata) === codigo) return candidata;
+  }
+  return 0;
+}
+
+function repartirRoles(){
+  var e = {
+    o1: aleatorio() < PROB_OLEADA_1,
+    o2: false,
+    sintoma: Math.floor(aleatorio() * SINTOMAS.length),
+    demora: aleatorio() * TARDANZA_MUERTE,
+    atendido: 0
+  };
+  if (!e.o1) e.o2 = aleatorio() < PROB_OLEADA_2;
+  var forzado = new URLSearchParams(location.search).get("rol");
+  if (forzado === "enfermo"){ e.o1 = true; e.o2 = false; }
+  if (forzado === "sano"){ e.o1 = false; e.o2 = false; }
+  return e;
+}
+
+function arrancar(marca){
+  inicio = marca;
+  estado = recuperar(marca) || repartirRoles();
+  guardar();
+  abrirAudio();
+  pedirCandado();
+  pintar();
+}
+
+/* ---------- el reloj ---------- */
+
+function faseDe(s){
+  var f = "espera";
+  for (var i=0;i<GUION.length;i++) if (s >= GUION[i].t) f = GUION[i].fase;
+  return f;
+}
+
+function estaEnfermo(s){
+  if (!estado) return false;
+  if (estado.o1 && s >= 120) return true;
+  if (estado.o2 && s >= 215) return true;
+  return false;
+}
+
+function momentoMuerte(){
+  return 300 + (estado ? estado.demora : 0);
+}
+
+function pintar(){
+  if (!inicio){ return; }
+  var s = transcurrido();
+
+  if (s < 0){
+    var faltan = Math.ceil(-s);
+    $("cuentaAtras").textContent = faltan;
+    verPantalla("sincro");
+    if (faltan <= 3 && !tempranas["tic" + faltan]){ tempranas["tic" + faltan] = 1; campana(520, 0.35, 0.25); }
+    return;
+  }
+
+  if (esGuion){ pintarGuion(s); return; }
+
+  var enfermo = estaEnfermo(s);
+  var muerto  = enfermo && s >= momentoMuerte();
+
+  cuerpo.classList.toggle("enfermo", enfermo && !muerto && s < 340);
+  cuerpo.classList.toggle("muerto", muerto && s < 340);
+
+  var fase = faseDe(s);
+
+  if (fase === "calma" || fase === "oleada1" || fase === "medico" || fase === "oleada2" || fase === "muerte"){
+    if (enfermo){
+      if (muerto) verPantalla("muerte");
+      else if (s >= 300) verPantalla("agonia");
+      else verPantalla("infectado");
+    } else if (s >= 120){
+      verPantalla("sano");
+      $("sanoNota").textContent = (s >= 325)
+        ? "Una de cada tres personas de esta sala acaba de morir."
+        : "Por ahora.";
+    } else {
+      verPantalla("calma");
+      pintarAmbiente(s);
+    }
+  } else if (fase === "revelacion"){
+    verPantalla("revelacion");
+    pintarRevelacion(s - 340);
+  } else if (fase === "ratas"){
+    verPantalla("ratas");
+  } else if (fase === "cierre"){
+    verPantalla("cierre");
+  }
+
+  disparar(s, enfermo);
+}
+
+function reciente(s, t){ return (s - t) < 6; }
+
+function disparar(s, enfermo){
+  function una(clave, cuando, accion){
+    if (tempranas[clave]) return;
+    if (s < cuando) return;
+    tempranas[clave] = 1;
+    if (reciente(s, cuando) && document.visibilityState === "visible") accion();
+  }
+
+  if (enfermo && estado.o1) una("caida1", 120, contagio);
+  if (enfermo && estado.o2) una("caida2", 215, contagio);
+  if (enfermo) una("fin", momentoMuerte(), function(){ vibrar([1400]); campana(84, 8, 0.55); });
+  una("rev", 340, function(){ campana(150, 6, 0.3); });
+  una("rat", 378, function(){ soltarRatas(); chirrido(); vibrar([50,70,50,70,50,70,50]); });
+  una("cie", 404, function(){ campana(120, 7, 0.4); });
+}
+
+function contagio(){
+  vibrar([420, 130, 420, 130, 900]);
+  campana(196, 5, 0.5);
+  var st = SINTOMAS[estado.sintoma];
+  $("sintomaNombre").textContent = st.nombre;
+  $("sintomaDetalle").textContent = st.detalle;
+  $("sintomaHumor").textContent = st.humor;
+  $("sintomaCura").textContent = st.cura;
+}
+
+function rellenarFicha(){
+  if (!estado) return;
+  var st = SINTOMAS[estado.sintoma];
+  $("sintomaNombre").textContent = st.nombre;
+  $("sintomaDetalle").textContent = st.detalle;
+  $("sintomaHumor").textContent = st.humor;
+  $("sintomaCura").textContent = st.cura;
+}
+
+function pintarAmbiente(s){
+  var caja = $("ambiente");
+  var texto = "";
+  for (var i=0;i<AMBIENTE.length;i++) if (s >= AMBIENTE[i].t) texto = AMBIENTE[i].texto;
+  if (caja.dataset.texto === texto) return;
+  caja.dataset.texto = texto;
+  caja.innerHTML = texto ? "<span>" + texto + "</span>" : "";
+}
+
+var lineasPuestas = 0;
+function pintarRevelacion(s){
+  var caja = $("lineas");
+  if (!caja.childElementCount){
+    for (var i=0;i<REVELACION.length;i++){
+      var p = document.createElement("p");
+      p.className = "linea" + (REVELACION[i].rojo ? " roja" : "");
+      p.textContent = REVELACION[i].texto;
+      caja.appendChild(p);
+    }
+    lineasPuestas = 0;
+  }
+  for (var j=0;j<REVELACION.length;j++){
+    if (s >= REVELACION[j].t) caja.children[j].classList.add("puesta");
+  }
+}
+
+/* ---------- las ratas ---------- */
+
+function dibujarRata(){
+  var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 150 62");
+  svg.setAttribute("width", "150");
+  svg.setAttribute("height", "62");
+  svg.innerHTML =
+    '<g fill="#100d0b">' +
+      '<path d="M96 48c-3 0-5-2-5-5 0-1 0-2 1-3-9 3-21 3-30 0-8-3-13-9-13-16 0-4 2-8 5-11-4 0-8-2-10-5-2-3-2-7 0-10 3 4 8 6 13 5 5-3 12-4 18-3 9 1 16 6 19 13 12 2 22 8 27 16 2 3 3 7 2 10-1 3-4 5-7 5z"/>' +
+      '<path d="M35 40c-3 5-3 10 0 14 1 2 0 4-2 4s-4-1-5-3c-3-6-2-13 2-18z"/>' +
+      '<path d="M74 52c-1 4 0 8 3 11 1 2 0 4-2 4s-4-1-5-3c-2-4-2-9 0-13z"/>' +
+      '<circle cx="43" cy="17" r="9"/>' +
+    '</g>' +
+    '<path d="M133 46c14 1 20 7 15 12-4 4-13 4-19 1" fill="none" stroke="#100d0b" stroke-width="4" stroke-linecap="round"/>' +
+    '<circle cx="22" cy="24" r="2.4" fill="#c22b21"/>';
+  return svg;
+}
+
+function soltarRatas(){
+  var pista = $("pista");
+  pista.innerHTML = "";
+  var cuantas = 7;
+  for (var i=0;i<cuantas;i++){
+    (function(i){
+      setTimeout(function(){
+        var caja = document.createElement("div");
+        caja.className = "rata";
+        var alto = window.innerHeight;
+        var y = alto * (0.18 + Math.random() * 0.64);
+        var tam = 0.5 + Math.random() * 0.75;
+        var dur = 2.4 + Math.random() * 2.6;
+        caja.style.top = y + "px";
+        caja.style.transform = "scale(" + tam + ")";
+        caja.style.animation = "cruza " + dur + "s linear forwards";
+        caja.appendChild(dibujarRata());
+        pista.appendChild(caja);
+        setTimeout(function(){ if (caja.parentNode) caja.parentNode.removeChild(caja); }, dur * 1000 + 200);
+      }, i * (180 + Math.random() * 320));
+    })(i);
+  }
+}
+
+/* ---------- guion del expositor ---------- */
+
+var esGuion = false;
+
+function montarGuion(){
+  var lista = $("listaGuion");
+  lista.innerHTML = "";
+  for (var i=0;i<GUION.length;i++){
+    var li = document.createElement("li");
+    li.innerHTML = '<span class="hora">' + GUION[i].hora + '</span><span>' + GUION[i].nota + '</span>';
+    lista.appendChild(li);
+  }
+}
+
+function reloj(s){
+  var m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + "." + (r < 10 ? "0" : "") + r;
+}
+
+function pintarGuion(s){
+  verPantalla("guion");
+  $("relojGuion").textContent = reloj(s);
+  var siguiente = null, indice = -1;
+  for (var i=0;i<GUION.length;i++){
+    if (GUION[i].t <= s) indice = i;
+    if (GUION[i].t > s && !siguiente) siguiente = GUION[i];
+  }
+  $("faltaGuion").textContent = siguiente
+    ? "Faltan " + reloj(siguiente.t - s) + " para lo siguiente"
+    : "Terminado";
+  var lista = $("listaGuion").children;
+  for (var j=0;j<lista.length;j++){
+    lista[j].classList.toggle("ahora", j === indice);
+    lista[j].classList.toggle("pasada", j < indice);
+  }
+  $("btnArrancarGuion").style.display = "none";
+}
+
+/* ---------- codigo qr ---------- */
+
+function montarQr(){
+  var base = location.origin + location.pathname;
+  $("textoUrl").textContent = base.replace(/^https?:\/\//, "");
+  var s = document.createElement("script");
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+  s.onload = function(){
+    try {
+      new QRCode($("cajaQr"), { text: base, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.M });
+    } catch(e){}
+  };
+  document.head.appendChild(s);
+}
+
+/* ---------- botones ---------- */
+
+$("btnComenzar").addEventListener("click", function(){
+  abrirAudio();
+  arrancar(proximaRejilla());
+});
+
+$("btnTarde").addEventListener("click", function(){
+  var codigo = prompt("Codigo de la sala");
+  if (!codigo) return;
+  var marca = marcaDeCodigo(codigo);
+  if (!marca){ alert("Ese codigo no aparece"); return; }
+  abrirAudio();
+  arrancar(marca);
+});
+
+$("btnAtendido").addEventListener("click", function(){
+  if (!estado || estado.atendido) return;
+  estado.atendido = 1; guardar();
+  cuerpo.classList.add("tratado");
+  var cura = SINTOMAS[estado.sintoma].cura;
+  $("sintomaNombre").textContent = "Te sientes mejor";
+  $("sintomaDetalle").textContent = cura + ".";
+  $("levanta").textContent = "Baja el telefono.";
+  $("btnAtendido").style.display = "none";
+  campana(330, 3, 0.3);
+  setTimeout(function(){
+    if (!estaEnfermo(transcurrido())) return;
+    cuerpo.classList.remove("tratado");
+    $("sintomaNombre").textContent = "Vuelve la fiebre";
+    $("sintomaDetalle").textContent = "El tratamiento no sirvio de nada.";
+    $("levanta").textContent = "Levanta el telefono otra vez.";
+    vibrar([300, 120, 300]);
+    campana(196, 4, 0.4);
+  }, 26000);
+});
+
+$("btnArrancarGuion").addEventListener("click", function(){
+  abrirAudio();
+  arrancar(proximaRejilla());
+});
+
+/* ---------- entrada ---------- */
+
+function leerModo(){
+  var h = (location.hash || "").replace("#", "").toLowerCase();
+  if (h === "guion"){ esGuion = true; montarGuion(); verPantalla("guion"); }
+  else if (h === "qr"){ montarQr(); verPantalla("qr"); }
+  if (h === "ensayo"){ escala = 6; }
+  var p = new URLSearchParams(location.search);
+  if (p.get("ensayo")) escala = parseFloat(p.get("ensayo")) || 6;
+}
+
+leerModo();
+window.addEventListener("hashchange", function(){ location.reload(); });
+
+rellenarFicha();
+setInterval(pintar, 200);
+pintar();
+
+/* pista para el expositor, el codigo de sala sale por consola y en el guion */
+window.codigoSala = function(){ return inicio ? codigoDe(inicio) : "sin arrancar"; };
+
+})();
+</script>
+</body>
+</html>
