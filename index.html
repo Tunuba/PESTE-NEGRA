@@ -823,6 +823,16 @@ function llaveDe(p){
   return s;
 }
 
+// Cuando el papel viene por enlace, la demora sale de la propia llave en vez de
+// un dado. Asi la pantalla maestra tacha esa cara en el mismo segundo en que
+// este telefono se apaga, sin que los dos se hablen. Tiene que ser igual en
+// maestra.html.
+function demoraDeLlave(llave){
+  var n = 0;
+  for (var i=0;i<llave.length;i++) n = (n * 36 + ALFABETO.indexOf(llave.charAt(i))) % 100000;
+  return (n % 1000) / 1000 * TARDANZA_MUERTE;
+}
+
 function papelDeLlave(llave){
   var t = String(llave).trim().toLowerCase();
   if (t.length !== LARGO_LLAVE) return -1;
@@ -852,7 +862,9 @@ function repartirRoles(){
   if (forzado === "sano"){ e.o1 = false; e.dado2 = 1; }
 
   // el papel escondido en el enlace manda sobre el azar
-  var papel = busca.get("k") ? papelDeLlave(busca.get("k")) : -1;
+  var llave = busca.get("k");
+  var papel = llave ? papelDeLlave(llave) : -1;
+  if (papel >= 0) e.demora = demoraDeLlave(llave.trim().toLowerCase());
   if (papel === 0){ e.o1 = false; e.dado2 = 1; }
   else if (papel === 5){ e.o1 = false; e.dado2 = -1; }   // cae en la segunda
   else if (papel > 0){

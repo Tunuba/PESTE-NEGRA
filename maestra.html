@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0a09">
+<meta name="description" content="Pantalla maestra de la estacion de la peste negra">
+<title>Pantalla maestra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#0c0a09;
+  --pergamino:#e4d7b6;
+  --sangre:#8e1b16;
+  --sangre-viva:#c22b21;
+  --bilis:#b98f2c;
+  --humo:#7d7264;
+  --hueso:#cfc6b0;
+  --alto:'IM Fell English', Georgia, serif;
+  --cuerpo:'Cormorant Garamond', Georgia, serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0; position:fixed; inset:0; overflow:hidden;
+  background:var(--tinta); color:var(--pergamino);
+  font-family:var(--cuerpo); font-size:18px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+[hidden]{display:none !important}
+
+#grano{
+  position:fixed; inset:-40%; pointer-events:none; z-index:60; opacity:.13; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='220' height='220' filter='url(%23f)'/></svg>");
+  animation:tiembla 900ms steps(2,end) infinite;
+}
+@keyframes tiembla{0%{transform:translate(0,0)}50%{transform:translate(-14px,9px)}100%{transform:translate(7px,-11px)}}
+
+.paso{position:absolute; inset:0; z-index:10; display:none; flex-direction:column;
+  padding:26px 30px calc(26px + env(safe-area-inset-bottom)); overflow:auto}
+.paso.activo{display:flex; animation:aparece 500ms ease both}
+@keyframes aparece{from{opacity:0}to{opacity:1}}
+
+h1{font-family:var(--alto); font-weight:400; font-size:clamp(30px,5vw,50px); line-height:1; margin:0}
+h2{font-family:var(--alto); font-weight:400; font-size:clamp(22px,3.2vw,32px); line-height:1.05; margin:0}
+p{margin:0}
+.epigrafe{font-family:var(--alto); font-size:12px; letter-spacing:.34em; text-transform:uppercase; color:var(--humo)}
+.tenue{color:var(--humo); font-size:16px}
+.cabecera{display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; margin-bottom:22px; flex:none}
+.rayita{width:56px; height:1px; background:var(--humo); opacity:.6}
+
+button{
+  font-family:var(--alto); font-size:18px; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--pergamino); background:transparent;
+  border:1px solid rgba(228,215,182,.45); border-radius:0;
+  padding:14px 30px; cursor:pointer; transition:background 180ms, transform 110ms;
+}
+button:hover{background:rgba(228,215,182,.09)}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.32; cursor:default}
+button.fuerte{border-color:var(--pergamino)}
+.enlace{background:none; border:none; padding:9px; font-family:var(--cuerpo); font-size:16px;
+  letter-spacing:0; text-transform:none; color:var(--humo); text-decoration:underline}
+.botones{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:22px; flex:none}
+
+/* configuracion */
+#config .campos{display:flex; flex-direction:column; gap:22px; max-width:520px}
+.campo{display:flex; align-items:center; gap:18px}
+.campo label{flex:1; font-size:19px}
+.campo input{
+  width:120px; font-family:var(--alto); font-size:30px; text-align:center;
+  color:var(--pergamino); background:transparent; border:1px solid rgba(228,215,182,.4);
+  padding:8px 6px;
+}
+.campo input:focus{outline:none; border-color:var(--pergamino)}
+.cuenta{max-width:520px; margin-top:26px; padding-top:18px; border-top:1px solid rgba(228,215,182,.16)}
+.cuenta .fila{display:flex; justify-content:space-between; padding:7px 0; font-size:18px}
+.cuenta .fila span:last-child{font-family:var(--alto); font-size:22px}
+.aviso{color:var(--bilis); min-height:1.4em; margin-top:14px; font-size:17px}
+
+/* foto */
+#foto .zona{flex:1; display:flex; align-items:center; justify-content:center; min-height:0}
+#foto .marco{max-width:100%; max-height:100%; border:1px solid rgba(228,215,182,.25)}
+#foto .marco img, #foto .marco video{display:block; max-width:100%; max-height:62vh; object-fit:contain}
+#foto .vacio{color:var(--humo); font-style:italic; text-align:center}
+
+/* reparto */
+#reparto .cuerpo{flex:1; display:flex; flex-direction:column; align-items:center; gap:14px; min-height:0}
+#reparto .ladoqr{flex:none; width:min(34vh,300px); display:flex; flex-direction:column; align-items:center;
+  gap:10px}
+#reparto .cajaqr{background:#fff; padding:16px; line-height:0; width:100%}
+#reparto .cajaqr svg{display:block; width:100%; height:auto}
+#reparto .quien{font-family:var(--alto); font-size:26px; text-align:center}
+#reparto .liga{font-size:13px; color:var(--humo); word-break:break-all; text-align:center;
+  -webkit-user-select:text; user-select:text}
+#reparto .ladofoto{flex:1; width:100%; display:flex; flex-direction:column; min-height:0}
+#reparto .instruccion{color:var(--bilis); margin-bottom:12px; flex:none}
+
+/* la foto con los pines */
+.lienzo{flex:1; display:flex; align-items:center; justify-content:center; min-height:0; position:relative}
+.tabla{position:relative; max-width:100%; max-height:100%; line-height:0}
+.tabla img{display:block; width:100%; height:100%; object-fit:contain}
+.tabla.marcable{cursor:crosshair}
+.pin{position:absolute; transform:translate(-50%,-50%); pointer-events:none;
+  width:var(--pin,52px); height:var(--pin,52px); transition:opacity 600ms ease}
+.pin svg{width:100%; height:100%; display:block; overflow:visible}
+.pin .cera{fill:var(--hueso); fill-opacity:.82; stroke:rgba(20,16,12,.55); stroke-width:2}
+.pin .marca{fill:#1a1410; font-family:var(--alto); font-size:38px; text-anchor:middle; dominant-baseline:central}
+.pin .trazo{stroke:#1a1410; stroke-width:9; stroke-linecap:round; fill:none}
+
+.pin.enfermo .cera{fill:var(--sangre-viva); fill-opacity:.9}
+.pin.enfermo .trazo{stroke:#ffeae7}
+.pin.enfermo{animation:late 1.6s ease-in-out infinite}
+@keyframes late{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.11)}}
+
+.pin.muerto .cera{fill:#100c0a; fill-opacity:.92; stroke:rgba(207,198,176,.5)}
+.pin.muerto .trazo{stroke:var(--hueso)}
+.pin.muerto{animation:cae 900ms ease both}
+@keyframes cae{from{transform:translate(-50%,-50%) scale(1.5); opacity:.2}
+  to{transform:translate(-50%,-50%) scale(1); opacity:1}}
+
+.pin .halo{fill:none; stroke:var(--sangre-viva); stroke-width:3; opacity:0}
+.pin.enfermo .halo{opacity:.55; animation:onda 1.6s ease-out infinite}
+@keyframes onda{from{r:44; opacity:.55}to{r:62; opacity:0}}
+
+/* el pase */
+#pase{padding:0}
+#pase .arriba{position:absolute; top:0; left:0; right:0; z-index:20; display:flex; align-items:center;
+  gap:26px; padding:16px 26px; background:linear-gradient(rgba(12,10,9,.85), transparent)}
+#pase .reloj{font-family:var(--alto); font-size:44px; line-height:1; min-width:110px}
+#pase .fase{font-family:var(--alto); font-size:22px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--bilis)}
+#pase .marcador{margin-left:auto; display:flex; gap:26px; align-items:baseline}
+#pase .marcador div{text-align:right}
+#pase .marcador .n{font-family:var(--alto); font-size:34px; line-height:1}
+#pase .marcador .q{font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--humo)}
+#pase .marcador .enf .n{color:var(--sangre-viva)}
+#pase .marcador .mue .n{color:var(--humo)}
+#pase .lienzo{position:absolute; inset:0}
+#pase .tabla img{filter:saturate(.7) contrast(1.05) brightness(.82)}
+#pase .letrero{position:absolute; inset:0; z-index:30; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:20px; text-align:center;
+  background:rgba(8,6,5,.86); opacity:0; pointer-events:none; transition:opacity 1200ms ease}
+#pase .letrero.puesto{opacity:1}
+#pase .letrero p{font-family:var(--alto); font-size:clamp(28px,4.6vw,58px); line-height:1.12; max-width:20ch}
+#pase .letrero .roja{color:var(--sangre-viva)}
+#pase .abajo{position:absolute; bottom:0; left:0; right:0; z-index:20; display:flex; gap:18px;
+  align-items:center; padding:14px 26px; background:linear-gradient(transparent, rgba(12,10,9,.85))}
+
+/* antes de arrancar */
+#pase .antes{position:absolute; inset:0; z-index:40; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:18px; background:rgba(8,6,5,.94); text-align:center}
+#pase .antes .grande{font-family:var(--alto); font-size:clamp(46px,9vw,110px); line-height:1}
+#pase .antes .grande.espera{color:var(--sangre-viva)}
+#pase .antes .dice{color:var(--humo); font-size:19px; min-height:1.4em}
+
+/* final */
+#final .resumen{max-width:560px}
+#final .fila{display:flex; justify-content:space-between; padding:12px 0;
+  border-top:1px solid rgba(228,215,182,.16); font-size:19px}
+#final .fila span:last-child{font-family:var(--alto); font-size:26px}
+#final .mue span:last-child{color:var(--sangre-viva)}
+
+/* volumen */
+.sonido{display:flex; align-items:center; gap:10px; color:var(--humo); font-size:15px}
+.sonido input[type=range]{width:120px; accent-color:var(--sangre-viva)}
+
+/* ---------- que quepa en cualquier pantalla ---------- */
+
+/* Todo va centrado en la pantalla. Cada paso centra su contenido en vertical y
+   en horizontal, y ningun bloque se queda pegado a un lado. */
+#config, #foto, #final{justify-content:center; align-items:center}
+#config > *, #foto > *, #final > *{width:100%; max-width:660px; margin-left:auto; margin-right:auto}
+#foto .zona{max-width:100%}
+#config .cabecera, #foto .cabecera, #final .cabecera{justify-content:center; text-align:center}
+#config .campos, #config .cuenta, #final .resumen{margin-left:auto; margin-right:auto}
+#config .aviso, #foto .aviso, #foto .tenue{text-align:center}
+.botones{justify-content:center}
+
+/* el reparto tambien centrado, y el QR sin comerse la pantalla */
+#reparto{align-items:center}
+#reparto .cabecera{width:100%; max-width:1400px; margin-left:auto; margin-right:auto;
+  justify-content:center; text-align:center}
+#reparto .cuerpo{width:100%; max-width:1400px; margin-left:auto; margin-right:auto;
+  align-items:center; justify-content:center}
+#reparto .ladofoto{align-items:center}
+#reparto .instruccion{text-align:center; width:100%}
+#reparto .botones{width:100%; max-width:1400px; margin-left:auto; margin-right:auto}
+
+/* pantallas estrechas o bajas, el reparto se apila en vez de ir a dos columnas */
+@media (max-width:960px), (max-height:620px){
+  #reparto .ladoqr{width:min(72vw,250px)}
+  #reparto .quien{font-size:21px}
+  #reparto .ladofoto{min-height:34vh}
+}
+
+/* Pantallas bajas, tipico portatil de 800 de alto. El QR y los titulos se comian
+   el sitio y la foto quedaba tan chica que no se podia acertar una cara. */
+@media (max-height:900px){
+  #reparto .cabecera{display:none}
+  #reparto .ladoqr{width:min(24vh,185px)}
+  #reparto .quien{font-size:19px}
+  #reparto .liga{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+  #reparto .cuerpo{gap:9px}
+  #reparto .instruccion{margin-bottom:6px}
+  #reparto .botones{margin-top:10px}
+  #reparto .ladofoto{min-height:40vh}
+}
+
+@media (max-width:760px){
+  body{font-size:17px}
+  .paso{padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+  .cabecera{gap:8px; margin-bottom:16px}
+  button{font-size:16px; padding:12px 20px}
+  .botones{gap:11px; margin-top:16px}
+  .campo label{font-size:17px}
+  .campo input{width:92px; font-size:25px}
+  .cuenta .fila{font-size:16px}
+  .cuenta .fila span:last-child{font-size:19px}
+
+  #pase .arriba{flex-wrap:wrap; gap:10px 16px; padding:11px 14px}
+  #pase .reloj{font-size:31px; min-width:0}
+  #pase .fase{font-size:15px}
+  #pase .marcador{margin-left:0; width:100%; justify-content:space-between; gap:14px}
+  #pase .marcador .n{font-size:25px}
+  #pase .marcador .q{font-size:11.5px; letter-spacing:.14em}
+  #pase .abajo{padding:10px 14px; gap:12px}
+  #pase .letrero p{max-width:15ch}
+  .sonido input[type=range]{width:88px}
+}
+
+/* telefono de pie, lo mas apretado */
+@media (max-width:430px){
+  .campo{gap:12px}
+  .campo label{font-size:16px}
+  .campo input{width:80px; font-size:22px; padding:6px 4px}
+  #reparto .ladoqr{width:min(76vw,230px)}
+  #reparto .liga{font-size:11px}
+  #pase .marcador .n{font-size:22px}
+  #pase .reloj{font-size:27px}
+}
+
+/* PC ancha, que no se quede todo en una esquina */
+@media (min-width:1500px){
+  body{font-size:20px}
+}
+
+/* Ventana muy baja, un portatil con la barra del navegador comiendose el alto.
+   Va la ultima porque tiene que ganarle al min-height de las reglas de arriba,
+   que si no obligan a hacer scroll y la foto sale aplastada. */
+@media (max-height:640px){
+  #reparto .ladofoto{min-height:0}
+  /* El codigo en si nunca por debajo de 130, que es donde deja de leerse bien
+     con la camara. El marco blanco se come 18, asi que la caja va 18 mas ancha. */
+  #reparto .cajaqr{padding:9px}
+  #reparto .ladoqr{width:clamp(148px, 24vh, 168px)}
+  #reparto .liga{display:none}
+  #reparto .cuerpo{gap:7px}
+  #reparto .quien{font-size:17px}
+  .paso{padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+
+<section class="paso activo" id="config">
+  <div class="cabecera">
+    <h1>Pantalla maestra</h1>
+    <p class="epigrafe">Paso 1 de 4, el reparto</p>
+  </div>
+  <div class="campos">
+    <div class="campo"><label for="nTotal">Cuantas personas participan</label>
+      <input type="number" id="nTotal" min="1" max="200" value="24"></div>
+    <div class="campo"><label for="nEnfermos">Cuantas van a enfermar</label>
+      <input type="number" id="nEnfermos" min="0" max="200" value="14"></div>
+    <div class="campo"><label for="nOleada1">De esas, cuantas caen en la primera oleada</label>
+      <input type="number" id="nOleada1" min="0" max="200" value="9"></div>
+  </div>
+  <div class="cuenta" id="cuenta"></div>
+  <p class="aviso" id="avisoConfig"></p>
+  <div class="botones">
+    <button class="fuerte" id="btnAFoto">Siguiente</button>
+    <button class="enlace" id="btnOlvidar" hidden>Borrar lo guardado y empezar de nuevo</button>
+  </div>
+</section>
+
+<section class="paso" id="foto">
+  <div class="cabecera">
+    <h1>La foto del grupo</h1>
+    <p class="epigrafe">Paso 2 de 4</p>
+  </div>
+  <p class="tenue">Que salgan todas las caras y que nadie se mueva de sitio despues, porque los
+    sellos se ponen sobre esta foto.</p>
+  <div class="zona">
+    <div class="marco" id="marcoFoto"><p class="vacio" id="vacioFoto">Todavia no hay foto</p></div>
+  </div>
+  <p class="aviso" id="avisoFoto"></p>
+  <div class="botones">
+    <button id="btnSubir">Subir una foto</button>
+    <button id="btnCamara">Usar la camara</button>
+    <button id="btnDisparar" hidden>Tomarla</button>
+    <button class="fuerte" id="btnAReparto" disabled>Siguiente</button>
+    <button class="enlace" id="btnAConfig">Atras</button>
+  </div>
+  <input type="file" id="ficheroFoto" accept="image/*" hidden>
+</section>
+
+<section class="paso" id="reparto">
+  <div class="cabecera">
+    <h1>Repartir los papeles</h1>
+    <p class="epigrafe">Paso 3 de 4</p>
+  </div>
+  <div class="cuerpo">
+    <div class="ladoqr">
+      <p class="quien" id="quienQr">Persona 1</p>
+      <div class="cajaqr" id="cajaQr"></div>
+      <p class="liga" id="ligaQr"></p>
+    </div>
+    <div class="ladofoto">
+      <p class="instruccion" id="instruccion">Que escanee, y despues toca su cara en la foto</p>
+      <div class="lienzo"><div class="tabla marcable" id="tablaReparto"></div></div>
+    </div>
+  </div>
+  <div class="botones">
+    <button class="enlace" id="btnDeshacer">Quitar el ultimo sello</button>
+    <button class="enlace" id="btnSaltar">Este no participa</button>
+    <button class="fuerte" id="btnAPase">Ya estan todos</button>
+    <button class="enlace" id="btnAFoto2">Atras</button>
+  </div>
+</section>
+
+<section class="paso" id="pase">
+  <div class="lienzo"><div class="tabla" id="tablaPase"></div></div>
+
+  <div class="arriba" id="arribaPase" hidden>
+    <div class="reloj" id="relojPase">0.00</div>
+    <div class="fase" id="fasePase">La calle</div>
+    <div class="marcador">
+      <div><div class="n" id="nVivos">0</div><div class="q">En pie</div></div>
+      <div class="enf"><div class="n" id="nEnfermos2">0</div><div class="q">Enfermos</div></div>
+      <div class="mue"><div class="n" id="nMuertos">0</div><div class="q">Muertos</div></div>
+    </div>
+  </div>
+
+  <div class="letrero" id="letrero"><p id="letreroTexto"></p></div>
+
+  <div class="abajo" id="abajoPase" hidden>
+    <div class="sonido">
+      <label for="vol">Musica</label>
+      <input type="range" id="vol" min="0" max="100" value="55">
+    </div>
+    <button class="enlace" id="btnCortar">Cortar el pase</button>
+  </div>
+
+  <div class="antes" id="antesPase">
+    <p class="epigrafe">Paso 4 de 4</p>
+    <div class="grande" id="semaforo">Ahora</div>
+    <p class="dice" id="diceSemaforo"></p>
+    <p class="tenue" id="estadoMusica">Cargando la musica</p>
+    <div class="botones">
+      <button class="fuerte" id="btnArrancar">Arrancar el pase</button>
+      <button class="enlace" id="btnAReparto2">Atras</button>
+    </div>
+    <p class="tenue" style="max-width:44ch">Espera a que diga Ahora, di que presionen Comenzar en
+      sus telefonos y pulsa aqui a la vez. Todos caen en la misma tanda.</p>
+  </div>
+</section>
+
+<section class="paso" id="final">
+  <div class="cabecera">
+    <h1>Se acabo</h1>
+    <p class="epigrafe">Florencia, 1348</p>
+  </div>
+  <div class="resumen" id="resumen"></div>
+  <div class="botones">
+    <button id="btnVerFoto">Ver la foto otra vez</button>
+    <button class="enlace" id="btnOtraVez">Otro grupo</button>
+  </div>
+</section>
+
+<audio id="musica" preload="auto"></audio>
+<div id="grano"></div>
+
+<script>/* qrcode-generator 1.4.4 de Kazuhiko Arase, licencia MIT.
+   Va pegado aqui dentro a proposito. Si se cargara de internet y el wifi del
+   museo fallara, no habria codigos QR y se cae la estacion entera. */
+var qrcode=function(){function i(t,r){function a(t,r){g=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(l=4*u+17),e(0,0),e(l-7,0),e(0,l-7),i(),o(),v(t,r),7<=u&&h(t),null==n&&(n=w(u,f,c)),d(n,r)}var u=t,f=y[r],g=null,l=0,n=null,c=[],s={},e=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||l<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||l<=r+n||(g[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},o=function(){for(var t=8;t<l-8;t+=1)null==g[t][6]&&(g[t][6]=t%2==0);for(var r=8;r<l-8;r+=1)null==g[6][r]&&(g[6][r]=r%2==0)},i=function(){for(var t=B.getPatternPosition(u),r=0;r<t.length;r+=1)for(var e=0;e<t.length;e+=1){var n=t[r],o=t[e];if(null==g[n][o])for(var i=-2;i<=2;i+=1)for(var a=-2;a<=2;a+=1)g[n+i][o+a]=-2==i||2==i||-2==a||2==a||0==i&&0==a}},h=function(t){for(var r=B.getBCHTypeNumber(u),e=0;e<18;e+=1){var n=!t&&1==(r>>e&1);g[Math.floor(e/3)][e%3+l-8-3]=n}for(e=0;e<18;e+=1){n=!t&&1==(r>>e&1);g[e%3+l-8-3][Math.floor(e/3)]=n}},v=function(t,r){for(var e=f<<3|r,n=B.getBCHTypeInfo(e),o=0;o<15;o+=1){var i=!t&&1==(n>>o&1);o<6?g[o][8]=i:o<8?g[o+1][8]=i:g[l-15+o][8]=i}for(o=0;o<15;o+=1){i=!t&&1==(n>>o&1);o<8?g[8][l-o-1]=i:o<9?g[8][15-o-1+1]=i:g[8][15-o-1]=i}g[l-8][8]=!t},d=function(t,r){for(var e=-1,n=l-1,o=7,i=0,a=B.getMaskFunction(r),u=l-1;0<u;u-=2)for(6==u&&(u-=1);;){for(var f=0;f<2;f+=1)if(null==g[n][u-f]){var c=!1;i<t.length&&(c=1==(t[i]>>>o&1)),a(n,u-f)&&(c=!c),g[n][u-f]=c,-1==(o-=1)&&(i+=1,o=7)}if((n+=e)<0||l<=n){n-=e,e=-e;break}}},w=function(t,r,e){for(var n=b.getRSBlocks(t,r),o=M(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=C(i[u],l.getLength()-1).mod(l);a[u]=new Array(l.getLength()-1);for(g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=0<=s?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};s.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=x(t);break;case"Alphanumeric":e=m(t);break;case"Byte":e=L(t);break;case"Kanji":e=D(t);break;default:throw"mode:"+r}c.push(e),n=null},s.isDark=function(t,r){if(t<0||l<=t||r<0||l<=r)throw t+","+r;return g[t][r]},s.getModuleCount=function(){return l},s.make=function(){if(u<1){for(var t=1;t<40;t++){for(var r=b.getRSBlocks(t,f),e=M(),n=0;n<c.length;n++){var o=c[n];e.put(o.getMode(),4),e.put(o.getLength(),B.getLengthInBits(o.getMode(),t)),o.write(e)}var i=0;for(n=0;n<r.length;n++)i+=r[n].dataCount;if(e.getLengthInBits()<=8*i)break}u=t}a(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){a(!0,e);var n=B.getLostPoint(s);(0==e||n<t)&&(t=n,r=e)}return r}())},s.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<s.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<s.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=s.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},s.createSvgTag=function(t,r,e,n){var o={};"object"==typeof t&&(t=(o=t).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,f,c=s.getModuleCount()*t+2*r,g="";for(f="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",g+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',g+=o.scalable?"":' width="'+c+'px" height="'+c+'px"',g+=' viewBox="0 0 '+c+" "+c+'" ',g+=' preserveAspectRatio="xMinYMin meet"',g+=n.text||e.text?' role="img" aria-labelledby="'+p([n.id,e.id].join(" ").trim())+'"':"",g+=">",g+=n.text?'<title id="'+p(n.id)+'">'+p(n.text)+"</title>":"",g+=e.text?'<description id="'+p(e.id)+'">'+p(e.text)+"</description>":"",g+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',g+='<path d="',a=0;a<s.getModuleCount();a+=1)for(u=a*t+r,i=0;i<s.getModuleCount();i+=1)s.isDark(a,i)&&(g+="M"+(i*t+r)+","+u+f);return g+='" stroke="transparent" fill="black"/>',g+="</svg>"},s.createDataURL=function(o,t){o=o||2,t=void 0===t?4*o:t;var r=s.getModuleCount()*o+2*t,i=t,a=r-t;return I(r,r,function(t,r){if(i<=t&&t<a&&i<=r&&r<a){var e=Math.floor((t-i)/o),n=Math.floor((r-i)/o);return s.isDark(n,e)?0:1}return 1})},s.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=s.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=s.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=p(e),o+='"'),o+="/>"};var p=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return s.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*s.getModuleCount()+2*t,u=t,f=a-t,c={"██":"█","█ ":"▀"," █":"▄","  ":" "},g={"██":"▀","█ ":"▀"," █":" ","  ":" "},l="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<f&&u<=r&&r<f&&s.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<f&&u<=r+1&&r+1<f&&s.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",l+=t<1&&f<=r+1?g[i]:c[i];l+="\n"}return a%2&&0<t?l.substring(0,l.length-a-1)+Array(1+a).join("▀"):l.substring(0,l.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=s.getModuleCount()*t+2*r,u=r,f=a-r,c=Array(t+1).join("██"),g=Array(t+1).join("  "),l="",h="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),h="",n=0;n<a;n+=1)i=1,u<=n&&n<f&&u<=e&&e<f&&s.isDark(o,Math.floor((n-u)/t))&&(i=0),h+=i?c:g;for(o=0;o<t;o+=1)l+=h+"\n"}return l.substring(0,l.length-1)},s.renderTo2dContext=function(t,r){r=r||2;for(var e=s.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=s.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},s}i.stringToBytes=(i.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,i.createStringToBytes=function(u,f){var i=function(){function t(){var t=r.read();if(-1==t)throw"eof";return t}for(var r=S(u),e=0,n={};;){var o=r.read();if(-1==o)break;var i=t(),a=t()<<8|t();n[String.fromCharCode(o<<8|i)]=a,e+=1}if(e!=f)throw e+" != "+f;return n}(),a="?".charCodeAt(0);return function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);if(n<128)r.push(n);else{var o=i[t.charAt(e)];"number"==typeof o?(255&o)==o?r.push(o):(r.push(o>>>8),r.push(255&o)):r.push(a)}}return r}};var r,t,a=1,u=2,o=4,f=8,y={L:1,M:0,Q:3,H:2},e=0,n=1,c=2,g=3,l=4,h=5,s=6,v=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],(t={}).getBCHTypeInfo=function(t){for(var r=t<<10;0<=d(r)-d(1335);)r^=1335<<d(r)-d(1335);return 21522^(t<<10|r)},t.getBCHTypeNumber=function(t){for(var r=t<<12;0<=d(r)-d(7973);)r^=7973<<d(r)-d(7973);return t<<12|r},t.getPatternPosition=function(t){return r[t-1]},t.getMaskFunction=function(t){switch(t){case e:return function(t,r){return(t+r)%2==0};case n:return function(t,r){return t%2==0};case c:return function(t,r){return r%3==0};case g:return function(t,r){return(t+r)%3==0};case l:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case h:return function(t,r){return t*r%2+t*r%3==0};case s:return function(t,r){return(t*r%2+t*r%3)%2==0};case v:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},t.getErrorCorrectPolynomial=function(t){for(var r=C([1],0),e=0;e<t;e+=1)r=r.multiply(C([1,w.gexp(e)],0));return r},t.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case o:case f:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case o:return 16;case f:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case o:return 16;case f:return 12;default:throw"mode:"+t}}},t.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);5<i&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},t);function d(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r}var w=function(){for(var r=new Array(256),e=new Array(256),t=0;t<8;t+=1)r[t]=1<<t;for(t=8;t<256;t+=1)r[t]=r[t-4]^r[t-5]^r[t-6]^r[t-8];for(t=0;t<255;t+=1)e[r[t]]=t;var n={glog:function(t){if(t<1)throw"glog("+t+")";return e[t]},gexp:function(t){for(;t<0;)t+=255;for(;256<=t;)t-=255;return r[t]}};return n}();function C(n,o){if(void 0===n.length)throw n.length+"/"+o;var r=function(){for(var t=0;t<n.length&&0==n[t];)t+=1;for(var r=new Array(n.length-t+o),e=0;e<n.length-t;e+=1)r[e]=n[e+t];return r}(),i={getAt:function(t){return r[t]},getLength:function(){return r.length},multiply:function(t){for(var r=new Array(i.getLength()+t.getLength()-1),e=0;e<i.getLength();e+=1)for(var n=0;n<t.getLength();n+=1)r[e+n]^=w.gexp(w.glog(i.getAt(e))+w.glog(t.getAt(n)));return C(r,0)},mod:function(t){if(i.getLength()-t.getLength()<0)return i;for(var r=w.glog(i.getAt(0))-w.glog(t.getAt(0)),e=new Array(i.getLength()),n=0;n<i.getLength();n+=1)e[n]=i.getAt(n);for(n=0;n<t.getLength();n+=1)e[n]^=w.gexp(w.glog(t.getAt(n))+r);return C(e,0).mod(t)}};return i}function p(){var e=[],o={writeByte:function(t){e.push(255&t)},writeShort:function(t){o.writeByte(t),o.writeByte(t>>>8)},writeBytes:function(t,r,e){r=r||0,e=e||t.length;for(var n=0;n<e;n+=1)o.writeByte(t[n+r])},writeString:function(t){for(var r=0;r<t.length;r+=1)o.writeByte(t.charCodeAt(r))},toByteArray:function(){return e},toString:function(){var t="";t+="[";for(var r=0;r<e.length;r+=1)0<r&&(t+=","),t+=e[r];return t+="]"}};return o}var k,A,b=(k=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],(A={}).getRSBlocks=function(t,r){var e=function(t,r){switch(r){case y.L:return k[4*(t-1)+0];case y.M:return k[4*(t-1)+1];case y.Q:return k[4*(t-1)+2];case y.H:return k[4*(t-1)+3];default:return}}(t,r);if(void 0===e)throw"bad rs block @ typeNumber:"+t+"/errorCorrectionLevel:"+r;for(var n,o,i=e.length/3,a=[],u=0;u<i;u+=1)for(var f=e[3*u+0],c=e[3*u+1],g=e[3*u+2],l=0;l<f;l+=1)a.push((n=g,o=void 0,(o={}).totalCount=c,o.dataCount=n,o));return a},A),M=function(){var e=[],n=0,o={getBuffer:function(){return e},getAt:function(t){var r=Math.floor(t/8);return 1==(e[r]>>>7-t%8&1)},put:function(t,r){for(var e=0;e<r;e+=1)o.putBit(1==(t>>>r-e-1&1))},getLengthInBits:function(){return n},putBit:function(t){var r=Math.floor(n/8);e.length<=r&&e.push(0),t&&(e[r]|=128>>>n%8),n+=1}};return o},x=function(t){var r=a,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+2<r.length;)t.put(o(r.substring(e,e+3)),10),e+=3;e<r.length&&(r.length-e==1?t.put(o(r.substring(e,e+1)),4):r.length-e==2&&t.put(o(r.substring(e,e+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return e},m=function(t){var r=u,n=t,e={getMode:function(){return r},getLength:function(t){return n.length},write:function(t){for(var r=n,e=0;e+1<r.length;)t.put(45*o(r.charAt(e))+o(r.charAt(e+1)),11),e+=2;e<r.length&&t.put(o(r.charAt(e)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return e},L=function(t){var r=o,e=i.stringToBytes(t),n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=0;r<e.length;r+=1)t.put(e[r],8)}};return n},D=function(t){var r=f,e=i.stringToBytesFuncs.SJIS;if(!e)throw"sjis not supported.";!function(){var t=e("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=e(t),n={getMode:function(){return r},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return n},S=function(t){var e=t,n=0,o=0,i=0,r={read:function(){for(;i<8;){if(n>=e.length){if(0==i)return-1;throw"unexpected end of file./"+i}var t=e.charAt(n);if(n+=1,"="==t)return i=0,-1;t.match(/^\s$/)||(o=o<<6|a(t.charCodeAt(0)),i+=6)}var r=o>>>i-8&255;return i-=8,r}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return r},I=function(t,r,e){for(var n=function(t,r){var n=t,o=r,l=new Array(t*r),e={setPixel:function(t,r,e){l[r*n+t]=e},write:function(t){t.writeString("GIF87a"),t.writeShort(n),t.writeShort(o),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(n),t.writeShort(o),t.writeByte(0);var r=i(2);t.writeByte(2);for(var e=0;255<r.length-e;)t.writeByte(255),t.writeBytes(r,e,255),e+=255;t.writeByte(r.length-e),t.writeBytes(r,e,r.length-e),t.writeByte(0),t.writeString(";")}},i=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,o=h(),i=0;i<r;i+=1)o.add(String.fromCharCode(i));o.add(String.fromCharCode(r)),o.add(String.fromCharCode(e));var a=p(),u=function(t){var e=t,n=0,o=0,r={write:function(t,r){if(t>>>r!=0)throw"length over";for(;8<=n+r;)e.writeByte(255&(t<<n|o)),r-=8-n,t>>>=8-n,n=o=0;o|=t<<n,n+=r},flush:function(){0<n&&e.writeByte(o)}};return r}(a);u.write(r,n);var f=0,c=String.fromCharCode(l[f]);for(f+=1;f<l.length;){var g=String.fromCharCode(l[f]);f+=1,o.contains(c+g)?c+=g:(u.write(o.indexOf(c),n),o.size()<4095&&(o.size()==1<<n&&(n+=1),o.add(c+g)),c=g)}return u.write(o.indexOf(c),n),u.write(e,n),u.flush(),a.toByteArray()},h=function(){var r={},e=0,n={add:function(t){if(n.contains(t))throw"dup key:"+t;r[t]=e,e+=1},size:function(){return e},indexOf:function(t){return r[t]},contains:function(t){return void 0!==r[t]}};return n};return e}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=p();n.write(a);for(var u=function(){function e(t){a+=String.fromCharCode(r(63&t))}var n=0,o=0,i=0,a="",t={},r=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return t.writeByte=function(t){for(n=n<<8|255&t,o+=8,i+=1;6<=o;)e(n>>>o-6),o-=6},t.flush=function(){if(0<o&&(e(n<<6-o),o=n=0),i%3!=0)for(var t=3-i%3,r=0;r<t;r+=1)a+="="},t.toString=function(){return a},t}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return i}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||57344<=n?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- los mismos numeros que index.html ---------- */
+
+var T_OLEADA1    = 55;
+var T_MEDICO     = 70;
+var T_OLEADA2    = 100;
+var T_MUERTE     = 125;
+var T_REVELACION = 145;
+var T_RATAS      = 165;
+var T_CIERRE     = 180;
+var TARDANZA_MUERTE = 12;
+var REJILLA = 30;
+
+var FASES = [
+  { t:0,            nombre:"La calle" },
+  { t:T_OLEADA1,    nombre:"Primera oleada" },
+  { t:T_MEDICO,     nombre:"Entra el medico" },
+  { t:T_OLEADA2,    nombre:"Segunda oleada" },
+  { t:T_MUERTE,     nombre:"Se mueren" },
+  { t:T_REVELACION, nombre:"No fue el aire" },
+  { t:T_RATAS,      nombre:"Las ratas" },
+  { t:T_CIERRE,     nombre:"La cuarentena" }
+];
+
+var LETREROS = [
+  { t:T_REVELACION,      texto:"No fue el aire" },
+  { t:T_REVELACION + 7,  texto:"Fue una bacteria", roja:true },
+  { t:T_REVELACION + 14, texto:"Nadie la vio hasta 1894" },
+  { t:T_RATAS,           texto:"Viajaba en las pulgas de las ratas" },
+  { t:T_CIERRE,          texto:"Cuarenta dias de espera", roja:true }
+];
+
+/* ---------- las llaves, identicas a index.html ---------- */
+/* Si cambias esto, cambialo tambien alli o los papeles dejan de cuadrar. */
+
+var ALFABETO = "0123456789abcdefghijklmnopqrstuvwxyz";
+var LARGO_LLAVE = 6;
+var NUM_PAPELES = 6;
+
+function llaveDe(p){
+  var d = [], suma = 0, i;
+  for (i=0;i<LARGO_LLAVE;i++){ d.push(Math.floor(Math.random() * 36)); suma += d[i]; }
+  var falta = (((p - suma) % NUM_PAPELES) + NUM_PAPELES) % NUM_PAPELES;
+  var donde = Math.floor(Math.random() * LARGO_LLAVE);
+  d[donde] = (d[donde] + falta) % 36;
+  var s = "";
+  for (i=0;i<LARGO_LLAVE;i++) s += ALFABETO.charAt(d[i]);
+  return s;
+}
+
+// la demora sale de la propia llave, para que la pantalla y el telefono maten
+// a la misma persona en el mismo segundo sin hablarse
+function demoraDeLlave(llave){
+  var n = 0;
+  for (var i=0;i<llave.length;i++) n = (n * 36 + ALFABETO.indexOf(llave.charAt(i))) % 100000;
+  return (n % 1000) / 1000 * TARDANZA_MUERTE;
+}
+
+/* ---------- utilidades ---------- */
+
+var $ = function(id){ return document.getElementById(id); };
+function ahora(){ return Date.now(); }
+
+var escala = 1;
+var inicio = 0;
+var cortado = false;
+
+var estado = {
+  cfg:  { total:24, enfermos:14, oleada1:9 },
+  foto: null,
+  ancho: 0,
+  alto: 0,
+  pins: [],
+  siguiente: 0
+};
+
+function verPaso(id){
+  var todos = document.querySelectorAll(".paso");
+  for (var i=0;i<todos.length;i++) todos[i].classList.toggle("activo", todos[i].id === id);
+}
+
+function guardar(){
+  try { localStorage.setItem("maestra", JSON.stringify(estado)); } catch(e){}
+}
+function recuperar(){
+  try {
+    var crudo = localStorage.getItem("maestra");
+    if (!crudo) return null;
+    var e = JSON.parse(crudo);
+    return (e && e.pins) ? e : null;
+  } catch(e){ return null; }
+}
+
+/* ---------- paso 1, la configuracion ---------- */
+
+function leerConfig(){
+  return {
+    total:   Math.max(1, parseInt($("nTotal").value, 10) || 0),
+    enfermos: Math.max(0, parseInt($("nEnfermos").value, 10) || 0),
+    oleada1: Math.max(0, parseInt($("nOleada1").value, 10) || 0)
+  };
+}
+
+function pintarCuenta(){
+  var c = leerConfig();
+  var sanos = c.total - c.enfermos;
+  var seg = c.enfermos - c.oleada1;
+  $("cuenta").innerHTML =
+    '<div class="fila"><span>Se salvan</span><span>' + Math.max(0, sanos) + '</span></div>' +
+    '<div class="fila"><span>Caen en la primera oleada, al minuto 0.55</span><span>' + c.oleada1 + '</span></div>' +
+    '<div class="fila"><span>Caen en la segunda, al 1.40</span><span>' + Math.max(0, seg) + '</span></div>' +
+    '<div class="fila"><span>Acaban muertos</span><span>' + c.enfermos + '</span></div>';
+
+  var mal = "";
+  if (c.enfermos > c.total) mal = "No pueden enfermar mas de las que hay";
+  else if (c.oleada1 > c.enfermos) mal = "En la primera oleada no pueden caer mas de las que enferman";
+  else if (c.enfermos === 0) mal = "Sin enfermos no pasa nada, sube el numero";
+  $("avisoConfig").textContent = mal;
+  $("btnAFoto").disabled = !!mal;
+  return !mal;
+}
+
+/* ---------- el reparto de papeles ---------- */
+
+// 0 sano, 1 fiebre, 2 buba, 3 tos, 4 enfermo al azar, 5 enfermo en la segunda oleada
+function repartirPapeles(c){
+  var lista = [], i;
+  for (i=0;i<c.oleada1;i++) lista.push(1 + (i % 3));
+  for (i=0;i<c.enfermos - c.oleada1;i++) lista.push(5);
+  for (i=0;i<c.total - c.enfermos;i++) lista.push(0);
+  for (i=lista.length-1;i>0;i--){          // barajar
+    var j = Math.floor(Math.random() * (i+1));
+    var t = lista[i]; lista[i] = lista[j]; lista[j] = t;
+  }
+  return lista.map(function(p){
+    var k = llaveDe(p);
+    return { papel:p, llave:k, demora:demoraDeLlave(k), x:0, y:0, puesto:false };
+  });
+}
+
+function enfermaEn(p){
+  if (p.papel === 0) return Infinity;
+  return p.papel === 5 ? T_OLEADA2 : T_OLEADA1;
+}
+function muereEn(p){
+  return p.papel === 0 ? Infinity : T_MUERTE + p.demora;
+}
+function estadoDe(p, s){
+  if (s >= muereEn(p)) return "muerto";
+  if (s >= enfermaEn(p)) return "enfermo";
+  return "sano";
+}
+
+/* ---------- los sellos ---------- */
+
+var CAMINO_SELLO = (function(){
+  var n = 11, rv = 40, rc = 53, d = "", i;
+  for (i=0;i<n;i++){
+    var a0 = (i / n) * Math.PI * 2 - Math.PI/2;
+    var am = ((i + 0.5) / n) * Math.PI * 2 - Math.PI/2;
+    var a1 = ((i + 1) / n) * Math.PI * 2 - Math.PI/2;
+    var p0 = [50 + Math.cos(a0)*rv, 50 + Math.sin(a0)*rv];
+    var pc = [50 + Math.cos(am)*rc, 50 + Math.sin(am)*rc];
+    var p1 = [50 + Math.cos(a1)*rv, 50 + Math.sin(a1)*rv];
+    if (i === 0) d += "M" + p0[0].toFixed(1) + "," + p0[1].toFixed(1);
+    d += "Q" + pc[0].toFixed(1) + "," + pc[1].toFixed(1) + " " + p1[0].toFixed(1) + "," + p1[1].toFixed(1);
+  }
+  return d + "Z";
+})();
+
+function dibujarSello(numero, como){
+  var marca;
+  if (como === "muerto"){
+    marca = '<path class="trazo" d="M32,32 L68,68 M68,32 L32,68"/>';
+  } else if (como === "enfermo"){
+    // la cruz que se pintaba en las puertas de las casas apestadas
+    marca = '<path class="trazo" d="M50,26 L50,74 M30,44 L70,44"/>';
+  } else {
+    marca = '<text class="marca" x="50" y="52">' + numero + '</text>';
+  }
+  return '<svg viewBox="0 0 100 100">' +
+    '<circle class="halo" cx="50" cy="50" r="44"/>' +
+    '<path class="cera" d="' + CAMINO_SELLO + '"/>' + marca + '</svg>';
+}
+
+/* ---------- la foto con los sellos ---------- */
+
+function montarTabla(caja, marcable){
+  caja.innerHTML = "";
+  if (!estado.foto) return;
+  var im = document.createElement("img");
+  im.src = estado.foto;
+  im.alt = "";
+  caja.appendChild(im);
+  ajustarTabla(caja);
+}
+
+function ajustarTabla(caja){
+  if (!estado.ancho || !estado.alto) return;
+  var padre = caja.parentNode;
+  var dw = padre.clientWidth, dh = padre.clientHeight;
+  if (!dw || !dh) return;
+  var r = estado.ancho / estado.alto;
+  var w = dw, h = dw / r;
+  if (h > dh){ h = dh; w = dh * r; }
+  caja.style.width = Math.floor(w) + "px";
+  caja.style.height = Math.floor(h) + "px";
+}
+
+function pintarPins(caja, s){
+  if (!estado.foto) return;
+  var puestos = estado.pins.filter(function(p){ return p.puesto; });
+  var viejos = caja.querySelectorAll(".pin");
+  for (var v=0; v<viejos.length; v++) viejos[v].remove();
+  var tam = Math.max(30, Math.min(72, caja.clientWidth / 16));
+  for (var i=0;i<puestos.length;i++){
+    var p = puestos[i];
+    var como = (s === null) ? "sano" : estadoDe(p, s);
+    var el = document.createElement("div");
+    el.className = "pin " + como;
+    el.style.left = p.x + "%";
+    el.style.top = p.y + "%";
+    el.style.setProperty("--pin", tam + "px");
+    el.innerHTML = dibujarSello(p.n, como);
+    caja.appendChild(el);
+  }
+}
+
+/* ---------- paso 2, la foto ---------- */
+
+var flujo = null;
+
+function meterFoto(dataUrl){
+  var im = new Image();
+  im.onload = function(){
+    var max = 1600;
+    var w = im.width, h = im.height;
+    if (w > max){ h = Math.round(h * max / w); w = max; }
+    var c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    c.getContext("2d").drawImage(im, 0, 0, w, h);
+    try {
+      estado.foto = c.toDataURL("image/jpeg", 0.82);
+    } catch(e){
+      $("avisoFoto").textContent = "No se pudo leer esa imagen";
+      return;
+    }
+    estado.ancho = w; estado.alto = h;
+    $("marcoFoto").innerHTML = "";
+    var vista = document.createElement("img");
+    vista.src = estado.foto;
+    $("marcoFoto").appendChild(vista);
+    $("btnAReparto").disabled = false;
+    $("avisoFoto").textContent = "";
+    guardar();
+  };
+  im.onerror = function(){ $("avisoFoto").textContent = "No se pudo leer esa imagen"; };
+  im.src = dataUrl;
+}
+
+function pararCamara(){
+  if (flujo){ flujo.getTracks().forEach(function(t){ t.stop(); }); flujo = null; }
+  $("btnDisparar").hidden = true;
+}
+
+/* ---------- paso 3, el reparto ---------- */
+
+function pintarReparto(){
+  var i = estado.siguiente;
+  var quedan = estado.pins.length - i;
+  if (quedan <= 0){
+    $("quienQr").textContent = "Ya estan todos";
+    $("cajaQr").innerHTML = "";
+    $("ligaQr").textContent = "";
+    $("instruccion").textContent = "Pulsa Ya estan todos para seguir";
+  } else {
+    $("quienQr").textContent = "Persona " + (i+1) + " de " + estado.pins.length;
+    var url = location.origin + location.pathname.replace(/maestra\.html$/, "") + "index.html?k=" + estado.pins[i].llave;
+    $("ligaQr").textContent = url;
+    try {
+      var qr = qrcode(0, "M");
+      qr.addData(url);
+      qr.make();
+      $("cajaQr").innerHTML = qr.createSvgTag({ scalable:true, margin:1 });
+    } catch(e){
+      $("cajaQr").innerHTML = "";
+      $("ligaQr").textContent = "No se pudo dibujar el codigo. Escribe esta direccion a mano: " + url;
+    }
+    $("instruccion").textContent = "Que escanee, y despues toca su cara en la foto";
+  }
+  $("btnDeshacer").disabled = i === 0;
+  $("btnSaltar").disabled = quedan <= 0;
+  montarTabla($("tablaReparto"), true);
+  pintarPins($("tablaReparto"), null);
+}
+
+function ponerSello(ev){
+  var i = estado.siguiente;
+  if (i >= estado.pins.length) return;
+  var caja = $("tablaReparto");
+  var r = caja.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  var p = estado.pins[i];
+  p.x = ((ev.clientX - r.left) / r.width) * 100;
+  p.y = ((ev.clientY - r.top) / r.height) * 100;
+  p.puesto = true;
+  p.n = i + 1;
+  estado.siguiente = i + 1;
+  guardar();
+  pintarReparto();
+}
+
+/* ---------- paso 4, el pase ---------- */
+
+function transcurrido(){ return inicio ? (ahora() - inicio) / 1000 * escala : -1; }
+
+function faseDe(s){
+  var f = FASES[0].nombre;
+  for (var i=0;i<FASES.length;i++) if (s >= FASES[i].t) f = FASES[i].nombre;
+  return f;
+}
+
+function reloj(s){
+  if (s < 0) s = 0;
+  var m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + "." + (r < 10 ? "0" : "") + r;
+}
+
+function pintarSemaforo(){
+  var fase = (ahora() % (REJILLA * 1000)) / 1000;
+  var frontera = REJILLA / 2;
+  var malo = fase >= frontera - 5 && fase <= frontera + 1;
+  var faltan = Math.max(1, Math.ceil(frontera + 1 - fase));
+  $("semaforo").textContent = malo ? "Espera " + faltan : "Ahora";
+  $("semaforo").classList.toggle("espera", malo);
+  $("diceSemaforo").textContent = malo
+    ? "Si arrancas ahora la sala se parte en dos tandas"
+    : "Buen momento para decir que presionen";
+}
+
+var letreroPuesto = -1;
+
+function pintarPase(){
+  var s = transcurrido();
+  $("relojPase").textContent = reloj(s);
+  $("fasePase").textContent = faseDe(s);
+
+  var puestos = estado.pins.filter(function(p){ return p.puesto; });
+  var enf = 0, mue = 0;
+  for (var i=0;i<puestos.length;i++){
+    var e = estadoDe(puestos[i], s);
+    if (e === "enfermo") enf++;
+    else if (e === "muerto") mue++;
+  }
+  $("nVivos").textContent = puestos.length - mue;
+  $("nEnfermos2").textContent = enf;
+  $("nMuertos").textContent = mue;
+
+  pintarPins($("tablaPase"), s);
+
+  var cual = -1;
+  for (var j=0;j<LETREROS.length;j++) if (s >= LETREROS[j].t) cual = j;
+  if (cual !== letreroPuesto){
+    letreroPuesto = cual;
+    var caja = $("letrero");
+    if (cual < 0){ caja.classList.remove("puesto"); }
+    else {
+      $("letreroTexto").textContent = LETREROS[cual].texto;
+      $("letreroTexto").className = LETREROS[cual].roja ? "roja" : "";
+      caja.classList.add("puesto");
+    }
+  }
+
+  // la musica se va apagando en el cierre
+  var mus = $("musica");
+  if (!mus.paused && s > T_CIERRE - 6){
+    var queda = Math.max(0, (T_CIERRE + 6 - s) / 12);
+    mus.volume = volBase() * queda;
+  }
+
+  if (s >= T_CIERRE + 8) terminar();
+}
+
+function volBase(){ return (parseInt($("vol").value, 10) || 0) / 100; }
+
+/* La musica se baja entera antes de empezar, no se va tirando del servidor
+   mientras suena. Si el wifi del museo va lento, un fichero de cinco megas se
+   puede cortar a mitad del pase, y ahi ya no hay arreglo. Asi se sabe antes. */
+var musicaLista = false;
+
+function decirMusica(){
+  $("estadoMusica").textContent = musicaLista ? "Musica lista" : "Sin musica, el pase corre igual";
+}
+
+function cargarMusica(){
+  $("estadoMusica").textContent = "Cargando la musica";
+  fetch("peste-negra.mp3").then(function(r){
+    if (!r.ok) throw new Error("no llego");
+    return r.blob();
+  }).then(function(b){
+    var a = $("musica");
+    // lista es cuando el navegador ya sabe cuanto dura, no cuando llegan los bytes
+    a.addEventListener("loadedmetadata", function(){ musicaLista = true; decirMusica(); }, { once:true });
+    a.addEventListener("error", function(){ musicaLista = false; decirMusica(); }, { once:true });
+    a.preload = "auto";
+    a.src = URL.createObjectURL(b);
+    a.load();
+  }).catch(function(){
+    // ultimo recurso, que al menos lo intente en directo
+    $("musica").src = "peste-negra.mp3";
+    musicaLista = false;
+    decirMusica();
+  });
+}
+
+function arrancarPase(){
+  var paso = REJILLA * 1000;
+  inicio = Math.round(ahora() / paso) * paso;
+  cortado = false;
+  letreroPuesto = -1;
+  $("antesPase").hidden = true;
+  $("arribaPase").hidden = false;
+  $("abajoPase").hidden = false;
+  montarTabla($("tablaPase"), false);
+  var mus = $("musica");
+  try {
+    mus.currentTime = 0;
+    mus.volume = volBase();
+    mus.play().catch(function(){});
+  } catch(e){}
+  pintarPase();
+}
+
+function terminar(){
+  if (cortado) return;
+  cortado = true;
+  var mus = $("musica");
+  try { mus.pause(); } catch(e){}
+  var puestos = estado.pins.filter(function(p){ return p.puesto; });
+  var mue = puestos.filter(function(p){ return p.papel !== 0; }).length;
+  var pct = puestos.length ? Math.round(mue * 100 / puestos.length) : 0;
+  $("resumen").innerHTML =
+    '<div class="fila"><span>Estaban</span><span>' + puestos.length + '</span></div>' +
+    '<div class="fila mue"><span>Murieron</span><span>' + mue + '</span></div>' +
+    '<div class="fila"><span>Se salvaron</span><span>' + (puestos.length - mue) + '</span></div>' +
+    '<div class="fila"><span>De cada cien</span><span>' + pct + '</span></div>';
+  verPaso("final");
+}
+
+/* ---------- el bucle ---------- */
+
+setInterval(function(){
+  var activo = document.querySelector(".paso.activo");
+  if (!activo) return;
+  if (activo.id === "pase"){
+    if (inicio && !cortado) pintarPase();
+    else if (!inicio) pintarSemaforo();
+  }
+}, 200);
+
+window.addEventListener("resize", function(){
+  var activo = document.querySelector(".paso.activo");
+  if (!activo) return;
+  if (activo.id === "reparto"){ ajustarTabla($("tablaReparto")); pintarPins($("tablaReparto"), null); }
+  if (activo.id === "pase" && inicio){ ajustarTabla($("tablaPase")); pintarPase(); }
+});
+
+/* ---------- los botones ---------- */
+
+$("nTotal").addEventListener("input", pintarCuenta);
+$("nEnfermos").addEventListener("input", pintarCuenta);
+$("nOleada1").addEventListener("input", pintarCuenta);
+
+$("btnAFoto").addEventListener("click", function(){
+  if (!pintarCuenta()) return;
+  var c = leerConfig();
+  var mismo = estado.cfg && estado.cfg.total === c.total &&
+              estado.cfg.enfermos === c.enfermos && estado.cfg.oleada1 === c.oleada1;
+  if (!mismo || !estado.pins.length){
+    estado.cfg = c;
+    estado.pins = repartirPapeles(c);
+    estado.siguiente = 0;
+  }
+  guardar();
+  verPaso("foto");
+});
+
+$("btnOlvidar").addEventListener("click", function(){
+  try { localStorage.removeItem("maestra"); } catch(e){}
+  location.reload();
+});
+
+$("btnSubir").addEventListener("click", function(){ $("ficheroFoto").click(); });
+
+$("ficheroFoto").addEventListener("change", function(){
+  var f = this.files && this.files[0];
+  if (!f) return;
+  pararCamara();
+  var lector = new FileReader();
+  lector.onload = function(){ meterFoto(lector.result); };
+  lector.onerror = function(){ $("avisoFoto").textContent = "No se pudo abrir el fichero"; };
+  lector.readAsDataURL(f);
+});
+
+$("btnCamara").addEventListener("click", function(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    $("avisoFoto").textContent = "Este navegador no da acceso a la camara, sube una foto";
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ video:{ width:{ ideal:1920 } } }).then(function(f){
+    flujo = f;
+    $("marcoFoto").innerHTML = "";
+    var v = document.createElement("video");
+    v.autoplay = true; v.playsInline = true; v.muted = true;
+    v.srcObject = f;
+    $("marcoFoto").appendChild(v);
+    $("btnDisparar").hidden = false;
+    $("avisoFoto").textContent = "";
+  }).catch(function(){
+    $("avisoFoto").textContent = "No se pudo abrir la camara, sube una foto";
+  });
+});
+
+$("btnDisparar").addEventListener("click", function(){
+  var v = $("marcoFoto").querySelector("video");
+  if (!v) return;
+  var c = document.createElement("canvas");
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext("2d").drawImage(v, 0, 0);
+  var d = c.toDataURL("image/jpeg", 0.9);
+  pararCamara();
+  meterFoto(d);
+});
+
+$("btnAConfig").addEventListener("click", function(){ pararCamara(); verPaso("config"); });
+
+$("btnAReparto").addEventListener("click", function(){
+  pararCamara();
+  verPaso("reparto");
+  setTimeout(pintarReparto, 30);
+});
+
+$("tablaReparto").addEventListener("click", ponerSello);
+
+$("btnDeshacer").addEventListener("click", function(){
+  if (estado.siguiente === 0) return;
+  estado.siguiente--;
+  estado.pins[estado.siguiente].puesto = false;
+  guardar();
+  pintarReparto();
+});
+
+$("btnSaltar").addEventListener("click", function(){
+  if (estado.siguiente >= estado.pins.length) return;
+  estado.pins.splice(estado.siguiente, 1);
+  guardar();
+  pintarReparto();
+});
+
+$("btnAFoto2").addEventListener("click", function(){ verPaso("foto"); });
+
+$("btnAPase").addEventListener("click", function(){
+  inicio = 0;
+  verPaso("pase");
+  $("antesPase").hidden = false;
+  $("arribaPase").hidden = true;
+  $("abajoPase").hidden = true;
+  pintarSemaforo();
+});
+
+$("btnAReparto2").addEventListener("click", function(){
+  verPaso("reparto");
+  setTimeout(pintarReparto, 30);
+});
+
+$("btnArrancar").addEventListener("click", arrancarPase);
+
+$("btnCortar").addEventListener("click", terminar);
+
+$("vol").addEventListener("input", function(){
+  var mus = $("musica");
+  if (transcurrido() < T_CIERRE - 6) mus.volume = volBase();
+});
+
+$("btnVerFoto").addEventListener("click", function(){
+  cortado = true;
+  $("letrero").classList.remove("puesto");   // si no, el ultimo letrero tapa la foto
+  letreroPuesto = -1;
+  verPaso("pase");
+  $("antesPase").hidden = true;
+  $("arribaPase").hidden = false;
+  $("abajoPase").hidden = false;
+  montarTabla($("tablaPase"), false);
+  pintarPins($("tablaPase"), T_CIERRE);
+});
+
+$("btnOtraVez").addEventListener("click", function(){
+  estado.pins = repartirPapeles(estado.cfg);
+  estado.siguiente = 0;
+  inicio = 0;
+  guardar();
+  verPaso("reparto");
+  setTimeout(pintarReparto, 30);
+});
+
+/* ---------- entrada ---------- */
+
+(function(){
+  var p = new URLSearchParams(location.search);
+  if (p.get("ensayo")) escala = parseFloat(p.get("ensayo")) || 6;
+
+  var guardado = recuperar();
+  if (guardado){
+    estado = guardado;
+    $("nTotal").value = estado.cfg.total;
+    $("nEnfermos").value = estado.cfg.enfermos;
+    $("nOleada1").value = estado.cfg.oleada1;
+    $("btnOlvidar").hidden = false;
+    if (estado.foto){
+      var vista = document.createElement("img");
+      vista.src = estado.foto;
+      $("marcoFoto").innerHTML = "";
+      $("marcoFoto").appendChild(vista);
+      $("btnAReparto").disabled = false;
+    }
+  }
+  pintarCuenta();
+  cargarMusica();
+})();
+
+/* para probar sin montar todo el paso a paso */
+window.pruebaRapida = function(cuantos){
+  estado.cfg = { total:cuantos||12, enfermos:Math.round((cuantos||12)*0.6), oleada1:Math.round((cuantos||12)*0.35) };
+  estado.pins = repartirPapeles(estado.cfg);
+  estado.siguiente = estado.pins.length;
+  for (var i=0;i<estado.pins.length;i++){
+    estado.pins[i].puesto = true;
+    estado.pins[i].n = i+1;
+    estado.pins[i].x = 10 + (i % 6) * 14;
+    estado.pins[i].y = 18 + Math.floor(i / 6) * 22;
+  }
+  return estado.pins.map(function(p){ return { papel:p.papel, llave:p.llave, demora:+p.demora.toFixed(2) }; });
+};
+window.verEstado = function(){ return estado; };
+window.irA = verPaso;
+window.arrancarYa = arrancarPase;
+
+})();
+</script>
+</body>
+</html>

@@ -147,3 +147,46 @@ Ahora o Espera segun donde este el reloj.
 Medido presionando en los 30 segundos de la rejilla, con el ultimo del grupo entrando cuatro
 segundos despues del primero. Dando la orden en verde, 23 de 23 momentos caen todos en la
 misma tanda, cero fallos. En rojo fallan 4 de 7, que es justo lo que el semaforo avisa.
+
+## La pantalla maestra
+
+`maestra.html` es la pantalla que se proyecta. Lleva la estacion de principio a fin en
+cuatro pasos y no necesita servidor, igual que el resto.
+
+1. **Configuracion.** Cuantas personas participan, cuantas enferman y cuantas caen en la
+   primera oleada. Va diciendo cuantas se salvan y cuantas acaban muertas.
+2. **La foto del grupo.** Se sube o se toma con la camara. Se guarda encogida a 1600 de
+   ancho para que quepa en el navegador.
+3. **Repartir.** Sale un codigo QR por persona, de uno en uno. Cada quien escanea el suyo
+   y despues tocas su cara en la foto para ponerle su sello. El QR lleva el papel dentro,
+   con las mismas llaves de `?k=` que entiende index.html.
+4. **El pase.** Corre el reloj y las caras se van marcando solas. Cruz roja al enfermar,
+   aspa negra al morir, con el reloj, la fase y la cuenta de vivos, enfermos y muertos.
+
+**Por que no lee los telefonos.** No puede, no hay servidor. Pero no le hace falta, porque
+la propia pantalla repartio los papeles y sabe el reloj. Marca cada cara en el segundo que
+toca sin recibir nada de nadie. Lo unico que no sabe es que frasco eligio cada uno, y eso
+no cambia el final.
+
+La demora de cada muerte sale de la propia llave con una cuenta que hacen igual los dos
+lados, asi que la pantalla tacha una cara en el mismo segundo en que ese telefono se apaga.
+Comprobado con 24 personas, cuadrando papel, momento de enfermar, sintoma y muerte.
+
+**El generador de codigos QR va pegado dentro del archivo.** Si se cargara de internet y el
+wifi del museo fallara, no habria codigos y se cae la estacion entera. Comprobado leyendo
+los codigos con otro lector, 24 de 24, y a todos los tamanos en que se dibuja, desde 120
+pixeles para arriba.
+
+**La musica** es `peste-negra.mp3` y suena solo aqui, no en los telefonos. Se baja entera
+antes de arrancar y se reproduce desde la memoria, no tirando del servidor mientras suena,
+porque cinco megas por un wifi lento se cortan a mitad del pase. La pantalla dice Musica
+lista cuando de verdad lo esta. Si no llega, el pase corre igual sin ella.
+
+Se guarda todo en el navegador segun avanzas, asi que si se recarga a media estacion vuelve
+donde estaba con su foto y sus sellos.
+
+`?ensayo=9` corre el pase nueve veces mas rapido para ensayar.
+
+Probado en trece tamanos de pantalla, de 360x640 a 2560x1440, comprobando que nada se
+desborda, que nada se solapa, que todo queda centrado y que el codigo QR nunca baja de los
+130 pixeles en que deja de leerse bien.
