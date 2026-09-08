@@ -119,6 +119,9 @@ body.tratado #infectado .ficha{opacity:.35}
 @keyframes respira{0%,100%{opacity:.28}50%{opacity:.85}}
 #muerte h2{color:#5c5347}
 #muerte .tenue{color:#3a352d}
+#muerte .calavera{width:min(150px,42vw); height:auto; margin-bottom:26px;
+  opacity:0; animation:asoma 2600ms ease 300ms both}
+@keyframes asoma{from{opacity:0; transform:scale(.82)}to{opacity:.92; transform:scale(1)}}
 
 /* revelacion */
 #revelacion .lineas{max-width:380px; display:flex; flex-direction:column; gap:20px}
@@ -303,8 +306,20 @@ body.enfermo .plazo{color:#e0a09a}
 </section>
 
 <section class="pantalla" id="muerte">
+  <svg class="calavera" viewBox="0 0 120 128" aria-hidden="true">
+    <g fill="#8d8578">
+      <path d="M60 5c27 0 44 20 44 47 0 14-5 25-12 33H28c-7-8-12-19-12-33C16 25 33 5 60 5Z"/>
+      <path d="M34 85h52v20c0 10-10 17-26 17s-26-7-26-17Z"/>
+    </g>
+    <ellipse cx="41" cy="47" rx="13" ry="15" fill="#0a0908"/>
+    <ellipse cx="79" cy="47" rx="13" ry="15" fill="#0a0908"/>
+    <path d="M60 66 52 83h16Z" fill="#0a0908"/>
+    <g stroke="#0a0908" stroke-width="2.6" stroke-linecap="round">
+      <path d="M42 86v14M51 86v14M60 86v14M69 86v14M78 86v14M37 100h46"/>
+    </g>
+  </svg>
   <h2>Moriste</h2>
-  <div class="rayita" style="margin:26px auto"></div>
+  <div class="rayita" style="margin:22px auto"></div>
   <p class="tenue">Florencia, 1348</p>
 </section>
 
@@ -392,21 +407,21 @@ var GUION = [
   { t:T_CIERRE,     fase:"cierre",     nota:"Cierre sobre la cuarentena. Cada uno abre su expediente y sella sus cuarenta dias." }
 ];
 
-var PROB_OLEADA_1 = 0.20;   // uno de cada cinco
-var PROB_OLEADA_2 = 0.16;   // de los que quedaron sanos
+// Florencia perdio mas de la mitad de su gente en 1348. El uno de cada tres del
+// guion es Europa entera en cuatro anios, aqui estamos en la peor ciudad
+var PROB_OLEADA_1 = 0.35;   // algo mas de uno de cada tres, de golpe
+var PROB_OLEADA_2 = 0.38;   // de los que quedaron sanos y no eligieron
 var REJILLA = 15;           // segundos de la rejilla de arranque comun
 var ESPERA_MINIMA = 5;      // segundos de margen antes de arrancar
 
+// tres enfermedades, las mismas tres que nombra el expositor en el guion
 var SINTOMAS = [
-  { nombre:"Bubas en el cuello", detalle:"Un bulto duro debajo de la oreja, del tamano de un huevo.", humor:"Sangre", cura:"Sangria en el brazo del mismo lado" },
-  { nombre:"Buba en la ingle",   detalle:"Un bulto caliente que no deja caminar.", humor:"Sangre", cura:"Abrirla y ponerle una cataplasma" },
-  { nombre:"Fiebre y escalofrios", detalle:"Tiritas de frio con la piel ardiendo.", humor:"Bilis amarilla", cura:"Quemar tomillo alrededor de la cama" },
-  { nombre:"Manchas negras",     detalle:"Manchas oscuras en los brazos que ayer no estaban.", humor:"Bilis negra", cura:"Sangria y dieta caliente" },
-  { nombre:"Tos con sangre",     detalle:"Toses y en el pano queda sangre.", humor:"Flema", cura:"Vinagre en la nariz y hablarte de lejos" },
-  { nombre:"Vomito",             detalle:"No retienes nada desde anoche.", humor:"Bilis amarilla", cura:"Dieta seca y caliente" },
-  { nombre:"Delirio",            detalle:"Hablas con gente que no esta en el cuarto.", humor:"Bilis negra", cura:"Panos frios en la frente y oracion" },
-  { nombre:"Sed y dolor de cabeza", detalle:"Bebes y sigues seco.", humor:"Bilis amarilla", cura:"Examinar tu orina en el frasco" },
-  { nombre:"Aliento pesado",     detalle:"El olor llena el cuarto entero.", humor:"Flema", cura:"Hierbas quemadas en la puerta" }
+  { nombre:"Fiebre y vomitos", detalle:"Ardes por dentro y no retienes nada desde anoche.",
+    humor:"Sangre",      cura:"Sangria en el brazo" },
+  { nombre:"Buba en el cuello", detalle:"Un bulto duro debajo de la oreja, del tamano de un huevo.",
+    humor:"Bilis negra", cura:"Abrirla y quemar tomillo" },
+  { nombre:"Tos con sangre",   detalle:"Toses y en el pano queda sangre.",
+    humor:"Flema",       cura:"Vinagre en la nariz y hablarte de lejos" }
 ];
 
 // la rueda de la orina, simplificada a los cuatro humores
@@ -417,12 +432,11 @@ var HUMORES = [
   { nombre:"Flema",          color:"#d9d2bd", lee:"Palida y lechosa" }
 ];
 
-// se cura con lo contrario, que era la regla de la epoca
+// tres curas, una por enfermedad. Son las tres que hace el medico en la sala
 var TRATAMIENTOS = [
-  { que:"Que te sangren",        porque:"Sacarte lo que sobra por el brazo",     humor:"Sangre" },
-  { que:"Purga y dieta fria",    porque:"Enfriar lo que arde por dentro",        humor:"Bilis amarilla" },
-  { que:"Bano caliente y vino",  porque:"Aflojar lo frio y lo seco",             humor:"Bilis negra" },
-  { que:"Hierbas y vinagre",     porque:"Secar el humor y limpiar el aire",      humor:"Flema" }
+  { que:"Que te sangren",      porque:"Sacarte por el brazo la sangre que sobra", humor:"Sangre" },
+  { que:"Abrirte la buba",     porque:"Sacar lo podrido y quemar tomillo",        humor:"Bilis negra" },
+  { que:"Vinagre en la nariz", porque:"Filtrar el aire malo que respiras",        humor:"Flema" }
 ];
 
 var HUIDA = [
@@ -430,8 +444,8 @@ var HUIDA = [
   { que:"Huir",      porque:"Al campo, como hicieron los ricos", huye:true }
 ];
 
-var PROB_QUEDARSE = 0.26;   // el que se queda entre enfermos cae mas
-var PROB_HUIR     = 0.08;   // el que huye casi siempre se salva, casi
+var PROB_QUEDARSE = 0.55;   // el que se queda entre enfermos cae mucho mas
+var PROB_HUIR     = 0.22;   // el que huye se salva mas, pero no siempre
 
 var AMBIENTE = [
   { t:16, texto:"Hace seis meses llegaron unos barcos al puerto." },
@@ -1019,7 +1033,7 @@ function pintarSano(s){
   var quedo = estado && estado.huyo === 0;
   $("sanoMarca").textContent = huyo ? "Saliste a tiempo" : (quedo ? "Te quedaste" : "Sigues sano");
   if (s >= T_MUERTE + TARDANZA_MUERTE + 3){
-    $("sanoNota").textContent = "Una de cada tres personas de esta sala acaba de morir.";
+    $("sanoNota").textContent = "Mas de la mitad de esta sala acaba de morir.";
   } else if (huyo){
     $("sanoNota").textContent = "Los caminos van llenos de gente como tu.";
   } else if (quedo){
@@ -1151,7 +1165,7 @@ function soltarRatas(){
 
 /* ---------- el expediente ---------- */
 
-var NEUMONICA = 4;           // Tos con sangre, la que va a los pulmones
+var NEUMONICA = 2;           // Tos con sangre, la que va a los pulmones
 var viendoExpediente = false;
 
 function fila(rotulo, dato, apunte, mal){
@@ -1198,7 +1212,7 @@ function pintarExpediente(){
         !cuadra);
     }
   } else {
-    h += fila("No caiste", "Ni en la primera ni en la segunda", "Una de cada tres personas si.", false);
+    h += fila("No caiste", "Ni en la primera ni en la segunda", "Mas de la mitad de la sala si.", false);
   }
 
   if (!estado.o1){
@@ -1235,9 +1249,12 @@ function montarMedico(){
     for (var j=0;j<TRATAMIENTOS.length;j++){
       if (TRATAMIENTOS[j].humor === HUMORES[i].nombre) t = TRATAMIENTOS[j].que + ", " + TRATAMIENTOS[j].porque.toLowerCase();
     }
+    // la bilis amarilla entra en la teoria pero no la tiene ninguno de estos tres enfermos
+    var linea = t ? "Le sobra " + HUMORES[i].nombre.toLowerCase() + ". " + t
+                  : "Le sobra " + HUMORES[i].nombre.toLowerCase() + ". Ningun enfermo de esta calle la tiene, si te la dicen se equivocaron de frasco";
     h += '<div class="par"><div class="gota" style="background:' + HUMORES[i].color + '"></div>' +
          '<div><div class="humor">' + HUMORES[i].lee + '</div>' +
-         '<div class="hace">Le sobra ' + HUMORES[i].nombre.toLowerCase() + '. ' + t + '</div></div></div>';
+         '<div class="hace">' + linea + '</div></div></div>';
   }
   caja.innerHTML = h;
 }

@@ -32,9 +32,30 @@ Nadie mira la pantalla esperando. Los tres momentos son estos.
 humores te sobra. El color es una pista de verdad, la misma rueda que usaba el medico, asi
 que se puede acertar. Es la unica pregunta de la estacion que tiene respuesta correcta.
 
-**Si enfermas, eliges tratamiento.** Cuatro opciones reales de 1348, cada una pensada para
-un humor, porque se trataba con lo contrario. Te alivia trece segundos y despues vuelve la
+**Si enfermas, eliges tratamiento.** Tres opciones reales de 1348, cada una pensada para un
+humor, porque se trataba con lo contrario. Te alivia trece segundos y despues vuelve la
 fiebre. Elijas lo que elijas, te mueres.
+
+## Las tres enfermedades y sus tres curas
+
+Son las mismas tres que nombra el expositor en el guion, para que lo que dice y lo que sale
+en las pantallas sea lo mismo. El medico solo tiene que ensayar tres gestos.
+
+| Enfermedad | Frasco | Lo que sobra | La cura |
+| --- | --- | --- | --- |
+| Fiebre y vomitos | Roja y espesa | Sangre | Que te sangren del brazo |
+| Buba en el cuello | Oscura, casi negra | Bilis negra | Abrirte la buba y quemar tomillo |
+| Tos con sangre | Palida y lechosa | Flema | Vinagre en la nariz y hablarte de lejos |
+
+La bilis amarilla sigue en la rueda del frasco porque es uno de los cuatro humores y el
+expositor los nombra, pero ninguno de estos tres enfermos la tiene. El que la elige se
+equivoco, y su expediente se lo dice al final.
+
+Cuantos enferman. Cae algo mas de uno de cada tres en la primera oleada, y al terminar la
+segunda hay entre el 49 y el 67 por ciento de la sala enferma segun lo que haya decidido la
+gente, con el 60 por ciento como caso normal. Eso no contradice el uno de cada tres del
+guion, que es Europa entera en cuatro anios. La estacion pasa en Florencia en 1348, que fue
+de las ciudades peor golpeadas y perdio mas de la mitad de su gente.
 
 **Si sigues sano, decides si huyes.** Te quedas o te vas al campo, como hicieron los ricos.
 Tienes hasta el 1.36, que es cuando cierran las puertas. El que se queda cae en la segunda
