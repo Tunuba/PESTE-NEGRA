@@ -190,12 +190,23 @@ body.muerto #pulsoPantalla{animation:none; opacity:0}
   border:2px solid #cfe6ff; opacity:.9; animation:panoSube 620ms ease-out both}
 @keyframes panoSube{from{width:14px;height:14px;opacity:.95}to{width:120px;height:120px;opacity:0}}
 
+/* las brasas del juego de la fiebre */
+.brasa{position:absolute; border-radius:50%; transform:translate(-50%,-50%);
+  background:radial-gradient(circle at 36% 32%, #ffd9a0, #ff7a3c 45%, #a32b12);
+  box-shadow:0 0 22px rgba(255,140,60,.6); cursor:pointer;
+  animation:brasaSale 260ms ease both}
+@keyframes brasaSale{from{transform:translate(-50%,-50%) scale(.2)}to{transform:translate(-50%,-50%) scale(1)}}
+.brasa.muriendo{animation:brasaUltimo 400ms ease-in-out infinite}
+@keyframes brasaUltimo{0%,100%{opacity:1}50%{opacity:.35}}
+
 /* bubas */
 .buba{position:absolute; border-radius:50%; transform:translate(-50%,-50%);
   background:radial-gradient(circle at 35% 32%, #e86a5c, #7d1410);
   border:2px solid rgba(255,220,214,.55); cursor:pointer;
-  animation:crece 400ms ease both}
-@keyframes crece{from{transform:translate(-50%,-50%) scale(.2)}to{transform:translate(-50%,-50%) scale(1)}}
+  transition:background 300ms}
+.buba.madurando{background:radial-gradient(circle at 35% 32%, #ff8f7a, #5c0c08);
+  border-color:rgba(255,200,190,.9); animation:aPunto 520ms ease-in-out infinite}
+@keyframes aPunto{0%,100%{box-shadow:0 0 0 rgba(194,43,33,0)}50%{box-shadow:0 0 26px rgba(255,80,60,.75)}}
 .buba.rota{animation:revienta 340ms ease both; pointer-events:none}
 @keyframes revienta{to{transform:translate(-50%,-50%) scale(1.9); opacity:0}}
 
@@ -11601,16 +11612,25 @@ function pintarTension(s, enfermo, muerto){
 
 /* ---------- los mini juegos, uno por enfermedad ---------- */
 
+/* Cada enfermedad tiene su juego y sus tres etapas. Las etapas salen solas
+   segun la tension, asi que se nota que va a peor por escalones y no solo
+   porque todo vaya mas rapido. Ninguno se puede ganar, es la idea. */
 var JUEGOS = [
-  { orden:"Bajale la fiebre",  pista:"Toca para ponerle un pano frio",
-    izq:"Fiebre", der:"Panos" },
-  { orden:"Revienta las bubas", pista:"Tocalas antes de que se llene",
-    izq:"Cuerpo", der:"Reventadas" },
-  { orden:"No pierdas el aire", pista:"Manten el dedo mientras el circulo crece",
-    izq:"Aliento", der:"Respiraciones" }
+  { izq:"Fiebre", der:"panos", etapas:[
+      { t:0,    orden:"Bajale la fiebre", pista:"Toca las brasas antes de que se apaguen solas" },
+      { t:0.45, orden:"No le baja",       pista:"Salen mas y duran menos" },
+      { t:0.76, orden:"Estas delirando",  pista:"Ya casi no le das" } ] },
+  { izq:"Cuerpo", der:"reventadas", etapas:[
+      { t:0,    orden:"Revienta las bubas", pista:"Las gordas primero. Si maduran es peor" },
+      { t:0.45, orden:"Salen mas rapido",   pista:"No dejes que ninguna madure" },
+      { t:0.76, orden:"Ya no das abasto",   pista:"Se te esta llenando el cuerpo" } ] },
+  { izq:"Aliento", der:"respiraciones", etapas:[
+      { t:0,    orden:"No pierdas el aire", pista:"Aprieta mientras el circulo crece" },
+      { t:0.45, orden:"Te falta el aire",   pista:"El ritmo ya no es el de antes" },
+      { t:0.76, orden:"Te estas ahogando",  pista:"Se corta sin avisar" } ] }
 ];
 
-var jug = null;      // el juego en marcha
+var jug = null;
 var rafJuego = 0;
 
 function abrirJuego(cual){
@@ -11620,18 +11640,21 @@ function abrirJuego(cual){
   jug = {
     cual: cual,
     lienzo: $("juegoLienzo"),
-    aguante: 1,          // 0 a 1, lo que te queda de control
+    aguante: 1,
     aciertos: 0,
-    bubas: [],
+    perdidas: 0,
+    etapa: -1,
+    cosas: [],
     proxima: 0,
+    calor: 0.32,
     faseAire: 0,
+    velAire: 1,
     dentro: false,
+    saltoEn: 2.5,
     ultimo: performance.now()
   };
   $("juegoSintoma").textContent = st.nombre;
   $("juegoTratado").textContent = TRATAMIENTOS[estado.tratamiento].que + ", y no sirvio";
-  $("juegoOrden").textContent = JUEGOS[cual].orden;
-  $("juegoPista").textContent = JUEGOS[cual].pista;
   $("juegoIzq").textContent = JUEGOS[cual].izq;
   jug.lienzo.innerHTML = "";
 
@@ -11639,7 +11662,6 @@ function abrirJuego(cual){
     jug.lienzo.innerHTML = '<div class="termo"><div class="liquido" id="termoLiq"></div>' +
       '<div class="raya" style="top:25%"></div><div class="raya" style="top:50%"></div>' +
       '<div class="raya" style="top:75%"></div></div>';
-    jug.calor = 0.35;
   } else if (cual === 2){
     jug.lienzo.innerHTML = '<div class="guia" id="guiaAire"></div><div class="aliento" id="circAire"></div>';
   }
@@ -11651,35 +11673,60 @@ function cerrarJuego(){
   if (jug){ jug.lienzo.innerHTML = ""; jug = null; }
 }
 
+function pintarEtapa(ten){
+  var e = JUEGOS[jug.cual].etapas, cual = 0;
+  for (var i=0;i<e.length;i++) if (ten >= e[i].t) cual = i;
+  if (cual === jug.etapa) return;
+  jug.etapa = cual;
+  $("juegoOrden").textContent = e[cual].orden;
+  $("juegoPista").textContent = e[cual].pista;
+  if (cual > 0){ vibrar([70, 50, 70]); campana(180, 2.2, 0.3); }
+}
+
+function quitarCosa(c, i){
+  if (c.el && c.el.parentNode) c.el.parentNode.removeChild(c.el);
+  jug.cosas.splice(i, 1);
+}
+
 function tocarJuego(ev){
   if (!jug || !estado) return;
   var r = jug.lienzo.getBoundingClientRect();
-  var x = (ev.clientX - r.left), y = (ev.clientY - r.top);
+  var x = ev.clientX - r.left, y = ev.clientY - r.top;
+
   if (jug.cual === 0){
-    jug.calor = Math.max(0, jug.calor - 0.11);
-    jug.aciertos++;
-    jug.aguante = Math.min(1, jug.aguante + 0.05);
-    var p = document.createElement("div");
-    p.className = "pano";
-    p.style.left = (x - 7) + "px"; p.style.top = (y - 7) + "px";
-    jug.lienzo.appendChild(p);
-    setTimeout(function(){ if (p.parentNode) p.remove(); }, 640);
-    campana(760, 0.5, 0.14);
-  } else if (jug.cual === 1){
-    for (var i=jug.bubas.length-1;i>=0;i--){
-      var b = jug.bubas[i];
-      if (b.rota) continue;
+    // solo cuenta si le da a una brasa. Antes valia tocar en cualquier sitio
+    for (var i=jug.cosas.length-1;i>=0;i--){
+      var b = jug.cosas[i];
       var d = Math.sqrt((x-b.x)*(x-b.x) + (y-b.y)*(y-b.y));
-      if (d <= b.r + 12){
-        b.rota = true;
-        b.el.classList.add("rota");
-        (function(el){ setTimeout(function(){ if (el.parentNode) el.remove(); }, 360); })(b.el);
-        jug.bubas.splice(i,1);
+      if (d <= b.r + 14){
+        jug.calor = Math.max(0, jug.calor - 0.085);
         jug.aciertos++;
-        jug.aguante = Math.min(1, jug.aguante + 0.06);
-        campana(520, 0.4, 0.16);
+        var p = document.createElement("div");
+        p.className = "pano";
+        p.style.left = (b.x - 7) + "px"; p.style.top = (b.y - 7) + "px";
+        jug.lienzo.appendChild(p);
+        (function(el){ setTimeout(function(){ if (el.parentNode) el.remove(); }, 640); })(p);
+        quitarCosa(b, i);
+        campana(760, 0.5, 0.14);
+        vibrar([16]);
+        return;
+      }
+    }
+    campana(150, 0.35, 0.1);
+
+  } else if (jug.cual === 1){
+    for (var j=jug.cosas.length-1;j>=0;j--){
+      var b2 = jug.cosas[j];
+      var d2 = Math.sqrt((x-b2.x)*(x-b2.x) + (y-b2.y)*(y-b2.y));
+      if (d2 <= b2.r + 12){
+        b2.el.classList.add("rota");
+        (function(el){ setTimeout(function(){ if (el.parentNode) el.remove(); }, 360); })(b2.el);
+        b2.el = null;
+        jug.cosas.splice(j, 1);
+        jug.aciertos++;
+        campana(430 + b2.r * 6, 0.4, 0.16);
         vibrar([18]);
-        break;
+        return;
       }
     }
   }
@@ -11692,42 +11739,85 @@ function pasoJuego(ahoraMs){
   jug.ultimo = ahoraMs;
   var s = transcurrido();
   var ten = tensionEn(s);
-  // cuanto mas cerca del final, mas rapido va todo. Al final no se puede seguir
-  var prisa = 0.55 + ten * 2.6;
+  var prisa = 0.6 + ten * 2.4;
+  var an = jug.lienzo.clientWidth, al = jug.lienzo.clientHeight;
+  pintarEtapa(ten);
 
   if (jug.cual === 0){
-    jug.calor = Math.min(1, jug.calor + dt * 0.085 * prisa);
+    jug.calor = Math.min(1, jug.calor + dt * 0.052 * prisa);
+    // brasas que hay que apagar. Si se apagan solas, la fiebre pega un tiron
+    jug.proxima -= dt;
+    if (jug.proxima <= 0 && jug.cosas.length < 7 && an > 20 && al > 20){
+      jug.proxima = Math.max(0.30, 1.5 / prisa);
+      var rad = 17 + Math.random() * 10;
+      var el = document.createElement("div");
+      el.className = "brasa";
+      var bx = rad + 6 + Math.random() * Math.max(1, an - rad*2 - 12);
+      var by = rad + 6 + Math.random() * Math.max(1, al - rad*2 - 12);
+      el.style.width = el.style.height = (rad*2) + "px";
+      el.style.left = bx + "px"; el.style.top = by + "px";
+      jug.lienzo.appendChild(el);
+      jug.cosas.push({ x:bx, y:by, r:rad, vida:Math.max(1.1, 3.4/prisa), el:el });
+    }
+    for (var i=jug.cosas.length-1;i>=0;i--){
+      var b = jug.cosas[i];
+      b.vida -= dt;
+      if (b.el) b.el.classList.toggle("muriendo", b.vida < 0.9);
+      if (b.vida <= 0){
+        jug.calor = Math.min(1, jug.calor + 0.055);
+        jug.perdidas++;
+        quitarCosa(b, i);
+      }
+    }
     var liq = $("termoLiq");
     if (liq) liq.style.height = Math.round(jug.calor * 100) + "%";
     jug.aguante = 1 - jug.calor;
-    $("juegoDer").textContent = jug.aciertos + " panos";
+    $("juegoDer").textContent = jug.aciertos + " " + JUEGOS[0].der;
 
   } else if (jug.cual === 1){
+    // las bubas crecen. La que madura ya no se puede reventar y cuenta doble
     jug.proxima -= dt;
-    if (jug.proxima <= 0 && jug.bubas.length < 14){
-      jug.proxima = Math.max(0.24, 1.5 / prisa);
-      var an = jug.lienzo.clientWidth, al = jug.lienzo.clientHeight;
-      if (an > 20 && al > 20){
-        var rad = 17 + Math.random() * 13;
-        var b = { x: rad + Math.random() * (an - rad*2), y: rad + Math.random() * (al - rad*2), r: rad, rota:false };
-        var el = document.createElement("div");
-        el.className = "buba";
-        el.style.width = (rad*2) + "px"; el.style.height = (rad*2) + "px";
-        el.style.left = b.x + "px"; el.style.top = b.y + "px";
-        b.el = el;
-        jug.lienzo.appendChild(el);
-        jug.bubas.push(b);
+    if (jug.proxima <= 0 && jug.cosas.length < 12 && an > 20 && al > 20){
+      jug.proxima = Math.max(0.30, 1.7 / prisa);
+      var r0 = 11, rMax = 26 + Math.random() * 12;
+      var el2 = document.createElement("div");
+      el2.className = "buba";
+      var x2 = rMax + 6 + Math.random() * Math.max(1, an - rMax*2 - 12);
+      var y2 = rMax + 6 + Math.random() * Math.max(1, al - rMax*2 - 12);
+      el2.style.left = x2 + "px"; el2.style.top = y2 + "px";
+      el2.style.width = el2.style.height = (r0*2) + "px";
+      jug.lienzo.appendChild(el2);
+      jug.cosas.push({ x:x2, y:y2, r:r0, rMax:rMax, el:el2 });
+    }
+    for (var j=jug.cosas.length-1;j>=0;j--){
+      var b3 = jug.cosas[j];
+      b3.r += dt * (4.5 + ten * 9);
+      if (b3.el){
+        b3.el.style.width = b3.el.style.height = Math.round(b3.r*2) + "px";
+        b3.el.classList.toggle("madurando", b3.r > b3.rMax * 0.78);
+      }
+      if (b3.r >= b3.rMax){
+        jug.perdidas += 2;
+        quitarCosa(b3, j);
+        campana(110, 1.4, 0.24);
+        vibrar([90]);
       }
     }
-    jug.aguante = Math.max(0, 1 - jug.bubas.length / 12);
-    $("juegoDer").textContent = jug.aciertos + " reventadas";
+    jug.aguante = Math.max(0, 1 - (jug.cosas.length + jug.perdidas * 0.5) / 12);
+    $("juegoDer").textContent = jug.aciertos + " " + JUEGOS[1].der;
 
   } else {
-    jug.faseAire += dt * (0.75 + ten * 1.5);
+    // el ritmo se salta y se corta, para que no se pueda ir en automatico
+    jug.saltoEn -= dt;
+    if (jug.saltoEn <= 0 && ten > 0.35){
+      jug.saltoEn = 1.4 + Math.random() * 2.6;
+      jug.faseAire += 0.22 + Math.random() * 0.3;
+      jug.velAire = 0.75 + Math.random() * 1.1;
+    }
+    jug.faseAire += dt * jug.velAire * (0.7 + ten * 1.4);
     var ciclo = Math.sin(jug.faseAire * Math.PI * 2);
     var subiendo = ciclo > 0;
-    var an2 = jug.lienzo.clientWidth, al2 = jug.lienzo.clientHeight;
-    var maxr = Math.max(40, Math.min(an2, al2) * 0.42);
+    var maxr = Math.max(40, Math.min(an, al) * 0.42);
     var rad2 = maxr * (0.34 + 0.66 * (ciclo * 0.5 + 0.5));
     var c = $("circAire"), g = $("guiaAire");
     if (c){
@@ -11735,22 +11825,22 @@ function pasoJuego(ahoraMs){
       c.classList.toggle("dentro", subiendo === jug.dentro);
       c.classList.toggle("fuera", subiendo !== jug.dentro);
     }
-    if (g){ g.style.width = g.style.height = Math.round(maxr * 2) + "px"; }
-    // acierta quien tiene el dedo puesto justo mientras el circulo crece
+    if (g) g.style.width = g.style.height = Math.round(maxr * 2) + "px";
     if (subiendo === jug.dentro){
-      jug.aguante = Math.min(1, jug.aguante + dt * 0.28);
+      jug.aguante = Math.min(1, jug.aguante + dt * 0.26);
       jug.buenSegundo = (jug.buenSegundo || 0) + dt;
       if (jug.buenSegundo > 1){ jug.buenSegundo = 0; jug.aciertos++; campana(392, 0.5, 0.12); }
     } else {
       jug.aguante = Math.max(0, jug.aguante - dt * 0.5);
+      jug.buenSegundo = 0;
     }
-    $("juegoDer").textContent = jug.aciertos + " respiraciones";
+    $("juegoDer").textContent = jug.aciertos + " " + JUEGOS[2].der;
   }
 
   var lleno = $("juegoLleno");
   if (lleno) lleno.style.width = Math.round(jug.aguante * 100) + "%";
   $("juegoBarra").classList.toggle("mal", jug.aguante < 0.34);
-  if (jug.aciertos > (estado.aciertos || 0)){ estado.aciertos = jug.aciertos; }
+  if (jug.aciertos > (estado.aciertos || 0)) estado.aciertos = jug.aciertos;
 }
 
 function pintarFicha(s){
@@ -12245,6 +12335,20 @@ document.addEventListener("pointerdown", function(){
 
 setInterval(pintar, 200);
 pintar();
+
+// avanza el mini juego a mano, para poder probarlo sin depender de que el
+// navegador este pintando. En segundo plano requestAnimationFrame no corre
+window.correrJuego = function(pasos, msPorPaso){
+  if (!jug) return "no hay juego";
+  var ms = msPorPaso || 16;
+  for (var i=0;i<(pasos||60);i++){
+    jug.ultimo = performance.now() - ms;
+    pasoJuego(performance.now());
+  }
+  return { etapa: jug.etapa, aciertos: jug.aciertos, perdidas: jug.perdidas,
+           aguante: +jug.aguante.toFixed(3), cosas: jug.cosas.length };
+};
+window.verJuego = function(){ return jug; };
 
 window.probarRatas = function(){ verPantalla("ratas"); soltarRatas(); chirrido(); };
 

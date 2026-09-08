@@ -75,13 +75,14 @@ tiene lo suyo.
 
 | Enfermedad | El juego |
 | --- | --- |
-| Fiebre y vomitos | Un termometro que sube solo. Tocas para ponerte panos frios |
-| Buba en el cuello | Salen bubas por la pantalla y las revientas tocandolas |
-| Tos con sangre | Un circulo que crece y encoge. Manten el dedo mientras crece |
+| Fiebre y vomitos | Salen brasas y hay que tocarlas antes de que se apaguen solas. Tocar en el aire no sirve, y cada brasa que se apaga le pega un tiron a la fiebre |
+| Buba en el cuello | Las bubas crecen. La que llega a su tamano ya no se puede reventar y cuenta doble, asi que hay que ir a por las gordas primero |
+| Tos con sangre | Un circulo que crece y encoge, manten el dedo mientras crece. El ritmo se salta y cambia de velocidad sola, para que no se pueda ir en automatico |
 
-Los tres se aceleran con la tension, asi que empiezas pudiendo y acabas sin dar abasto. Esa
-es la idea, que no es que pierdas al final sino que te va ganando, que es de lo que trata
-la estacion entera. Al terminar, el expediente cuenta cuanto peleaste.
+Cada uno tiene **tres etapas con nombre** que van saliendo segun la tension, asi que se
+nota que va a peor por escalones y no solo porque todo corra mas. En la fiebre son bajale
+la fiebre, no le baja y estas delirando. Ninguno se puede ganar, esa es la idea, no es que
+pierdas al final sino que te va ganando. Al terminar, el expediente cuenta cuanto peleaste.
 
 Arriba del juego se queda siempre el sintoma y el tratamiento que te hicieron, porque el
 medico no lleva nada encima y lo unico que tiene para trabajar es lo que ve en tu pantalla.
