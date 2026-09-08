@@ -33,6 +33,7 @@ body{
 }
 body.enfermo{background:#5e0f0c}
 body.muerto{background:#000}
+body.ratas{background:#cbbc99}
 
 /* grano y vineta */
 #grano{
@@ -124,11 +125,11 @@ body.tratado #infectado .ficha{opacity:.35}
 
 /* ratas */
 #ratas{justify-content:center; overflow:hidden}
-#ratas .mira{font-family:var(--alto); font-size:clamp(26px,8vw,38px); opacity:0; animation:aparece 1400ms ease 2.4s both}
+#ratas .mira{font-family:var(--alto); font-size:clamp(26px,8vw,38px); color:#191410; opacity:0; animation:aparece 1400ms ease 2.6s both}
 #pista{position:absolute; inset:0; z-index:5; pointer-events:none; overflow:hidden}
-.rata{position:absolute; left:-160px; opacity:.92}
-.rata svg{display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
-@keyframes cruza{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 260px))}}
+.rata{position:absolute; left:-230px; opacity:.94}
+.rata svg{display:block; filter:drop-shadow(0 6px 12px rgba(0,0,0,.65))}
+@keyframes cruza{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 320px))}}
 
 /* cierre */
 #cierre .grande{font-family:var(--alto); font-size:clamp(34px,11vw,52px); line-height:1.05}
@@ -494,10 +495,11 @@ function pintar(){
   var enfermo = estaEnfermo(s);
   var muerto  = enfermo && s >= momentoMuerte();
 
+  var fase = faseDe(s);
+
   cuerpo.classList.toggle("enfermo", enfermo && !muerto && s < 340);
   cuerpo.classList.toggle("muerto", muerto && s < 340);
-
-  var fase = faseDe(s);
+  cuerpo.classList.toggle("ratas", fase === "ratas");
 
   if (fase === "calma" || fase === "oleada1" || fase === "medico" || fase === "oleada2" || fase === "muerte"){
     if (enfermo){
@@ -607,20 +609,20 @@ function pintarRevelacion(s){
 
 /* ---------- las ratas ---------- */
 
-function dibujarRata(){
+function dibujarRata(tam){
   var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 150 62");
-  svg.setAttribute("width", "150");
-  svg.setAttribute("height", "62");
+  svg.setAttribute("viewBox", "-42 0 202 72");
+  svg.setAttribute("width", Math.round(170 * tam));
+  svg.setAttribute("height", Math.round(61 * tam));
   svg.innerHTML =
     '<g fill="#100d0b">' +
-      '<path d="M96 48c-3 0-5-2-5-5 0-1 0-2 1-3-9 3-21 3-30 0-8-3-13-9-13-16 0-4 2-8 5-11-4 0-8-2-10-5-2-3-2-7 0-10 3 4 8 6 13 5 5-3 12-4 18-3 9 1 16 6 19 13 12 2 22 8 27 16 2 3 3 7 2 10-1 3-4 5-7 5z"/>' +
-      '<path d="M35 40c-3 5-3 10 0 14 1 2 0 4-2 4s-4-1-5-3c-3-6-2-13 2-18z"/>' +
-      '<path d="M74 52c-1 4 0 8 3 11 1 2 0 4-2 4s-4-1-5-3c-2-4-2-9 0-13z"/>' +
-      '<circle cx="43" cy="17" r="9"/>' +
+      '<path d="M114 40c4 10 6 18 2 23-1 3-5 3-6 0-2-7-2-17 0-23z"/>' +
+      '<path d="M44 46c3 9 1 15-3 18-2 2-5 1-5-2 1-6 1-12 3-17z"/>' +
+      '<path d="M26 46c-4-12 2-24 16-28 20-8 50-8 70 2 12-2 26 6 40 18 2 2 1 4-2 4-10 2-20 3-30 2-8 6-20 10-40 10-20 2-42 2-50-2-4-2-4-4-4-6z"/>' +
+      '<circle cx="118" cy="20" r="9"/>' +
     '</g>' +
-    '<path d="M133 46c14 1 20 7 15 12-4 4-13 4-19 1" fill="none" stroke="#100d0b" stroke-width="4" stroke-linecap="round"/>' +
-    '<circle cx="22" cy="24" r="2.4" fill="#c22b21"/>';
+    '<path d="M30 46C12 54-14 50-24 38c-4-5-1-11 4-9" fill="none" stroke="#100d0b" stroke-width="3.6" stroke-linecap="round"/>' +
+    '<circle cx="140" cy="34" r="2.6" fill="#c22b21"/>';
   return svg;
 }
 
@@ -635,12 +637,11 @@ function soltarRatas(){
         caja.className = "rata";
         var alto = window.innerHeight;
         var y = alto * (0.18 + Math.random() * 0.64);
-        var tam = 0.5 + Math.random() * 0.75;
+        var tam = 0.55 + Math.random() * 0.7;
         var dur = 2.4 + Math.random() * 2.6;
         caja.style.top = y + "px";
-        caja.style.transform = "scale(" + tam + ")";
         caja.style.animation = "cruza " + dur + "s linear forwards";
-        caja.appendChild(dibujarRata());
+        caja.appendChild(dibujarRata(tam));
         pista.appendChild(caja);
         setTimeout(function(){ if (caja.parentNode) caja.parentNode.removeChild(caja); }, dur * 1000 + 200);
       }, i * (180 + Math.random() * 320));
