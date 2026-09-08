@@ -242,6 +242,7 @@ body.tratado #infectado .ficha{opacity:.35}
   <div class="reloj" id="relojGuion">0.00</div>
   <p class="falta" id="faltaGuion">Sin arrancar</p>
   <ol id="listaGuion"></ol>
+  <p class="tenue" id="salaGuion" style="align-self:center; margin-top:18px; font-size:14px"></p>
   <button class="enlace" id="btnArrancarGuion" style="align-self:center">Arrancar</button>
 </section>
 
@@ -250,6 +251,8 @@ body.tratado #infectado .ficha{opacity:.35}
   <div class="caja" id="cajaQr"></div>
   <p class="url" id="textoUrl"></p>
 </section>
+
+<p class="pie" id="sala" hidden></p>
 
 <div id="vineta"></div>
 <div id="grano"></div>
@@ -484,6 +487,11 @@ function pintar(){
   if (!inicio){ return; }
   var s = transcurrido();
 
+  // el codigo deja ver de un vistazo si alguien arranco en otra tanda
+  var sala = $("sala");
+  sala.hidden = !(s < 118);
+  if (!sala.hidden) sala.textContent = "Sala " + codigoDe(inicio);
+
   if (s < 0){
     var faltan = Math.ceil((inicio - ahora()) / 1000);
     $("cuentaAtras").textContent = faltan;
@@ -687,6 +695,7 @@ function pintarGuion(s){
     lista[j].classList.toggle("pasada", j < indice);
   }
   $("btnArrancarGuion").style.display = "none";
+  $("salaGuion").textContent = "Codigo de sala " + codigoDe(inicio);
 }
 
 /* ---------- codigo qr ---------- */
