@@ -42,8 +42,10 @@ body.ratas{background:#cbbc99}
   animation:tiembla 900ms steps(2,end) infinite;
 }
 @keyframes tiembla{0%{transform:translate(0,0)}50%{transform:translate(-14px,9px)}100%{transform:translate(7px,-11px)}}
-#vineta{position:fixed; inset:0; pointer-events:none; z-index:59;
+#vineta{position:fixed; inset:0; pointer-events:none; z-index:59; transition:background 900ms ease;
   background:radial-gradient(ellipse at 50% 42%, transparent 30%, rgba(0,0,0,.72) 100%)}
+body.ratas #vineta{background:radial-gradient(ellipse at 50% 42%, transparent 50%, rgba(74,54,26,.26) 100%)}
+body.ratas #grano{opacity:.10}
 
 /* pantallas */
 .pantalla{
