@@ -99,7 +99,7 @@ button:active{transform:scale(.97); background:rgba(228,215,182,.12)}
 #calma .ambiente span{display:block; animation:aparece 2.2s ease both}
 
 /* infectado */
-#infectado{justify-content:flex-start; padding-top:calc(28px + env(safe-area-inset-top))}
+#infectado{justify-content:flex-start; overflow-y:auto; padding-top:calc(28px + env(safe-area-inset-top))}
 #infectado .aviso{font-family:var(--alto); letter-spacing:.3em; text-transform:uppercase; font-size:13px; color:#f0c9c4}
 #infectado h2{color:#fff2ee; margin:14px 0 6px; text-shadow:0 2px 30px rgba(0,0,0,.5)}
 #infectado .detalle{color:#f2cdc7; font-style:italic; max-width:330px; margin-bottom:26px}
@@ -137,6 +137,80 @@ body.tratado #infectado .ficha{opacity:.35}
 /* cierre */
 #cierre .grande{font-family:var(--alto); font-size:clamp(34px,11vw,52px); line-height:1.05}
 #cierre .cuenta{color:var(--sangre-viva)}
+
+/* hidden tiene que ganarle a los display de abajo */
+[hidden]{display:none !important}
+
+/* elecciones */
+#pasoFrasco, #pasoCura{width:100%; max-width:370px}
+.pregunta{font-family:var(--alto); font-size:clamp(21px,6.6vw,29px); line-height:1.12; margin-bottom:2px}
+.opciones{display:flex; flex-direction:column; gap:9px; width:100%; max-width:370px; margin-top:16px}
+.opcion{
+  font-family:var(--cuerpo); font-size:17px; letter-spacing:0; text-transform:none;
+  text-align:left; padding:13px 17px; line-height:1.28;
+  border:1px solid rgba(228,215,182,.34); color:var(--pergamino); background:transparent;
+}
+.opcion .que{display:block; font-family:var(--alto); font-size:19px; letter-spacing:.02em}
+.opcion .porque{display:block; color:var(--humo); font-size:15px; font-style:italic; margin-top:3px}
+.opcion.elegida{background:rgba(228,215,182,.16); border-color:var(--pergamino)}
+body.enfermo .opcion{border-color:rgba(255,235,230,.42); color:#fff2ee}
+body.enfermo .opcion .porque{color:#e0a09a}
+body.enfermo .opcion.elegida{background:rgba(255,235,230,.18); border-color:#fff2ee}
+.plazo{font-size:14px; color:var(--humo); margin-top:15px}
+body.enfermo .plazo{color:#e0a09a}
+
+/* el frasco de orina */
+.frasco{width:92px; height:142px; display:block; margin:2px auto 6px}
+.frasco .vidrio{fill:rgba(255,255,255,.10); stroke:rgba(255,240,225,.55); stroke-width:2.4}
+.frasco .brillo{fill:rgba(255,255,255,.30)}
+
+/* eleccion de los sanos */
+#eleccion{justify-content:center}
+#eleccion .epigrafe{margin-bottom:16px}
+
+/* expediente */
+#expediente{justify-content:flex-start; text-align:left; overflow-y:auto;
+  padding-top:calc(26px + env(safe-area-inset-top))}
+#expediente h2{align-self:center; margin-bottom:4px}
+#expediente .epigrafe{align-self:center; margin-bottom:18px}
+#expediente .rollo{width:100%; max-width:400px; margin:0 auto}
+#expediente .fila{display:flex; gap:12px; padding:12px 0; border-top:1px solid rgba(228,215,182,.16)}
+#expediente .rotulo{font-family:var(--alto); font-size:11px; letter-spacing:.17em; text-transform:uppercase;
+  color:var(--humo); flex:none; width:96px; padding-top:6px}
+#expediente .dato{font-size:18px; flex:1}
+#expediente .dato .apunte{display:block; color:var(--humo); font-size:15px; font-style:italic; margin-top:2px}
+#expediente .mal{color:var(--sangre-viva)}
+#expediente .veredicto{font-family:var(--alto); font-size:clamp(21px,6.4vw,28px); line-height:1.18;
+  margin:28px auto 12px; text-align:center; width:100%; max-width:400px}
+#expediente .cola{color:var(--humo); font-size:16px; text-align:center; margin:0 auto 24px;
+  width:100%; max-width:400px}
+#expediente button{align-self:center}
+
+/* el sello de cuarentena */
+.sello{
+  width:168px; height:168px; margin:4px auto 24px; position:relative; border-radius:50%;
+  border:3px solid var(--sangre); color:var(--sangre);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:var(--alto); text-align:center; line-height:1;
+  opacity:0; transform:rotate(-16deg) scale(1.55);
+  transition:opacity 240ms ease, transform 280ms cubic-bezier(.2,1.5,.4,1);
+}
+.sello.puesto{opacity:.85; transform:rotate(-8deg) scale(1)}
+.sello .dias{font-size:54px}
+.sello .txt{font-size:11px; letter-spacing:.26em; text-transform:uppercase; margin-top:8px}
+.sello .aro{position:absolute; inset:9px; border:1px solid var(--sangre); border-radius:50%; opacity:.6}
+
+/* tabla del medico */
+#medico{justify-content:flex-start; text-align:left; overflow-y:auto;
+  padding-top:calc(24px + env(safe-area-inset-top))}
+#medico h2{align-self:center; margin-bottom:16px}
+#medico .tabla{width:100%; max-width:440px; margin:0 auto}
+#medico .par{display:flex; gap:12px; padding:13px 0; border-top:1px solid rgba(228,215,182,.16)}
+#medico .gota{width:22px; height:22px; border-radius:50%; flex:none; margin-top:3px;
+  border:1px solid rgba(228,215,182,.4)}
+#medico .humor{font-family:var(--alto); font-size:19px}
+#medico .hace{color:var(--humo); font-size:16px; font-style:italic}
+#medico .nota{color:var(--humo); font-size:15px; max-width:440px; margin:20px auto 0; font-style:italic}
 
 /* guion del expositor */
 #guion{justify-content:flex-start; text-align:left; padding-top:calc(24px + env(safe-area-inset-top))}
@@ -189,25 +263,37 @@ body.tratado #infectado .ficha{opacity:.35}
 </section>
 
 <section class="pantalla" id="infectado">
-  <p class="aviso">Enfermaste</p>
+  <p class="aviso" id="avisoEnfermo">Enfermaste</p>
   <h2 id="sintomaNombre">Bubas</h2>
   <p class="detalle" id="sintomaDetalle"></p>
-  <div class="ficha">
-    <p class="campo">Lo que te sobra</p>
-    <p class="valor" id="sintomaHumor"></p>
+
+  <div id="pasoFrasco" hidden>
+    <svg class="frasco" id="frasco" viewBox="0 0 92 142" aria-hidden="true"></svg>
+    <p class="pregunta">Que humor te sobra</p>
+    <p class="levanta">Mira tu frasco a contraluz y decide.</p>
+    <div class="opciones" id="opcionesHumor"></div>
   </div>
-  <div class="ficha">
-    <p class="campo">Lo que hara el medico</p>
-    <p class="valor" id="sintomaCura"></p>
+
+  <div id="pasoCura" hidden>
+    <p class="pregunta">Que dejas que te hagan</p>
+    <p class="levanta" id="levantaCura">Levanta el telefono para que el medico te vea.</p>
+    <div class="opciones" id="opcionesCura"></div>
   </div>
-  <div class="abajo">
+
+  <div id="pasoQuieto" hidden class="abajo">
     <p class="levanta" id="levanta">Levanta el telefono para que te vean.</p>
-    <button id="btnAtendido">El medico me atendio</button>
   </div>
 </section>
 
+<section class="pantalla" id="eleccion">
+  <p class="epigrafe">Ya cayeron los primeros</p>
+  <p class="pregunta">Te quedas o te vas</p>
+  <div class="opciones" id="opcionesHuida"></div>
+  <p class="plazo" id="plazoHuida"></p>
+</section>
+
 <section class="pantalla" id="sano">
-  <p class="marca">Sigues sano</p>
+  <p class="marca" id="sanoMarca">Sigues sano</p>
   <div class="rayita" style="margin:24px auto"></div>
   <p class="tenue cursiva" id="sanoNota">Por ahora.</p>
 </section>
@@ -236,6 +322,24 @@ body.tratado #infectado .ficha{opacity:.35}
   <p class="grande">Cuarenta dias<br>de espera</p>
   <p class="grande cuenta" style="margin-top:26px">Cuarentena</p>
   <p class="tenue" style="margin-top:30px">Todavia lo hacemos.</p>
+  <p style="margin-top:30px"><button id="btnExpediente">Ver lo que te paso</button></p>
+</section>
+
+<section class="pantalla" id="expediente">
+  <h2>Tu expediente</h2>
+  <p class="epigrafe">Florencia, 1348</p>
+  <div class="rollo" id="rollo"></div>
+  <p class="veredicto" id="veredicto"></p>
+  <p class="cola" id="cola"></p>
+  <div class="sello" id="sello"><div class="aro"></div><div class="dias">40</div><div class="txt">Dias</div></div>
+  <button class="enlace" id="btnSello">Sellar tu cuarentena</button>
+</section>
+
+<section class="pantalla" id="medico">
+  <h2>La tabla</h2>
+  <div class="tabla" id="tablaMedico"></div>
+  <p class="nota">Se trata con lo contrario. Lo caliente con lo frio, lo humedo con lo seco.
+    Miras el frasco a contraluz, ves que color tiene y de ahi sale el tratamiento.</p>
 </section>
 
 <section class="pantalla" id="guion">
@@ -274,16 +378,18 @@ var T_RATAS      = 165;
 var T_CIERRE     = 180;
 var TARDANZA_MUERTE = 12;   // segundos en los que se escalonan las muertes
 var T_RECAIDA       = 13;   // lo que dura el alivio del tratamiento
+var T_CIERRA_HUIDA  = 96;   // cierran las puertas, ya no da tiempo de salir de la ciudad
 
 var GUION = [
   { t:0,            fase:"calma",      nota:"Companero 1 explica la estacion. El frasco, el baston y los cuatro humores." },
-  { t:T_OLEADA1,    fase:"oleada1",    nota:"Primera oleada. Se encienden en rojo las primeras pantallas." },
-  { t:T_MEDICO,     fase:"medico",     nota:"Entra el medico. Lee el sintoma de cada pantalla roja y aplica el tratamiento." },
-  { t:T_OLEADA2,    fase:"oleada2",    nota:"Segunda oleada. Caen mas. El medico separa a los sanos de los enfermos." },
-  { t:T_MUERTE,     fase:"muerte",     nota:"Empiezan a morir. Las pantallas rojas se apagan una por una." },
+  { t:T_OLEADA1,    fase:"oleada1",    nota:"Primera oleada. Los rojos leen su frasco y eligen tratamiento. Los sanos deciden si huyen." },
+  { t:T_MEDICO,     fase:"medico",     nota:"Entra el medico con la tabla abierta. Lee el color del frasco de cada pantalla roja." },
+  { t:T_CIERRA_HUIDA, fase:"medico",   nota:"Cierran las puertas de la ciudad. Ya nadie puede huir." },
+  { t:T_OLEADA2,    fase:"oleada2",    nota:"Segunda oleada. Caen sobre todo los que se quedaron. El medico separa sanos de enfermos." },
+  { t:T_MUERTE,     fase:"muerte",     nota:"Empiezan a morir. Estertores y campanas de muerto en toda la sala." },
   { t:T_REVELACION, fase:"revelacion", nota:"Silencio. La revelacion sale sola en todas las pantallas." },
   { t:T_RATAS,      fase:"ratas",      nota:"Cruzan las ratas en las pantallas. Suelten las ratas de control remoto." },
-  { t:T_CIERRE,     fase:"cierre",     nota:"Cierre sobre la cuarentena. Sellar el pasaporte." }
+  { t:T_CIERRE,     fase:"cierre",     nota:"Cierre sobre la cuarentena. Cada uno abre su expediente y sella sus cuarenta dias." }
 ];
 
 var PROB_OLEADA_1 = 0.20;   // uno de cada cinco
@@ -302,6 +408,30 @@ var SINTOMAS = [
   { nombre:"Sed y dolor de cabeza", detalle:"Bebes y sigues seco.", humor:"Bilis amarilla", cura:"Examinar tu orina en el frasco" },
   { nombre:"Aliento pesado",     detalle:"El olor llena el cuarto entero.", humor:"Flema", cura:"Hierbas quemadas en la puerta" }
 ];
+
+// la rueda de la orina, simplificada a los cuatro humores
+var HUMORES = [
+  { nombre:"Sangre",         color:"#b8342a", lee:"Roja y espesa" },
+  { nombre:"Bilis amarilla", color:"#d8a318", lee:"Amarilla encendida" },
+  { nombre:"Bilis negra",    color:"#3a2a20", lee:"Oscura, casi negra" },
+  { nombre:"Flema",          color:"#d9d2bd", lee:"Palida y lechosa" }
+];
+
+// se cura con lo contrario, que era la regla de la epoca
+var TRATAMIENTOS = [
+  { que:"Que te sangren",        porque:"Sacarte lo que sobra por el brazo",     humor:"Sangre" },
+  { que:"Purga y dieta fria",    porque:"Enfriar lo que arde por dentro",        humor:"Bilis amarilla" },
+  { que:"Bano caliente y vino",  porque:"Aflojar lo frio y lo seco",             humor:"Bilis negra" },
+  { que:"Hierbas y vinagre",     porque:"Secar el humor y limpiar el aire",      humor:"Flema" }
+];
+
+var HUIDA = [
+  { que:"Quedarte",  porque:"Alguien tiene que enterrarlos", huye:false },
+  { que:"Huir",      porque:"Al campo, como hicieron los ricos", huye:true }
+];
+
+var PROB_QUEDARSE = 0.26;   // el que se queda entre enfermos cae mas
+var PROB_HUIR     = 0.08;   // el que huye casi siempre se salva, casi
 
 var AMBIENTE = [
   { t:16, texto:"Hace seis meses llegaron unos barcos al puerto." },
@@ -352,6 +482,8 @@ var ac = null, maestro = null;
 
 function abrirAudio(){
   try {
+    // una sola vez. Si se llamara dos veces, el sonido viejo se quedaria sonando solo
+    if (ac){ if (ac.state === "suspended") ac.resume(); return; }
     var C = window.AudioContext || window.webkitAudioContext;
     if (!C) return;
     ac = new C();
@@ -440,6 +572,175 @@ function chirrido(){
   } catch(e){}
 }
 
+/* ---------- tos, muerte y destruccion ---------- */
+
+var bufRuido = null;
+function fuenteRuido(){
+  if (!bufRuido){
+    var n = Math.floor(ac.sampleRate * 2);
+    bufRuido = ac.createBuffer(1, n, ac.sampleRate);
+    var d = bufRuido.getChannelData(0);
+    for (var i=0;i<n;i++) d[i] = Math.random() * 2 - 1;
+  }
+  var s = ac.createBufferSource();
+  s.buffer = bufRuido;
+  s.loop = true;
+  return s;
+}
+
+// una tos son dos cosas, el rasgado de la garganta y el golpe del pecho
+function tos(retraso, volumen, lejos){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime + (retraso || 0);
+    var v = volumen === undefined ? 0.5 : volumen;
+
+    var salida = ac.createGain();
+    salida.gain.value = 1;
+    if (lejos){
+      var lp = ac.createBiquadFilter();
+      lp.type = "lowpass"; lp.frequency.value = 850;
+      salida.connect(lp); lp.connect(maestro);
+    } else {
+      salida.connect(maestro);
+    }
+
+    var n = fuenteRuido();
+    var bp = ac.createBiquadFilter();
+    bp.type = "bandpass"; bp.Q.value = 1.4;
+    bp.frequency.setValueAtTime(1400 + Math.random() * 800, t);
+    bp.frequency.exponentialRampToValueAtTime(300, t + 0.19);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(v * 0.07, t + 0.07);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.27);
+
+    var o = ac.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(145 + Math.random() * 45, t);
+    o.frequency.exponentialRampToValueAtTime(60, t + 0.14);
+    var go = ac.createGain();
+    go.gain.setValueAtTime(0.0001, t);
+    go.gain.linearRampToValueAtTime(v * 0.5, t + 0.01);
+    go.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+
+    n.connect(bp); bp.connect(g); g.connect(salida);
+    o.connect(go); go.connect(salida);
+    n.start(t); n.stop(t + 0.4);
+    o.start(t); o.stop(t + 0.3);
+  } catch(e){}
+}
+
+// nadie tose una sola vez
+function ataqueTos(volumen, lejos){
+  var cuantas = 2 + Math.floor(Math.random() * 2);
+  for (var i=0;i<cuantas;i++){
+    tos(i * (0.24 + Math.random() * 0.14), volumen * (1 - i * 0.15), lejos);
+  }
+}
+
+// el estertor, lo ultimo que se oye
+function estertor(){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    var n = fuenteRuido();
+    var bp = ac.createBiquadFilter();
+    bp.type = "bandpass"; bp.Q.value = 2.1;
+    bp.frequency.setValueAtTime(430, t);
+    bp.frequency.linearRampToValueAtTime(170, t + 2.6);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.85, t + 0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 2.9);
+    var lfo = ac.createOscillator();
+    lfo.type = "sine"; lfo.frequency.value = 5.4;
+    var lg = ac.createGain(); lg.gain.value = 0.19;
+    lfo.connect(lg); lg.connect(g.gain);
+    n.connect(bp); bp.connect(g); g.connect(maestro);
+    n.start(t); n.stop(t + 3);
+    lfo.start(t); lfo.stop(t + 3);
+  } catch(e){}
+}
+
+// un grito lejano, de otra calle
+function lamento(retraso){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime + (retraso || 0);
+    var o = ac.createOscillator();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(280 + Math.random() * 150, t);
+    o.frequency.exponentialRampToValueAtTime(115, t + 1.7);
+    var vib = ac.createOscillator();
+    vib.type = "sine"; vib.frequency.value = 4.8 + Math.random();
+    var vg = ac.createGain(); vg.gain.value = 10;
+    vib.connect(vg); vg.connect(o.frequency);
+    var lp = ac.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 680;
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.12, t + 0.45);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 2);
+    o.connect(lp); lp.connect(g); g.connect(maestro);
+    o.start(t); o.stop(t + 2.1);
+    vib.start(t); vib.stop(t + 2.1);
+  } catch(e){}
+}
+
+// el fondo de la ciudad, siempre por debajo de la voz del expositor
+var nodoMurmullo = null;
+function murmullo(encendido){
+  if (!ac) return;
+  try {
+    if (encendido && !nodoMurmullo){
+      var n = fuenteRuido();
+      var lp = ac.createBiquadFilter();
+      lp.type = "lowpass"; lp.frequency.value = 300;
+      var g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, ac.currentTime);
+      g.gain.linearRampToValueAtTime(0.05, ac.currentTime + 4);
+      n.connect(lp); lp.connect(g); g.connect(maestro);
+      n.start();
+      nodoMurmullo = { n:n, g:g };
+    } else if (!encendido && nodoMurmullo){
+      var m = nodoMurmullo; nodoMurmullo = null;
+      m.g.gain.cancelScheduledValues(ac.currentTime);
+      m.g.gain.setValueAtTime(m.g.gain.value, ac.currentTime);
+      m.g.gain.linearRampToValueAtTime(0.0001, ac.currentTime + 1.6);
+      setTimeout(function(){ try { m.n.stop(); } catch(e){} }, 1900);
+    }
+  } catch(e){}
+}
+
+// las campanadas de muerto, a paso de entierro
+function doblar(cuantas, hueco){
+  for (var i=0;i<cuantas;i++){
+    (function(i){ setTimeout(function(){ campana(92, 6, 0.36); }, i * hueco); })(i);
+  }
+}
+
+// cuando toca toser, y de quien es la tos
+var proximaTos = 0;
+function toserSiToca(s, enfermo){
+  if (!ac || document.visibilityState !== "visible") return;
+  if (s < 9 || s >= T_REVELACION) return;
+  if (s < proximaTos) return;
+  var fase = faseDe(s);
+  if (fase === "calma"){
+    proximaTos = s + 7 + Math.random() * 9;
+    tos(0, 0.14 + Math.random() * 0.1, true);
+  } else if (enfermo && s < momentoMuerte()){
+    proximaTos = s + 3.5 + Math.random() * 3.5;
+    ataqueTos(0.5, false);
+    vibrar([28, 90, 28]);
+  } else {
+    proximaTos = s + 4 + Math.random() * 5;
+    tos(0, 0.16 + Math.random() * 0.14, true);
+  }
+}
+
 function vibrar(patron){
   try { if (navigator.vibrate) navigator.vibrate(patron); } catch(e){}
 }
@@ -483,15 +784,27 @@ function repartirRoles(){
   var e = {
     o1: aleatorio() < PROB_OLEADA_1,
     o2: false,
+    dado2: aleatorio(),     // se compara al llegar la segunda oleada, contra lo que haya elegido
     sintoma: Math.floor(aleatorio() * SINTOMAS.length),
     demora: aleatorio() * TARDANZA_MUERTE,
-    atendido: 0
+    atendido: 0,
+    humorElegido: -1,       // lo que leyo en su frasco
+    tratamiento: -1,        // lo que dejo que le hicieran
+    huyo: -1                // 0 se quedo, 1 huyo, -1 no eligio a tiempo
   };
-  if (!e.o1) e.o2 = aleatorio() < PROB_OLEADA_2;
   var forzado = new URLSearchParams(location.search).get("rol");
-  if (forzado === "enfermo"){ e.o1 = true; e.o2 = false; }
-  if (forzado === "sano"){ e.o1 = false; e.o2 = false; }
+  if (forzado === "enfermo"){ e.o1 = true; e.dado2 = 1; }
+  if (forzado === "sano"){ e.o1 = false; e.dado2 = 1; }
   return e;
+}
+
+// la segunda oleada la decide lo que eligio, no un dado echado al principio
+function cayoEnLaSegunda(){
+  if (!estado || estado.o1) return false;
+  var tope = PROB_OLEADA_2;
+  if (estado.huyo === 1) tope = PROB_HUIR;
+  else if (estado.huyo === 0) tope = PROB_QUEDARSE;
+  return estado.dado2 < tope;
 }
 
 function arrancar(marca){
@@ -516,8 +829,18 @@ function faseDe(s){
 function estaEnfermo(s){
   if (!estado) return false;
   if (estado.o1 && s >= T_OLEADA1) return true;
-  if (estado.o2 && s >= T_OLEADA2) return true;
+  if (s >= T_OLEADA2){
+    // se resuelve una sola vez y se guarda, para que no cambie al repintar
+    if (!estado.o2 && cayoEnLaSegunda()){ estado.o2 = true; guardar(); }
+    if (estado.o2) return true;
+  }
   return false;
+}
+
+// el momento en que este telefono cayo, para contar los pasos desde ahi
+function cayoEn(){
+  if (!estado) return T_OLEADA1;
+  return estado.o1 ? T_OLEADA1 : T_OLEADA2;
 }
 
 function momentoMuerte(){
@@ -525,6 +848,7 @@ function momentoMuerte(){
 }
 
 function pintar(){
+  if (esMedico){ return; }        // la tabla del medico no sigue el reloj
   if (!inicio){ return; }
   var s = transcurrido();
 
@@ -558,10 +882,13 @@ function pintar(){
       else if (s >= T_MUERTE) verPantalla("agonia");
       else { pintarFicha(s); verPantalla("infectado"); }
     } else if (s >= T_OLEADA1){
-      verPantalla("sano");
-      $("sanoNota").textContent = (s >= T_MUERTE + TARDANZA_MUERTE + 3)
-        ? "Una de cada tres personas de esta sala acaba de morir."
-        : "Por ahora.";
+      if (estado && estado.huyo === -1 && s < T_CIERRA_HUIDA){
+        pintarHuida(s);
+        verPantalla("eleccion");
+      } else {
+        pintarSano(s);
+        verPantalla("sano");
+      }
     } else {
       verPantalla("calma");
       pintarAmbiente(s);
@@ -572,10 +899,12 @@ function pintar(){
   } else if (fase === "ratas"){
     verPantalla("ratas");
   } else if (fase === "cierre"){
-    verPantalla("cierre");
+    verPantalla(viendoExpediente ? "expediente" : "cierre");
   }
 
   latido(s >= 0 && s < T_OLEADA1 && document.visibilityState === "visible");
+  murmullo(s >= 0 && s < T_REVELACION && document.visibilityState === "visible");
+  toserSiToca(s, enfermo && !muerto);
   disparar(s, enfermo);
 }
 
@@ -596,8 +925,13 @@ function disparar(s, enfermo){
   if (enfermo && estado.atendido) una("recaida", estado.atendido + T_RECAIDA, function(){
     vibrar([300, 120, 300]); campana(196, 4, 0.5);
   });
-  if (enfermo) una("fin", momentoMuerte(), function(){ vibrar([1400]); campana(84, 8, 0.7); });
-  una("rev", T_REVELACION, function(){ campana(150, 6, 0.4); });
+  if (enfermo) una("fin", momentoMuerte(), function(){
+    vibrar([1400]); campana(84, 8, 0.7); estertor();
+  });
+  // la calle entera, la oigan los vivos y los muertos
+  una("gritos", T_MUERTE, function(){ lamento(0.7); lamento(3.4); lamento(7.2); });
+  una("dobles", T_MUERTE + 2, function(){ doblar(5, 2500); });
+  una("rev", T_REVELACION, function(){ murmullo(false); campana(150, 6, 0.4); });
   una("rat", T_RATAS, function(){ soltarRatas(); chirrido(); vibrar([50,70,50,70,50,70,50]); });
   una("cie", T_CIERRE, function(){ campana(120, 7, 0.5); });
 }
@@ -607,30 +941,144 @@ function contagio(){
   campana(196, 5, 0.5);
 }
 
+/* ---------- las elecciones ---------- */
+
+function montarOpciones(caja, lista, elegida, alElegir){
+  if (caja.dataset.montada !== String(lista.length)){
+    caja.innerHTML = "";
+    for (var i=0;i<lista.length;i++){
+      (function(i){
+        var b = document.createElement("button");
+        b.className = "opcion";
+        b.innerHTML = '<span class="que">' + lista[i].que + '</span>' +
+                      '<span class="porque">' + lista[i].porque + '</span>';
+        b.addEventListener("click", function(){ alElegir(i); });
+        caja.appendChild(b);
+      })(i);
+    }
+    caja.dataset.montada = String(lista.length);
+  }
+  for (var j=0;j<caja.children.length;j++){
+    caja.children[j].classList.toggle("elegida", j === elegida);
+  }
+}
+
+function dibujarFrasco(color){
+  var d = "M28,12 C28,12 32,58 32,68 C13,77 13,124 46,133 C79,124 79,77 60,68 C60,58 64,12 64,12";
+  return '<defs><clipPath id="dentroFrasco"><path d="' + d + ' Z"/></clipPath></defs>' +
+    '<rect x="8" y="84" width="76" height="58" fill="' + color + '" clip-path="url(#dentroFrasco)"/>' +
+    '<ellipse cx="46" cy="84" rx="26" ry="4.6" fill="' + color + '" opacity=".75"/>' +
+    '<path d="' + d + '" fill="rgba(255,255,255,.06)" stroke="rgba(255,240,225,.55)" stroke-width="2.4"/>' +
+    '<ellipse cx="46" cy="12" rx="18" ry="4.5" fill="none" stroke="rgba(255,240,225,.55)" stroke-width="2.4"/>' +
+    '<path d="M37,82 C31,92 31,110 38,120 C33,108 33,92 37,82 Z" fill="rgba(255,255,255,.28)"/>';
+}
+
+function humorDe(nombre){
+  for (var i=0;i<HUMORES.length;i++) if (HUMORES[i].nombre === nombre) return i;
+  return 0;
+}
+
+function elegirHumor(i){
+  if (!estado || estado.humorElegido !== -1) return;
+  estado.humorElegido = i;
+  guardar();
+  campana(392, 1.6, 0.22);
+  vibrar([40]);
+  pintar();
+}
+
+function elegirTratamiento(i){
+  if (!estado || estado.tratamiento !== -1) return;
+  estado.tratamiento = i;
+  estado.atendido = transcurrido();
+  guardar();
+  campana(330, 3, 0.3);
+  vibrar([60, 60, 60]);
+  pintar();
+}
+
+function elegirHuida(i){
+  if (!estado || estado.huyo !== -1) return;
+  estado.huyo = HUIDA[i].huye ? 1 : 0;
+  guardar();
+  campana(HUIDA[i].huye ? 262 : 220, 2.4, 0.26);
+  vibrar([70]);
+  pintar();
+}
+
+function pintarHuida(s){
+  montarOpciones($("opcionesHuida"), HUIDA, -1, elegirHuida);
+  var faltan = Math.max(0, Math.ceil(T_CIERRA_HUIDA - s));
+  $("plazoHuida").textContent = faltan > 0
+    ? faltan + " segundos para salir de la ciudad"
+    : "Cerraron las puertas";
+}
+
+function pintarSano(s){
+  var huyo = estado && estado.huyo === 1;
+  var quedo = estado && estado.huyo === 0;
+  $("sanoMarca").textContent = huyo ? "Saliste a tiempo" : (quedo ? "Te quedaste" : "Sigues sano");
+  if (s >= T_MUERTE + TARDANZA_MUERTE + 3){
+    $("sanoNota").textContent = "Una de cada tres personas de esta sala acaba de morir.";
+  } else if (huyo){
+    $("sanoNota").textContent = "Los caminos van llenos de gente como tu.";
+  } else if (quedo){
+    $("sanoNota").textContent = "Te quedaste entre los enfermos.";
+  } else {
+    $("sanoNota").textContent = "Por ahora.";
+  }
+}
+
 function pintarFicha(s){
   if (!estado) return;
   var st = SINTOMAS[estado.sintoma];
-  var tratado = estado.atendido > 0 && s >= estado.atendido;
+  var t = s - cayoEn();
+  var tratado = estado.tratamiento !== -1 && estado.atendido > 0 && s >= estado.atendido;
   var recaida = tratado && s >= estado.atendido + T_RECAIDA;
-  if (!tratado){
+  var frasco = false, cura = false, quieto = false;
+
+  if (!tratado && t < 5){
+    $("avisoEnfermo").textContent = "Enfermaste";
     $("sintomaNombre").textContent = st.nombre;
     $("sintomaDetalle").textContent = st.detalle;
     $("levanta").textContent = "Levanta el telefono para que te vean.";
-    $("btnAtendido").style.display = "";
+    quieto = true;
+  } else if (estado.humorElegido === -1){
+    $("avisoEnfermo").textContent = "Uroscopia";
+    $("sintomaNombre").textContent = "Tu frasco";
+    $("sintomaDetalle").textContent = st.nombre;
+    if ($("frasco").dataset.color !== st.humor){
+      $("frasco").dataset.color = st.humor;
+      $("frasco").innerHTML = dibujarFrasco(HUMORES[humorDe(st.humor)].color);
+    }
+    montarOpciones($("opcionesHumor"), HUMORES.map(function(h){
+      return { que:h.nombre, porque:h.lee };
+    }), -1, elegirHumor);
+    frasco = true;
+  } else if (estado.tratamiento === -1){
+    $("avisoEnfermo").textContent = "Te sobra " + HUMORES[estado.humorElegido].nombre.toLowerCase();
+    $("sintomaNombre").textContent = "El remedio";
+    $("sintomaDetalle").textContent = st.nombre;
+    montarOpciones($("opcionesCura"), TRATAMIENTOS, -1, elegirTratamiento);
+    cura = true;
   } else if (!recaida){
+    $("avisoEnfermo").textContent = "Te atendieron";
     $("sintomaNombre").textContent = "Te sientes mejor";
-    $("sintomaDetalle").textContent = st.cura + ".";
+    $("sintomaDetalle").textContent = TRATAMIENTOS[estado.tratamiento].que + ".";
     $("levanta").textContent = "Baja el telefono.";
-    $("btnAtendido").style.display = "none";
+    quieto = true;
   } else {
+    $("avisoEnfermo").textContent = "No sirvio";
     $("sintomaNombre").textContent = "Vuelve la fiebre";
-    $("sintomaDetalle").textContent = "El tratamiento no sirvio de nada.";
+    $("sintomaDetalle").textContent = "Peor que antes.";
     $("levanta").textContent = "Levanta el telefono otra vez.";
-    $("btnAtendido").style.display = "none";
+    quieto = true;
   }
+
+  $("pasoFrasco").hidden = !frasco;
+  $("pasoCura").hidden = !cura;
+  $("pasoQuieto").hidden = !quieto;
   cuerpo.classList.toggle("tratado", tratado && !recaida);
-  $("sintomaHumor").textContent = st.humor;
-  $("sintomaCura").textContent = st.cura;
 }
 
 function pintarAmbiente(s){
@@ -701,9 +1149,103 @@ function soltarRatas(){
   }
 }
 
+/* ---------- el expediente ---------- */
+
+var NEUMONICA = 4;           // Tos con sangre, la que va a los pulmones
+var viendoExpediente = false;
+
+function fila(rotulo, dato, apunte, mal){
+  var h = '<div class="fila"><div class="rotulo">' + rotulo + '</div>' +
+          '<div class="dato' + (mal ? " mal" : "") + '">' + dato;
+  if (apunte) h += '<span class="apunte">' + apunte + '</span>';
+  return h + '</div></div>';
+}
+
+function pintarExpediente(){
+  if (!estado) return;
+  viendoExpediente = true;
+  var enfermo = estado.o1 || estado.o2;
+  var st = SINTOMAS[estado.sintoma];
+  var h = "";
+
+  if (enfermo){
+    h += fila("Caiste", estado.o1 ? "En la primera oleada" : "En la segunda", st.nombre, false);
+    h += fila("Era",
+      estado.sintoma === NEUMONICA ? "Peste neumonica" : "Peste bubonica",
+      estado.sintoma === NEUMONICA
+        ? "Le llego a los pulmones. Dos dias."
+        : "La bacteria en los ganglios. Tres o cinco dias.",
+      false);
+
+    if (estado.humorElegido === -1){
+      h += fila("Leiste", "No dio tiempo", "El medico no llego hasta ti.", true);
+    } else {
+      var bien = HUMORES[estado.humorElegido].nombre === st.humor;
+      h += fila("Leiste", HUMORES[estado.humorElegido].nombre,
+        bien ? "Es lo que habria dicho un medico de 1348."
+             : "Un medico de 1348 habria leido " + st.humor.toLowerCase() + ".",
+        !bien);
+    }
+
+    if (estado.tratamiento === -1){
+      h += fila("Te hicieron", "Nada", "Nadie llego a tratarte.", true);
+    } else {
+      var cuadra = estado.humorElegido !== -1 &&
+                   TRATAMIENTOS[estado.tratamiento].humor === HUMORES[estado.humorElegido].nombre;
+      h += fila("Te hicieron", TRATAMIENTOS[estado.tratamiento].que,
+        cuadra ? "Cuadra con lo que leiste. Se trataba con lo contrario."
+               : "No cuadra con lo que leiste.",
+        !cuadra);
+    }
+  } else {
+    h += fila("No caiste", "Ni en la primera ni en la segunda", "Una de cada tres personas si.", false);
+  }
+
+  if (!estado.o1){
+    h += fila("Elegiste",
+      estado.huyo === 1 ? "Huir" : (estado.huyo === 0 ? "Quedarte" : "No elegir"),
+      estado.huyo === 1 ? "Como los ricos de Florencia. Boccaccio conto lo mismo."
+        : (estado.huyo === 0 ? "Te quedaste donde estaba la peste." : "Cerraron las puertas antes."),
+      false);
+  }
+
+  h += fila("Acabaste", enfermo ? "Muerto" : "Vivo",
+            enfermo ? "Florencia, 1348" : "Esta vez", enfermo);
+
+  $("rollo").innerHTML = h;
+
+  var v;
+  if (enfermo && estado.tratamiento === -1) v = "Ni siquiera te dio tiempo de elegir.";
+  else if (enfermo) v = "Elegiste, y te moriste igual.";
+  else if (estado.huyo === 1) v = "Te salvaste, y llevaste la peste al pueblo de al lado.";
+  else if (estado.huyo === 0) v = "Te quedaste entre los enfermos y te salvaste. Nadie sabia por que.";
+  else v = "Te salvaste sin saber por que.";
+  $("veredicto").textContent = v;
+
+  $("cola").textContent = "Nada de lo que habia en 1348 servia, porque la bacteria no se vio hasta 1894. "
+    + "Hoy se cura con antibioticos en unos dias.";
+}
+
+/* ---------- la tabla del medico ---------- */
+
+function montarMedico(){
+  var caja = $("tablaMedico"), h = "";
+  for (var i=0;i<HUMORES.length;i++){
+    var t = "";
+    for (var j=0;j<TRATAMIENTOS.length;j++){
+      if (TRATAMIENTOS[j].humor === HUMORES[i].nombre) t = TRATAMIENTOS[j].que + ", " + TRATAMIENTOS[j].porque.toLowerCase();
+    }
+    h += '<div class="par"><div class="gota" style="background:' + HUMORES[i].color + '"></div>' +
+         '<div><div class="humor">' + HUMORES[i].lee + '</div>' +
+         '<div class="hace">Le sobra ' + HUMORES[i].nombre.toLowerCase() + '. ' + t + '</div></div></div>';
+  }
+  caja.innerHTML = h;
+}
+
 /* ---------- guion del expositor ---------- */
 
 var esGuion = false;
+var esMedico = false;
 
 function montarGuion(){
   var lista = $("listaGuion");
@@ -771,12 +1313,18 @@ $("btnTarde").addEventListener("click", function(){
   arrancar(marca);
 });
 
-$("btnAtendido").addEventListener("click", function(){
-  if (!estado || estado.atendido) return;
-  estado.atendido = transcurrido();
-  guardar();
-  campana(330, 3, 0.3);
-  pintar();
+$("btnExpediente").addEventListener("click", function(){
+  pintarExpediente();
+  verPantalla("expediente");
+});
+
+$("btnSello").addEventListener("click", function(){
+  var sello = $("sello");
+  if (sello.classList.contains("puesto")) return;
+  sello.classList.add("puesto");
+  $("btnSello").textContent = "Cuarenta dias fuera de la ciudad";
+  golpe(0, 0.6);
+  vibrar([180]);
 });
 
 $("btnArrancarGuion").addEventListener("click", function(){
@@ -790,8 +1338,10 @@ function leerModo(){
   var h = (location.hash || "").replace("#", "").toLowerCase();
   if (h === "guion"){ esGuion = true; montarGuion(); verPantalla("guion"); }
   else if (h === "qr"){ montarQr(); verPantalla("qr"); }
+  else if (h === "medico"){ esMedico = true; montarMedico(); verPantalla("medico"); }
   if (h === "ensayo"){ escala = 6; }
   var p = new URLSearchParams(location.search);
+  if (p.get("rol") === "medico"){ esMedico = true; montarMedico(); verPantalla("medico"); }
   if (p.get("ensayo")) escala = parseFloat(p.get("ensayo")) || 6;
   if (p.get("desde")) desde = parseFloat(p.get("desde")) || 0;
   if (escala > 1){ REJILLA = 5; ESPERA_MINIMA = 2; }
@@ -802,6 +1352,7 @@ window.addEventListener("hashchange", function(){ location.reload(); });
 
 // si el telefono recarga la pagina a medio pase, se vuelve a donde estaba
 function reanudar(){
+  if (esMedico) return;
   var p = new URLSearchParams(location.search);
   if (p.get("rol") || p.get("ensayo") || p.get("desde") || p.get("nuevo")) return;
   var crudo = null;
@@ -833,6 +1384,40 @@ pintar();
 /* pista para el expositor, el codigo de sala sale por consola y en el guion */
 window.codigoSala = function(){ return inicio ? codigoDe(inicio) : "sin arrancar"; };
 window.probarRatas = function(){ verPantalla("ratas"); soltarRatas(); chirrido(); };
+
+// para oir la tos, el grito y el estertor sin esperar al pase entero
+window.probarSonidos = function(cual){
+  abrirAudio();
+  if (ac && ac.state === "suspended") ac.resume();
+  if (cual === "tos"){ ataqueTos(0.55, false); }
+  else if (cual === "lejos"){ tos(0, 0.18, true); }
+  else if (cual === "grito"){ lamento(0); }
+  else if (cual === "campanas"){ doblar(3, 2200); }
+  else if (cual === "estertor"){ estertor(); }
+  else {
+    ataqueTos(0.55, false);
+    setTimeout(function(){ tos(0, 0.18, true); }, 1400);
+    setTimeout(function(){ lamento(0); }, 2600);
+    setTimeout(function(){ doblar(3, 2200); }, 5000);
+    setTimeout(estertor, 6000);
+  }
+  return "Audio " + (ac ? ac.state : "cerrado");
+};
+
+// comprueba que el sonido sale de verdad, no solo que no da error
+window.medirSonido = function(){
+  if (!ac) return null;
+  var an = ac.createAnalyser();
+  an.fftSize = 2048;
+  maestro.connect(an);
+  var buf = new Float32Array(an.fftSize);
+  return function(){
+    an.getFloatTimeDomainData(buf);
+    var m = 0;
+    for (var i=0;i<buf.length;i++){ var v = Math.abs(buf[i]); if (v > m) m = v; }
+    return m;
+  };
+};
 
 })();
 </script>
