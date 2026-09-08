@@ -86,6 +86,17 @@ button.fuerte{border-color:var(--pergamino)}
 #foto .marco img, #foto .marco video{display:block; max-width:100%; max-height:62vh; object-fit:contain}
 #foto .vacio{color:var(--humo); font-style:italic; text-align:center}
 
+/* los medicos */
+#medicos{justify-content:center; align-items:center}
+#medicos .cabecera{justify-content:center; text-align:center}
+.listaMedicos{display:flex; flex-wrap:wrap; gap:18px; justify-content:center; align-items:flex-start;
+  width:100%; max-width:900px; margin:0 auto 14px}
+.unMedico{display:flex; flex-direction:column; align-items:center; gap:6px}
+.unMedico .cajaqr{background:#fff; padding:9px; line-height:0; width:min(32vw,180px);
+  position:relative; z-index:61}
+.unMedico .cajaqr svg{display:block; width:100%; height:auto}
+.unMedico .nombre{font-family:var(--alto); font-size:18px}
+
 /* reparto */
 #reparto .cuerpo{flex:1; display:flex; flex-direction:column; align-items:center; gap:14px; min-height:0}
 #reparto .ladoqr{flex:none; width:min(34vh,300px); display:flex; flex-direction:column; align-items:center;
@@ -277,6 +288,8 @@ button.fuerte{border-color:var(--pergamino)}
       <input type="number" id="nEnfermos" min="0" max="200" value="14"></div>
     <div class="campo"><label for="nOleada1">De esas, cuantas caen en la primera oleada</label>
       <input type="number" id="nOleada1" min="0" max="200" value="9"></div>
+    <div class="campo"><label for="nMedicos">Cuantos medicos van a atender</label>
+      <input type="number" id="nMedicos" min="1" max="20" value="2"></div>
   </div>
   <div class="cuenta" id="cuenta"></div>
   <p class="aviso" id="avisoConfig"></p>
@@ -305,6 +318,20 @@ button.fuerte{border-color:var(--pergamino)}
     <button class="enlace" id="btnAConfig">Atras</button>
   </div>
   <input type="file" id="ficheroFoto" accept="image/*" hidden>
+</section>
+
+<section class="paso" id="medicos">
+  <div class="cabecera">
+    <h1>Los medicos</h1>
+    <p class="epigrafe">Que cada uno escanee el suyo</p>
+  </div>
+  <div class="listaMedicos" id="listaMedicos"></div>
+  <p class="tenue" style="text-align:center; max-width:520px">Les abre su mesa con las cuatro
+    botellas. No lleva instrucciones a proposito, se explican antes.</p>
+  <div class="botones">
+    <button class="fuerte" id="btnAReparto3">Siguiente</button>
+    <button class="enlace" id="btnAFoto3">Atras</button>
+  </div>
 </section>
 
 <section class="paso" id="reparto">
@@ -459,7 +486,7 @@ var inicio = 0;
 var cortado = false;
 
 var estado = {
-  cfg:  { total:24, enfermos:14, oleada1:9 },
+  cfg:  { total:24, enfermos:14, oleada1:9, medicos:2 },
   foto: null,
   ancho: 0,
   alto: 0,
@@ -490,8 +517,15 @@ function leerConfig(){
   return {
     total:   Math.max(1, parseInt($("nTotal").value, 10) || 0),
     enfermos: Math.max(0, parseInt($("nEnfermos").value, 10) || 0),
-    oleada1: Math.max(0, parseInt($("nOleada1").value, 10) || 0)
+    oleada1: Math.max(0, parseInt($("nOleada1").value, 10) || 0),
+    medicos: Math.max(1, parseInt($("nMedicos").value, 10) || 1)
   };
+}
+
+// del 1.10 al 2.05 hay 55 segundos, y es todo lo que tienen para atender la sala
+function segundosPorPaciente(c){
+  if (!c.enfermos) return 0;
+  return Math.round((T_MUERTE - T_MEDICO) * c.medicos / c.enfermos * 10) / 10;
 }
 
 function pintarCuenta(){
@@ -502,15 +536,49 @@ function pintarCuenta(){
     '<div class="fila"><span>Se salvan</span><span>' + Math.max(0, sanos) + '</span></div>' +
     '<div class="fila"><span>Caen en la primera oleada, al minuto 0.55</span><span>' + c.oleada1 + '</span></div>' +
     '<div class="fila"><span>Caen en la segunda, al 1.40</span><span>' + Math.max(0, seg) + '</span></div>' +
-    '<div class="fila"><span>Acaban muertos</span><span>' + c.enfermos + '</span></div>';
+    '<div class="fila"><span>Acaban muertos</span><span>' + c.enfermos + '</span></div>' +
+    '<div class="fila"><span>Segundos por paciente para cada medico</span><span>' +
+      segundosPorPaciente(c) + '</span></div>';
 
   var mal = "";
   if (c.enfermos > c.total) mal = "No pueden enfermar mas de las que hay";
   else if (c.oleada1 > c.enfermos) mal = "En la primera oleada no pueden caer mas de las que enferman";
   else if (c.enfermos === 0) mal = "Sin enfermos no pasa nada, sube el numero";
+  // Los medicos solo tienen del 1.10 al 2.05 para atender a todos. Si no les da
+  // el tiempo, media sala se muere sin que nadie la haya tocado.
+  if (!mal && segundosPorPaciente(c) < 4){
+    mal = "Van muy justos de tiempo, pon mas medicos o menos enfermos";
+  }
   $("avisoConfig").textContent = mal;
   $("btnAFoto").disabled = !!mal;
   return !mal;
+}
+
+/* ---------- los medicos ---------- */
+
+function montarMedicos(){
+  var base = location.origin + location.pathname.replace(/maestra[.]html$/, "") + "medico.html";
+  var caja = $("listaMedicos");
+  caja.innerHTML = "";
+  for (var i=1; i<=estado.cfg.medicos; i++){
+    var url = base + "?n=" + i;
+    var div = document.createElement("div");
+    div.className = "unMedico";
+    var cajaQr = document.createElement("div");
+    cajaQr.className = "cajaqr";
+    try {
+      var qr = qrcode(0, "M");
+      qr.addData(url);
+      qr.make();
+      cajaQr.innerHTML = qr.createSvgTag({ scalable:true, margin:1 });
+    } catch(e){ cajaQr.textContent = url; }
+    var nom = document.createElement("div");
+    nom.className = "nombre";
+    nom.textContent = "Medico " + i;
+    div.appendChild(cajaQr);
+    div.appendChild(nom);
+    caja.appendChild(div);
+  }
 }
 
 /* ---------- el reparto de papeles ---------- */
@@ -863,6 +931,7 @@ window.addEventListener("resize", function(){
 $("nTotal").addEventListener("input", pintarCuenta);
 $("nEnfermos").addEventListener("input", pintarCuenta);
 $("nOleada1").addEventListener("input", pintarCuenta);
+$("nMedicos").addEventListener("input", pintarCuenta);
 
 $("btnAFoto").addEventListener("click", function(){
   if (!pintarCuenta()) return;
@@ -929,9 +998,16 @@ $("btnAConfig").addEventListener("click", function(){ pararCamara(); verPaso("co
 
 $("btnAReparto").addEventListener("click", function(){
   pararCamara();
+  montarMedicos();
+  verPaso("medicos");
+});
+
+$("btnAReparto3").addEventListener("click", function(){
   verPaso("reparto");
   setTimeout(pintarReparto, 30);
 });
+
+$("btnAFoto3").addEventListener("click", function(){ verPaso("foto"); });
 
 $("tablaReparto").addEventListener("click", ponerSello);
 
@@ -1008,6 +1084,7 @@ $("btnOtraVez").addEventListener("click", function(){
     $("nTotal").value = estado.cfg.total;
     $("nEnfermos").value = estado.cfg.enfermos;
     $("nOleada1").value = estado.cfg.oleada1;
+    $("nMedicos").value = estado.cfg.medicos || 2;
     $("btnOlvidar").hidden = false;
     if (estado.foto){
       var vista = document.createElement("img");

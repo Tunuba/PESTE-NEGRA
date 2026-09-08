@@ -220,3 +220,45 @@ donde estaba con su foto y sus sellos.
 Probado en trece tamanos de pantalla, de 360x640 a 2560x1440, comprobando que nada se
 desborda, que nada se solapa, que todo queda centrado y que el codigo QR nunca baja de los
 130 pixeles en que deja de leerse bien.
+
+## La mesa del medico
+
+`medico.html` es lo que llevan los medicos. Se les da escaneando su codigo desde la
+pantalla maestra, que ahora pregunta cuantos medicos van a atender y saca uno por cada uno.
+
+La pagina es **solo cuatro botellas**. Sangria, purga, cataplasma y vinagre, con su color y
+nada mas. No dice para que sirve cada una a proposito, eso se explica antes en clase. El
+medico mira el frasco del enfermo, reconoce la botella por el color y la toca.
+
+Al tocarla sale un codigo QR grande. El enfermo lo apunta con su camara desde su propia
+pagina, sin salirse, y recibe esa cura. Si varios tienen lo mismo pueden escanear todos el
+mismo codigo a la vez, que es lo que hace que de tiempo.
+
+Debajo del QR salen seis letras. Es el respaldo por si a alguien no le arranca la camara,
+que el medico las diga y el enfermo las escriba.
+
+La botella tres es la de la bilis amarilla, que ningun enfermo tiene. Esta ahi para que el
+medico pueda equivocarse, que es medio sentido de la estacion.
+
+**El orden de las cuatro botellas es el mismo en `medico.html` y en `index.html`**, porque
+lo que viaja en el codigo es el numero, no el nombre. Si se cambia el orden en un sitio y
+en el otro no, al enfermo le llega una cura distinta de la que le dieron.
+
+## El reloj de los medicos
+
+La configuracion de la maestra calcula cuantos segundos tiene cada medico por paciente y
+avisa si van por debajo de cuatro. Del 1.10 al 2.05 hay 55 segundos y no hay mas. Con 14
+enfermos y un solo medico son cuatro segundos por cabeza y no llega, asi que o se ponen mas
+medicos o menos enfermos. Si no da, la mitad de la sala se muere sin que nadie la haya
+tocado, que pasa de verdad pero no es lo que se quiere ensenar.
+
+## Los dos lectores van pegados dentro
+
+`medico.html` lleva dentro el generador de codigos y `index.html` lleva el lector, ninguno
+se carga de internet. Si el wifi del museo falla el dia de la exposicion, nadie podria dar
+ni recibir una cura. El lector pesa 250 kilobytes en disco pero viaja en 57 comprimido.
+
+Comprobado generando 120 codigos de las cuatro botellas y leyendolos con otro lector
+distinto, los 120 legibles y con la cura correcta, a cuatro tamanos desde 180 pixeles. Y
+despues metiendo los codigos de verdad en la pagina del enfermo, las cuatro botellas dan la
+cura que les toca.
