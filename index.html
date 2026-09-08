@@ -206,8 +206,14 @@ body.enfermo .plazo{color:#e0a09a}
 #llaves .epigrafe{align-self:center; margin:6px 0 18px}
 #llaves .papel{padding:12px 0; border-top:1px solid rgba(228,215,182,.16)}
 #llaves .quien{font-family:var(--alto); font-size:18px; margin-bottom:5px}
+/* el body entero lleva user-select none para que no se seleccione nada jugando.
+   Aqui hay que poder marcar la direccion con el dedo, asi que se levanta */
+#llaves, #llaves *{-webkit-user-select:text; user-select:text}
 #llaves .liga{display:block; font-size:14px; color:var(--humo); word-break:break-all;
-  line-height:1.5}
+  line-height:1.5; cursor:pointer; padding:5px 0}
+#llaves .liga.copiada{color:var(--pergamino)}
+#llaves .aviso{align-self:center; min-height:1.3em; color:var(--bilis); font-size:15px;
+  margin-bottom:10px}
 #llaves .botones{display:flex; gap:18px; align-self:center; margin-top:8px}
 
 /* tabla del medico */
@@ -368,6 +374,7 @@ body.enfermo .plazo{color:#e0a09a}
 <section class="pantalla" id="llaves">
   <h2>Repartir papeles</h2>
   <p class="epigrafe">Cada enlace lleva su papel escondido</p>
+  <p class="aviso" id="avisoLlaves">Toca una direccion para copiarla</p>
   <div class="tabla" id="listaLlaves"></div>
   <p class="nota">Manda cada enlace por privado a quien le toque. El que lo abre no puede
     saber que le va a pasar, y los que entran sin enlace siguen cayendo al azar. Si dos
@@ -1332,12 +1339,54 @@ function agregarLlaves(cuantas){
   var papeles = $("listaLlaves").children;
   for (var i=0;i<papeles.length;i++){
     for (var j=0;j<cuantas;j++){
-      var sp = document.createElement("span");
-      sp.className = "liga";
-      sp.textContent = base + "?k=" + llaveDe(PAPELES[i].p);
-      papeles[i].appendChild(sp);
+      (function(){
+        var sp = document.createElement("span");
+        sp.className = "liga";
+        sp.textContent = base + "?k=" + llaveDe(PAPELES[i].p);
+        sp.addEventListener("click", function(){ copiarLiga(sp); });
+        papeles[i].appendChild(sp);
+      })();
     }
   }
+}
+
+function decirLlaves(texto){
+  $("avisoLlaves").textContent = texto;
+  clearTimeout(decirLlaves.t);
+  decirLlaves.t = setTimeout(function(){
+    $("avisoLlaves").textContent = "Toca una direccion para copiarla";
+  }, 2600);
+}
+
+// deja el texto marcado, que en el telefono ya sirve para copiarlo a mano
+function marcar(el){
+  try {
+    var r = document.createRange();
+    r.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  } catch(e){}
+}
+
+function copiar(texto, bien, mal){
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(texto).then(bien).catch(mal);
+      return;
+    }
+  } catch(e){}
+  mal();
+}
+
+function copiarLiga(sp){
+  copiar(sp.textContent, function(){
+    sp.classList.add("copiada");
+    decirLlaves("Copiada");
+  }, function(){
+    marcar(sp);
+    decirLlaves("Ya esta marcada, copiala tu");
+  });
 }
 
 function textoLlaves(){
@@ -1390,13 +1439,12 @@ $("btnSello").addEventListener("click", function(){
 $("btnMasLlaves").addEventListener("click", function(){ agregarLlaves(1); });
 
 $("btnCopiarLlaves").addEventListener("click", function(){
-  var b = $("btnCopiarLlaves");
-  try {
-    navigator.clipboard.writeText(textoLlaves()).then(function(){
-      b.textContent = "Copiados";
-      setTimeout(function(){ b.textContent = "Copiar todos"; }, 2000);
-    }).catch(function(){ b.textContent = "Copialos a mano"; });
-  } catch(e){ b.textContent = "Copialos a mano"; }
+  copiar(textoLlaves(), function(){
+    decirLlaves("Copiados todos");
+  }, function(){
+    marcar($("listaLlaves"));
+    decirLlaves("Ya estan marcados, copialos tu");
+  });
 });
 
 $("btnArrancarGuion").addEventListener("click", function(){

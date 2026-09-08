@@ -92,6 +92,11 @@ de un vistazo, que es lo unico que hace falta.
 Si dos personas van a llevar el mismo papel, dales enlaces distintos con el boton de abajo,
 porque dos direcciones iguales una al lado de la otra tambien delatan el truco.
 
+Para copiarlos, toca una direccion y se copia sola. El boton de abajo copia todas de golpe.
+Si el navegador no deja usar el portapapeles, la deja marcada para que la copies a mano. El
+resto de la pagina no se puede seleccionar a proposito, para que nadie marque texto sin
+querer mientras juega, pero en esta pantalla si.
+
 Comprobado generando 600 llaves, cien por papel. Las 600 dan el papel correcto, ninguna sale
 repetida, y cada papel usa entre 33 y 36 caracteres distintos en la primera y en la ultima
 posicion, o sea que ninguna posicion lo delata. Comprobado tambien abriendo la pagina con 72
