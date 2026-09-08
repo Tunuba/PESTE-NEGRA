@@ -90,7 +90,8 @@ button:active{transform:scale(.97); background:rgba(228,215,182,.12)}
   animation:latido 3.4s ease-in-out infinite; margin-bottom:34px;
 }
 @keyframes latido{0%,100%{transform:scale(1); opacity:.35}12%{transform:scale(1.9); opacity:.9}24%{transform:scale(1); opacity:.45}}
-#calma .ambiente{min-height:3.2em; max-width:340px; color:var(--humo); font-style:italic; font-size:17px}
+#calma .epigrafe{color:#a2937c}
+#calma .ambiente{min-height:3.2em; max-width:340px; color:#8e816e; font-style:italic; font-size:17px; margin-top:14px}
 #calma .ambiente span{display:block; animation:aparece 2.2s ease both}
 
 /* infectado */
@@ -303,6 +304,7 @@ var REVELACION = [
 var $ = function(id){ return document.getElementById(id); };
 var cuerpo = document.body;
 var escala = 1;                 // el modo ensayo comprime el tiempo
+var desde = 0;                  // arrancar con el reloj ya adelantado, para ensayar un tramo
 var inicio = 0;                 // marca de arranque compartida, en milisegundos
 var estado = null;              // rol y sintoma de este telefono
 var faseActual = "";
@@ -413,7 +415,8 @@ document.addEventListener("visibilitychange", function(){
 
 function proximaRejilla(){
   var paso = REJILLA * 1000;
-  return Math.ceil((ahora() + ESPERA_MINIMA * 1000) / paso) * paso;
+  var marca = Math.ceil((ahora() + ESPERA_MINIMA * 1000) / paso) * paso;
+  return marca - Math.round(desde * 1000 / escala);
 }
 
 function codigoDe(marca){
@@ -478,7 +481,7 @@ function pintar(){
   var s = transcurrido();
 
   if (s < 0){
-    var faltan = Math.ceil(-s);
+    var faltan = Math.ceil((inicio - ahora()) / 1000);
     $("cuentaAtras").textContent = faltan;
     verPantalla("sincro");
     if (faltan <= 3 && !tempranas["tic" + faltan]){ tempranas["tic" + faltan] = 1; campana(520, 0.35, 0.25); }
@@ -731,6 +734,8 @@ function leerModo(){
   if (h === "ensayo"){ escala = 6; }
   var p = new URLSearchParams(location.search);
   if (p.get("ensayo")) escala = parseFloat(p.get("ensayo")) || 6;
+  if (p.get("desde")) desde = parseFloat(p.get("desde")) || 0;
+  if (escala > 1){ REJILLA = 5; ESPERA_MINIMA = 2; }
 }
 
 leerModo();
