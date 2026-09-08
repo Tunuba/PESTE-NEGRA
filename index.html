@@ -218,6 +218,7 @@ body.enfermo .plazo{color:#e0a09a}
 /* guion del expositor */
 #guion{justify-content:flex-start; text-align:left; padding-top:calc(24px + env(safe-area-inset-top))}
 #guion .reloj{font-family:var(--alto); font-size:64px; line-height:1}
+#guion .reloj.espera{color:var(--sangre-viva)}
 #guion .falta{color:var(--bilis); font-size:16px; margin-bottom:18px}
 #guion ol{list-style:none; margin:0; padding:0; width:100%; max-width:460px; overflow-y:auto}
 #guion li{display:flex; gap:14px; padding:11px 0; border-top:1px solid rgba(228,215,182,.14); color:var(--humo); font-size:16px}
@@ -250,7 +251,6 @@ body.enfermo .plazo{color:#e0a09a}
     <p style="margin-top:28px"><button id="btnComenzar">Comenzar</button></p>
     <p class="tenue" style="margin-top:16px; font-size:14px">Presiona cuando lo diga el expositor.</p>
   </div>
-  <button class="enlace" id="btnTarde" style="position:absolute;bottom:18px">Ya empezo sin mi</button>
 </section>
 
 <section class="pantalla" id="sincro">
@@ -362,7 +362,6 @@ body.enfermo .plazo{color:#e0a09a}
   <div class="reloj" id="relojGuion">0.00</div>
   <p class="falta" id="faltaGuion">Sin arrancar</p>
   <ol id="listaGuion"></ol>
-  <p class="tenue" id="salaGuion" style="align-self:center; margin-top:18px; font-size:14px"></p>
   <button class="enlace" id="btnArrancarGuion" style="align-self:center">Arrancar</button>
 </section>
 
@@ -371,8 +370,6 @@ body.enfermo .plazo{color:#e0a09a}
   <div class="caja" id="cajaQr"></div>
   <p class="url" id="textoUrl"></p>
 </section>
-
-<p class="pie" id="sala" hidden></p>
 
 <div id="vineta"></div>
 <div id="grano"></div>
@@ -411,8 +408,7 @@ var GUION = [
 // guion es Europa entera en cuatro anios, aqui estamos en la peor ciudad
 var PROB_OLEADA_1 = 0.35;   // algo mas de uno de cada tres, de golpe
 var PROB_OLEADA_2 = 0.38;   // de los que quedaron sanos y no eligieron
-var REJILLA = 15;           // segundos de la rejilla de arranque comun
-var ESPERA_MINIMA = 5;      // segundos de margen antes de arrancar
+var REJILLA = 30;           // segundos de la rejilla de arranque comun
 
 // tres enfermedades, las mismas tres que nombra el expositor en el guion
 var SINTOMAS = [
@@ -774,24 +770,14 @@ document.addEventListener("visibilitychange", function(){
 
 /* ---------- arranque compartido ---------- */
 
+// Se coge la marca de la rejilla MAS CERCANA, no la siguiente. Asi el que
+// presiona un poco tarde entra en la que ya va corriendo, en vez de quedarse
+// esperando la siguiente y arrancar medio minuto despues que los demas. Por eso
+// no hace falta ningun codigo de sala.
 function proximaRejilla(){
   var paso = REJILLA * 1000;
   if (desde > 0) return ahora() - Math.round(desde * 1000 / escala);
-  return Math.ceil((ahora() + ESPERA_MINIMA * 1000) / paso) * paso;
-}
-
-function codigoDe(marca){
-  return (Math.round(marca / (REJILLA * 1000)) % 46656).toString(36).toUpperCase();
-}
-function marcaDeCodigo(codigo){
-  codigo = String(codigo).trim().toUpperCase();
-  var paso = REJILLA * 1000;
-  var base = Math.round(ahora() / paso);
-  for (var d=0; d<160; d++){
-    var candidata = (base - d) * paso;
-    if (codigoDe(candidata) === codigo) return candidata;
-  }
-  return 0;
+  return Math.round(ahora() / paso) * paso;
 }
 
 function repartirRoles(){
@@ -863,13 +849,8 @@ function momentoMuerte(){
 
 function pintar(){
   if (esMedico){ return; }        // la tabla del medico no sigue el reloj
-  if (!inicio){ return; }
+  if (!inicio){ if (esGuion) pintarSemaforo(); return; }
   var s = transcurrido();
-
-  // el codigo deja ver de un vistazo si alguien arranco en otra tanda
-  var sala = $("sala");
-  sala.hidden = !(s < T_OLEADA1 - 2);
-  if (!sala.hidden) sala.textContent = "Sala " + codigoDe(inicio);
 
   if (s < 0){
     var faltan = Math.ceil((inicio - ahora()) / 1000);
@@ -1279,6 +1260,23 @@ function reloj(s){
   return m + "." + (r < 10 ? "0" : "") + r;
 }
 
+// Todos los telefonos se pegan a la marca de rejilla mas cercana, asi que la
+// frontera esta en la mitad de la rejilla. Si el expositor da la orden justo
+// encima, unos caen en una marca y otros en la siguiente y la sala se parte en
+// dos tandas. Esto le dice cuando puede decirlo, y asi no hace falta ningun codigo.
+function pintarSemaforo(){
+  var fase = (ahora() % (REJILLA * 1000)) / 1000;
+  var frontera = REJILLA / 2;
+  var malo = fase >= frontera - 5 && fase <= frontera + 1;
+  var faltan = Math.max(1, Math.ceil(frontera + 1 - fase));
+  $("relojGuion").textContent = malo ? "Espera " + faltan : "Ahora";
+  $("faltaGuion").textContent = malo
+    ? "Si lo dices ahora la sala se parte en dos tandas"
+    : "Buen momento para decir que presionen";
+  $("relojGuion").classList.toggle("espera", malo);
+  $("btnArrancarGuion").style.display = "";
+}
+
 function pintarGuion(s){
   verPantalla("guion");
   $("relojGuion").textContent = reloj(s);
@@ -1296,7 +1294,6 @@ function pintarGuion(s){
     lista[j].classList.toggle("pasada", j < indice);
   }
   $("btnArrancarGuion").style.display = "none";
-  $("salaGuion").textContent = "Codigo de sala " + codigoDe(inicio);
 }
 
 /* ---------- codigo qr ---------- */
@@ -1319,15 +1316,6 @@ function montarQr(){
 $("btnComenzar").addEventListener("click", function(){
   abrirAudio();
   arrancar(proximaRejilla());
-});
-
-$("btnTarde").addEventListener("click", function(){
-  var codigo = prompt("Codigo de la sala");
-  if (!codigo) return;
-  var marca = marcaDeCodigo(codigo);
-  if (!marca){ alert("Ese codigo no aparece"); return; }
-  abrirAudio();
-  arrancar(marca);
 });
 
 $("btnExpediente").addEventListener("click", function(){
@@ -1361,7 +1349,7 @@ function leerModo(){
   if (p.get("rol") === "medico"){ esMedico = true; montarMedico(); verPantalla("medico"); }
   if (p.get("ensayo")) escala = parseFloat(p.get("ensayo")) || 6;
   if (p.get("desde")) desde = parseFloat(p.get("desde")) || 0;
-  if (escala > 1){ REJILLA = 5; ESPERA_MINIMA = 2; }
+  if (escala > 1){ REJILLA = 5; }
 }
 
 leerModo();
@@ -1398,8 +1386,6 @@ document.addEventListener("pointerdown", function(){
 setInterval(pintar, 200);
 pintar();
 
-/* pista para el expositor, el codigo de sala sale por consola y en el guion */
-window.codigoSala = function(){ return inicio ? codigoDe(inicio) : "sin arrancar"; };
 window.probarRatas = function(){ verPantalla("ratas"); soltarRatas(); chirrido(); };
 
 // para oir la tos, el grito y el estertor sin esperar al pase entero

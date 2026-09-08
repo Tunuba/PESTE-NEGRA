@@ -6,15 +6,15 @@ presionan Comenzar y al minuto algunos se enferman solos. Todo dura tres minutos
 ## Como se usa el dia de la exposicion
 
 1. Proyecta o muestra la pagina con #qr al final de la direccion para que todos escaneen.
-2. Cuando todos la tengan abierta, di que presionen Comenzar. La pagina espera unos
-   segundos y arranca al mismo tiempo en todos los telefonos.
-3. Abajo de cada pantalla sale un codigo de tres letras. Di el tuyo en voz alta. Si a
-   alguien le salio otro, presiono fuera de tiempo y tiene que entrar con el enlace
-   Ya empezo sin mi poniendo tu codigo.
+2. Ten #guion abierto en tu telefono. Antes de arrancar te dice Ahora en grande cuando
+   puedes dar la orden, o Espera en rojo con los segundos que faltan.
+3. Cuando todos la tengan abierta y tu pantalla diga Ahora, di que presionen Comenzar.
+   Todos los telefonos se pegan solos al mismo arranque. No hay codigos ni nada que decir
+   en voz alta.
 4. Del segundo 0 al 55, el companero 1 explica la estacion. Los telefonos laten y de vez
    en cuando se oye toser a alguien de la sala.
-5. En el 0.55 se ponen rojas una de cada cinco pantallas y vibran. En el 1.40 caen mas.
-   Entre todas queda infectada como una de cada tres personas.
+5. En el 0.55 se pone roja algo mas de una de cada tres pantallas y vibra. En el 1.40 caen
+   mas. Entre las dos oleadas enferma cerca del 60 por ciento de la sala.
 6. A partir de ahi cada quien tiene algo que decidir, y lo que decide cambia lo que le pasa.
    Ver la seccion de abajo.
 7. El companero 2 entra como medico con la tabla abierta en su telefono, lee el color del
@@ -76,8 +76,7 @@ tu propia hoja, que nada de lo que elegiste cambio nada porque en 1348 no habia 
 - ?ensayo=6 corre todo seis veces mas rapido para ensayar.
 - ?desde=140 arranca con el reloj ya adelantado, para ver solo el final.
 - ?rol=enfermo y ?rol=sano fuerzan el papel para probar las pantallas. Sin esto te toca al
-  azar y es normal pasar varias pruebas seguidas sin enfermarte, porque solo cae uno de
-  cada cinco en la primera oleada.
+  azar, asi que puedes pasar varias pruebas seguidas sin enfermarte.
 - ?rol=medico hace lo mismo que #medico.
 
 ## El sonido
@@ -106,3 +105,22 @@ sirve, pero si alguien no oye nada que toque la pantalla una vez.
 
 Si el telefono recarga la pagina a medio pase, vuelve sola a donde iba y mantiene si
 estaba sano o enfermo.
+
+## Por que no hay codigo de sala
+
+Antes cada pantalla mostraba un codigo de tres letras para ver si alguien habia arrancado en
+otra tanda, y habia un enlace para entrar a mano con el codigo de otro. Se quito entero.
+
+Los telefonos no se hablan entre ellos, lo unico que comparten es el reloj del mundo. Por eso
+todos se pegan a una marca comun cada 30 segundos. Antes se cogia la marca SIGUIENTE, asi que
+dos personas que presionaban con un segundo de diferencia pero a caballo de un limite
+arrancaban con medio minuto de separacion. El codigo servia para notarlo y arreglarlo a mano.
+
+Ahora se coge la marca MAS CERCANA, no la siguiente, asi que el que presiona un poco tarde
+entra en la que ya va corriendo en vez de esperar a la proxima. El limite queda en la mitad
+de la rejilla, y en vez de taparlo con un codigo se evita, porque #guion le dice al expositor
+Ahora o Espera segun donde este el reloj.
+
+Medido presionando en los 30 segundos de la rejilla, con el ultimo del grupo entrando cuatro
+segundos despues del primero. Dando la orden en verde, 23 de 23 momentos caen todos en la
+misma tanda, cero fallos. En rojo fallan 4 de 7, que es justo lo que el semaforo avisa.
