@@ -68,6 +68,29 @@ tiembla un poco mas, el latido del sonido se acelera de dos segundos a menos de 
 saliendo frases de lo que te esta pasando. Te cuesta tragar. Ves borroso. Te pesan las
 piernas. Ya casi no oyes la calle. No te queda aire. Frio.
 
+## La alarma no para hasta que llega el medico
+
+Cuando caes, el telefono suena como una sirena y **se queda sonando** cada cuatro
+segundos hasta que te curan. Es la senal de que ahi hay alguien sin atender, asi que con la
+sala llena el medico va apagando alarmas una a una y el silencio se va notando.
+
+No mira si la pantalla esta encendida, a proposito. Guardarse el telefono en el bolsillo no
+cura a nadie.
+
+## Lo que hace el que no enferma
+
+Antes se pasaba dos minutos mirando Sigues sano y nada mas. Ahora tiene dos tareas y las
+dos son de verdad.
+
+**Hasta que empiezan a morir, quema hierbas.** Un brasero que se apaga solo y hay que ir
+avivando. Tocar fuera del brasero no cuenta. Es exactamente lo que hacia la gente para
+limpiar el aire y no servia absolutamente de nada, que es la gracia.
+
+**Cuando empiezan a morir, entierra.** Van llegando cuerpos y hay que tocarlos uno a uno.
+Si se acumulan, la barra se pone roja. Enterrar era lo unico que de verdad hacia falta y
+tambien lo mas peligroso, porque los que enterraban eran de los siguientes en caer. Su
+expediente se lo dice al final.
+
 ## Los mini juegos
 
 Despues de que el medico te trate, en vez de mirar una pantalla parada, cada enfermedad

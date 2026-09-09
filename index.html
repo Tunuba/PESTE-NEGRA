@@ -218,6 +218,41 @@ body.muerto #pulsoPantalla{animation:none; opacity:0}
 .guia{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   border-radius:50%; border:1px dashed rgba(255,235,230,.32)}
 
+/* Lo que hace el que no enferma. Antes se quedaba dos minutos mirando Sigues
+   sano y nada mas. Primero quema hierbas, que es lo que hacia la gente para
+   limpiar el aire y no servia de nada, y cuando empiezan a morir, entierra. */
+#sano{justify-content:flex-start; padding-top:calc(26px + env(safe-area-inset-top))}
+#sano .orden{font-family:var(--alto); font-size:clamp(20px,6.6vw,27px); margin-top:14px}
+#sano .pista{font-size:15px; color:var(--humo); margin-bottom:10px; min-height:1.3em}
+#sano .lienzo{position:relative; flex:1; width:100%; max-width:380px; min-height:0;
+  border:1px solid rgba(228,215,182,.2); overflow:hidden; touch-action:manipulation}
+#sano .abajo{flex:none; width:100%; max-width:380px; padding:10px 0 4px}
+#sano .barra{height:9px; background:rgba(0,0,0,.4); overflow:hidden}
+#sano .barra .lleno{height:100%; width:0%; background:var(--bilis); transition:width 140ms linear}
+#sano .barra.mal .lleno{background:var(--sangre-viva)}
+#sano .cuenta{display:flex; justify-content:space-between; margin-top:7px;
+  font-size:14px; color:var(--humo)}
+
+/* el brasero de las hierbas */
+.brasero{position:absolute; left:50%; bottom:12%; transform:translateX(-50%);
+  width:min(46%,140px); cursor:pointer}
+.brasero svg{width:100%; height:auto; display:block}
+.humo{position:absolute; bottom:0; left:50%; width:14px; height:14px; border-radius:50%;
+  background:rgba(220,210,190,.5); pointer-events:none}
+.chispa{position:absolute; width:5px; height:5px; border-radius:50%; background:#ffb15c;
+  pointer-events:none; animation:chispaSube 900ms ease-out both}
+@keyframes chispaSube{from{transform:translate(0,0) scale(1); opacity:.95}
+  to{transform:translate(var(--dx,0), -90px) scale(.2); opacity:0}}
+
+/* los muertos que hay que enterrar */
+.cuerpo{position:absolute; transform:translate(-50%,-50%); cursor:pointer;
+  animation:cuerpoLlega 500ms ease both}
+.cuerpo svg{display:block}
+@keyframes cuerpoLlega{from{opacity:0; transform:translate(-50%,-50%) scale(.7)}
+  to{opacity:1; transform:translate(-50%,-50%) scale(1)}}
+.cuerpo.enterrado{animation:seVa 620ms ease both; pointer-events:none}
+@keyframes seVa{to{opacity:0; transform:translate(-50%,-30%) scale(.75)}}
+
 /* sano */
 #sano .marca{font-family:var(--alto); font-size:15px; letter-spacing:.3em; text-transform:uppercase; color:var(--humo)}
 
@@ -312,6 +347,10 @@ body.enfermo .plazo{color:#e0a09a}
 /* mientras dura el alivio el temblor y el palpito se paran */
 body.alivio #infectado, body.alivio #juego{animation:none !important; transform:none !important}
 body.alivio #pulsoPantalla{animation:none !important; opacity:0 !important}
+
+/* mientras nadie le atiende, la pantalla pide ayuda a la vez que la alarma */
+body.pidiendo #infectado .aviso{animation:pideAyuda 1.9s ease-in-out infinite}
+@keyframes pideAyuda{0%,100%{opacity:.55}50%{opacity:1; letter-spacing:.42em}}
 
 /* la camara con la que se recibe la cura del medico */
 .camara{position:relative; width:100%; aspect-ratio:1/1; max-height:38vh; margin:4px auto 10px;
@@ -507,8 +546,14 @@ body.alivio #pulsoPantalla{animation:none !important; opacity:0 !important}
 
 <section class="pantalla" id="sano">
   <p class="marca" id="sanoMarca">Sigues sano</p>
-  <div class="rayita" style="margin:24px auto"></div>
   <p class="tenue cursiva" id="sanoNota">Por ahora.</p>
+  <p class="orden" id="sanoOrden"></p>
+  <p class="pista" id="sanoPista"></p>
+  <div class="lienzo" id="sanoLienzo"></div>
+  <div class="abajo">
+    <div class="barra" id="sanoBarra"><div class="lleno" id="sanoLleno"></div></div>
+    <div class="cuenta"><span id="sanoIzq"></span><span id="sanoDer"></span></div>
+  </div>
 </section>
 
 <section class="pantalla" id="agonia">
@@ -10904,6 +10949,21 @@ function latido(encendido, ritmo){
   }
 }
 
+/* La alarma no suena una vez y ya. Se queda sonando hasta que el medico llega,
+   porque es la senal de que ahi hay alguien sin atender. Con la sala llena, el
+   medico va apagando alarmas una a una y el silencio se nota. */
+var alarmaBucle = 0;
+
+function alarmaEncendida(si){
+  if (si && !alarmaBucle){
+    alarma();
+    alarmaBucle = setInterval(alarma, 3800);
+  } else if (!si && alarmaBucle){
+    clearInterval(alarmaBucle);
+    alarmaBucle = 0;
+  }
+}
+
 // La alarma de cuando caes. Son dos tonos alternos como una sirena, pero tocados
 // con timbre de campana, que es como se avisaba de una desgracia en una ciudad
 // de 1348. Suena a emergencia sin sonar a ambulancia de hoy.
@@ -11130,6 +11190,159 @@ function vibrar(patron){
   try { if (navigator.vibrate) navigator.vibrate(patron); } catch(e){}
 }
 
+/* ---------- los sonidos de los juegos ---------- */
+
+/* Todos los aciertos sonaban a la misma campana. Cada cosa tiene el suyo, que
+   es lo que hace que se note lo que estas haciendo sin mirar la pantalla. */
+
+// el pano frio sobre la piel que arde
+function chapoteo(){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    var n = fuenteRuido();
+    var lp = ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(4200, t);
+    lp.frequency.exponentialRampToValueAtTime(700, t + 0.22);
+    lp.Q.value = 2.4;
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.3, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+    n.connect(lp); lp.connect(g); g.connect(maestro);
+    n.start(t); n.stop(t + 0.32);
+  } catch(e){}
+}
+
+// la brasa que se apaga sola, el vapor subiendo
+function siseo(){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    var n = fuenteRuido();
+    var bp = ac.createBiquadFilter();
+    bp.type = "bandpass"; bp.Q.value = 1.6;
+    bp.frequency.setValueAtTime(900, t);
+    bp.frequency.exponentialRampToValueAtTime(3400, t + 0.5);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.38, t + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+    n.connect(bp); bp.connect(g); g.connect(maestro);
+    n.start(t); n.stop(t + 0.6);
+  } catch(e){}
+}
+
+// la buba que revienta, mas grave cuanto mas gorda estaba
+function plop(gorda){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    var base = 520 - (gorda || 0) * 220;
+    var o = ac.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(base, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(60, base * 0.18), t + 0.13);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.4, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+    var n = fuenteRuido();
+    var bp = ac.createBiquadFilter();
+    bp.type = "bandpass"; bp.frequency.value = 1500; bp.Q.value = 1.1;
+    var gn = ac.createGain();
+    gn.gain.setValueAtTime(0.22, t);
+    gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    o.connect(g); g.connect(maestro);
+    n.connect(bp); bp.connect(gn); gn.connect(maestro);
+    o.start(t); o.stop(t + 0.2);
+    n.start(t); n.stop(t + 0.12);
+  } catch(e){}
+}
+
+// el aire que entra cuando aciertas la respiracion
+function bocanada(){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    var n = fuenteRuido();
+    var bp = ac.createBiquadFilter();
+    bp.type = "bandpass"; bp.Q.value = 2.2;
+    bp.frequency.setValueAtTime(520, t);
+    bp.frequency.exponentialRampToValueAtTime(1500, t + 0.42);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.36, t + 0.14);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    n.connect(bp); bp.connect(g); g.connect(maestro);
+    n.start(t); n.stop(t + 0.55);
+  } catch(e){}
+}
+
+// el fuelle sobre las ascuas
+function soplo(){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    var n = fuenteRuido();
+    var lp = ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(700, t);
+    lp.frequency.linearRampToValueAtTime(2600, t + 0.18);
+    lp.frequency.linearRampToValueAtTime(500, t + 0.5);
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.42, t + 0.1);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.52);
+    n.connect(lp); lp.connect(g); g.connect(maestro);
+    n.start(t); n.stop(t + 0.56);
+  } catch(e){}
+}
+
+// la tierra que cae encima
+function tierra(){
+  if (!ac) return;
+  try {
+    var t0 = ac.currentTime;
+    for (var i=0;i<4;i++){
+      var t = t0 + i * (0.05 + Math.random() * 0.05);
+      var n = fuenteRuido();
+      var bp = ac.createBiquadFilter();
+      bp.type = "bandpass"; bp.Q.value = 1.3;
+      bp.frequency.value = 260 + Math.random() * 500;
+      var g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.17 - i * 0.03, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+      n.connect(bp); bp.connect(g); g.connect(maestro);
+      n.start(t); n.stop(t + 0.14);
+    }
+    golpe(0.02, 0.22);
+  } catch(e){}
+}
+
+// el aviso de que la cosa acaba de empeorar
+function peorAun(){
+  if (!ac) return;
+  try {
+    var t = ac.currentTime;
+    var o = ac.createOscillator();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(240, t);
+    o.frequency.exponentialRampToValueAtTime(96, t + 0.8);
+    var lp = ac.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 900;
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.26, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.95);
+    o.connect(lp); lp.connect(g); g.connect(maestro);
+    o.start(t); o.stop(t + 1);
+    golpe(0, 0.4);
+  } catch(e){}
+}
+
 /* ---------- pantalla despierta ---------- */
 
 var candado = null;
@@ -11219,7 +11432,9 @@ function repartirRoles(){
     atendido: 0,
     humorElegido: -1,       // lo que leyo en su frasco
     tratamiento: -1,        // lo que dejo que le hicieran
-    aciertos: 0             // lo que aguanto en el mini juego
+    aciertos: 0,            // lo que aguanto en el mini juego
+    manojos: 0,             // hierbas que quemo, si no enfermo
+    enterrados: 0           // muertos que enterro
   };
   var busca = new URLSearchParams(location.search);
   var forzado = busca.get("rol");
@@ -11313,6 +11528,7 @@ function pintar(){
 
   if (fase === "calma" || fase === "oleada1" || fase === "medico" || fase === "oleada2" || fase === "muerte"){
     if (enfermo){
+      cerrarSano();
       if (muerto){ cerrarJuego(); verPantalla("muerte"); }
       else if (s >= momentoMuerte() - 7){ cerrarJuego(); verPantalla("agonia"); }
       else if (estado.tratamiento !== -1 && s >= estado.atendido + 2){
@@ -11324,10 +11540,12 @@ function pintar(){
       pintarSano(s);
       verPantalla("sano");
     } else {
+      cerrarSano();
       verPantalla("calma");
       pintarAmbiente(s);
     }
   } else if (fase === "revelacion"){
+    cerrarSano(); cerrarJuego();
     verPantalla("revelacion");
     pintarRevelacion(s - T_REVELACION);
   } else if (fase === "ratas"){
@@ -11335,6 +11553,12 @@ function pintar(){
   } else if (fase === "cierre"){
     verPantalla(viendoExpediente ? "expediente" : "cierre");
   }
+
+  // Suena mientras este enfermo y sin tratar, y se calla en cuanto le curan.
+  // A proposito no mira si la pantalla esta visible: es la senal de que ahi hay
+  // alguien sin atender, y guardarse el telefono en el bolsillo no lo cura.
+  alarmaEncendida(enfermo && !muerto && estado && estado.tratamiento === -1 &&
+                  s < T_REVELACION);
 
   var ten = pintarTension(s, enfermo && !muerto && s < T_REVELACION, muerto);
   // en la calma late despacio. Si estas cayendo, el corazon se acelera contigo
@@ -11379,7 +11603,6 @@ function disparar(s, enfermo){
 function contagio(){
   vibrar([420, 130, 420, 130, 900]);
   campana(196, 5, 0.5);
-  alarma();
 }
 
 /* ---------- las elecciones ---------- */
@@ -11525,6 +11748,7 @@ function aplicarCura(i){
 
 // lo unico bueno que le pasa al enfermo en toda la estacion
 function soltarAlivio(i){
+  alarmaEncendida(false);
   var caja = $("alivio");
   $("alivioCual").textContent = TRATAMIENTOS[i].que + ". " + TRATAMIENTOS[i].porque + ".";
   caja.classList.remove("va");
@@ -11558,6 +11782,8 @@ function pintarSano(s){
   } else {
     $("sanoNota").textContent = "Por ahora.";
   }
+  // hasta que empiezan a morir, quema hierbas. Despues, entierra
+  abrirSano(s >= T_MUERTE ? "enterrar" : "hierbas");
 }
 
 /* ---------- lo que pasa mientras te mueres ---------- */
@@ -11611,6 +11837,151 @@ function pintarTension(s, enfermo, muerto){
 }
 
 /* ---------- los mini juegos, uno por enfermedad ---------- */
+
+/* ---------- lo que hace el que no enferma ---------- */
+
+/* Dos tareas, las dos de verdad. Mientras los demas caen, quema hierbas para
+   limpiar el aire, que es lo que hacia todo el mundo y no servia de nada. Y
+   cuando empiezan a morir, entierra, que es lo que de verdad hacia falta y era
+   lo mas peligroso que podias hacer. */
+var san = null;
+var rafSano = 0;
+
+function abrirSano(tarea){
+  if (san && san.tarea === tarea) return;
+  cerrarSano();
+  san = {
+    tarea: tarea,
+    lienzo: $("sanoLienzo"),
+    humo: 0.6,
+    manojos: 0,
+    enterrados: 0,
+    cuerpos: [],
+    proxima: 1.2,
+    ultimo: performance.now()
+  };
+  san.lienzo.innerHTML = "";
+  if (tarea === "hierbas"){
+    $("sanoOrden").textContent = "Quema hierbas";
+    $("sanoPista").textContent = "Toca el brasero para que no se apague";
+    $("sanoIzq").textContent = "Humo";
+    var b = document.createElement("div");
+    b.className = "brasero";
+    b.innerHTML = '<svg viewBox="0 0 120 90" aria-hidden="true">' +
+      '<path d="M18 34h84l-11 42a10 10 0 0 1-10 8H39a10 10 0 0 1-10-8z" fill="#4a3a28" stroke="rgba(228,215,182,.5)" stroke-width="2.5"/>' +
+      '<rect x="12" y="26" width="96" height="9" rx="4.5" fill="#5d4a33" stroke="rgba(228,215,182,.5)" stroke-width="2"/>' +
+      '<ellipse id="ascuas" cx="60" cy="31" rx="38" ry="6" fill="#ff8a3c"/>' +
+      '<path d="M34 84l-8 6M86 84l8 6" stroke="rgba(228,215,182,.45)" stroke-width="3" stroke-linecap="round"/>' +
+      '</svg>';
+    san.lienzo.appendChild(b);
+    san.brasero = b;
+  } else {
+    $("sanoOrden").textContent = "Entierra a los muertos";
+    $("sanoPista").textContent = "Tocalos uno a uno. Nadie mas lo va a hacer";
+    $("sanoIzq").textContent = "Sin enterrar";
+  }
+  rafSano = requestAnimationFrame(pasoSano);
+}
+
+function cerrarSano(){
+  if (rafSano){ cancelAnimationFrame(rafSano); rafSano = 0; }
+  if (san){ san.lienzo.innerHTML = ""; san = null; }
+}
+
+function dibujarCuerpo(){
+  return '<svg viewBox="0 0 60 34" width="58" height="33" aria-hidden="true">' +
+    '<ellipse cx="30" cy="24" rx="26" ry="8" fill="rgba(0,0,0,.45)"/>' +
+    '<path d="M10 22c0-5 6-8 14-8h12c8 0 14 3 14 8z" fill="#7d7264"/>' +
+    '<circle cx="15" cy="15" r="6" fill="#8d8578"/>' +
+    '<path d="M22 20h24" stroke="#5a5248" stroke-width="2"/></svg>';
+}
+
+function tocarSano(ev){
+  if (!san) return;
+  var r = san.lienzo.getBoundingClientRect();
+  var x = ev.clientX - r.left, y = ev.clientY - r.top;
+
+  if (san.tarea === "hierbas"){
+    var rb = san.brasero.getBoundingClientRect();
+    var dentro = ev.clientX >= rb.left - 20 && ev.clientX <= rb.right + 20 &&
+                 ev.clientY >= rb.top - 20 && ev.clientY <= rb.bottom + 20;
+    if (!dentro) return;
+    san.humo = Math.min(1, san.humo + 0.16);
+    san.manojos++;
+    soplo();
+    vibrar([14]);
+    for (var i=0;i<5;i++){
+      var c = document.createElement("div");
+      c.className = "chispa";
+      c.style.left = (x - 2 + (Math.random()*40 - 20)) + "px";
+      c.style.top = (y - 2) + "px";
+      c.style.setProperty("--dx", (Math.random()*50 - 25) + "px");
+      san.lienzo.appendChild(c);
+      (function(el){ setTimeout(function(){ if (el.parentNode) el.remove(); }, 950); })(c);
+    }
+  } else {
+    for (var j=san.cuerpos.length-1;j>=0;j--){
+      var m = san.cuerpos[j];
+      if (Math.abs(x - m.x) < 34 && Math.abs(y - m.y) < 24){
+        m.el.classList.add("enterrado");
+        (function(el){ setTimeout(function(){ if (el.parentNode) el.remove(); }, 640); })(m.el);
+        san.cuerpos.splice(j, 1);
+        san.enterrados++;
+        tierra();
+        vibrar([50]);
+        return;
+      }
+    }
+  }
+}
+
+function pasoSano(ahoraMs){
+  rafSano = requestAnimationFrame(pasoSano);
+  if (!san || !estado) return;
+  var dt = Math.min(0.05, (ahoraMs - san.ultimo) / 1000);
+  san.ultimo = ahoraMs;
+  var s = transcurrido();
+  var an = san.lienzo.clientWidth, al = san.lienzo.clientHeight;
+
+  if (san.tarea === "hierbas"){
+    san.humo = Math.max(0, san.humo - dt * 0.11);
+    var as = san.lienzo.querySelector("#ascuas");
+    if (as){
+      as.setAttribute("rx", (14 + san.humo * 26).toFixed(1));
+      as.setAttribute("fill", san.humo > 0.35 ? "#ff8a3c" : "#8a4526");
+    }
+    $("sanoLleno").style.width = Math.round(san.humo * 100) + "%";
+    $("sanoBarra").classList.toggle("mal", san.humo < 0.3);
+    $("sanoPista").textContent = san.humo < 0.3
+      ? "Se te apaga. El aire se vuelve a espesar"
+      : "Toca el brasero para que no se apague";
+    $("sanoDer").textContent = san.manojos + " manojos";
+    estado.manojos = san.manojos;
+
+  } else {
+    // van llegando los que se murieron ahi al lado
+    san.proxima -= dt;
+    if (san.proxima <= 0 && san.cuerpos.length < 9 && an > 30 && al > 30){
+      san.proxima = 2.2 + Math.random() * 2.4;
+      var el = document.createElement("div");
+      el.className = "cuerpo";
+      var cx = 40 + Math.random() * Math.max(1, an - 80);
+      var cy = 26 + Math.random() * Math.max(1, al - 52);
+      el.style.left = cx + "px"; el.style.top = cy + "px";
+      el.innerHTML = dibujarCuerpo();
+      san.lienzo.appendChild(el);
+      san.cuerpos.push({ x:cx, y:cy, el:el });
+    }
+    var pend = san.cuerpos.length;
+    $("sanoLleno").style.width = Math.round(Math.min(1, pend / 9) * 100) + "%";
+    $("sanoBarra").classList.toggle("mal", pend >= 5);
+    $("sanoPista").textContent = pend >= 5
+      ? "Se te acumulan. No das abasto"
+      : "Tocalos uno a uno. Nadie mas lo va a hacer";
+    $("sanoDer").textContent = san.enterrados + " enterrados";
+    estado.enterrados = san.enterrados;
+  }
+}
 
 /* Cada enfermedad tiene su juego y sus tres etapas. Las etapas salen solas
    segun la tension, asi que se nota que va a peor por escalones y no solo
@@ -11680,7 +12051,7 @@ function pintarEtapa(ten){
   jug.etapa = cual;
   $("juegoOrden").textContent = e[cual].orden;
   $("juegoPista").textContent = e[cual].pista;
-  if (cual > 0){ vibrar([70, 50, 70]); campana(180, 2.2, 0.3); }
+  if (cual > 0){ vibrar([70, 50, 70]); peorAun(); }
 }
 
 function quitarCosa(c, i){
@@ -11707,12 +12078,12 @@ function tocarJuego(ev){
         jug.lienzo.appendChild(p);
         (function(el){ setTimeout(function(){ if (el.parentNode) el.remove(); }, 640); })(p);
         quitarCosa(b, i);
-        campana(760, 0.5, 0.14);
+        chapoteo();
         vibrar([16]);
         return;
       }
     }
-    campana(150, 0.35, 0.1);
+    campana(150, 0.35, 0.08);        // fallaste, no le diste a ninguna
 
   } else if (jug.cual === 1){
     for (var j=jug.cosas.length-1;j>=0;j--){
@@ -11724,7 +12095,7 @@ function tocarJuego(ev){
         b2.el = null;
         jug.cosas.splice(j, 1);
         jug.aciertos++;
-        campana(430 + b2.r * 6, 0.4, 0.16);
+        plop(Math.min(1, (b2.r - 11) / 26));
         vibrar([18]);
         return;
       }
@@ -11767,6 +12138,8 @@ function pasoJuego(ahoraMs){
         jug.calor = Math.min(1, jug.calor + 0.055);
         jug.perdidas++;
         quitarCosa(b, i);
+        siseo();
+        vibrar([30]);
       }
     }
     var liq = $("termoLiq");
@@ -11799,8 +12172,8 @@ function pasoJuego(ahoraMs){
       if (b3.r >= b3.rMax){
         jug.perdidas += 2;
         quitarCosa(b3, j);
-        campana(110, 1.4, 0.24);
-        vibrar([90]);
+        golpe(0, 0.5);
+        vibrar([120]);
       }
     }
     jug.aguante = Math.max(0, 1 - (jug.cosas.length + jug.perdidas * 0.5) / 12);
@@ -11829,7 +12202,7 @@ function pasoJuego(ahoraMs){
     if (subiendo === jug.dentro){
       jug.aguante = Math.min(1, jug.aguante + dt * 0.26);
       jug.buenSegundo = (jug.buenSegundo || 0) + dt;
-      if (jug.buenSegundo > 1){ jug.buenSegundo = 0; jug.aciertos++; campana(392, 0.5, 0.12); }
+      if (jug.buenSegundo > 1){ jug.buenSegundo = 0; jug.aciertos++; bocanada(); }
     } else {
       jug.aguante = Math.max(0, jug.aguante - dt * 0.5);
       jug.buenSegundo = 0;
@@ -11857,6 +12230,7 @@ function pintarFicha(s){
     $("sintomaDetalle").textContent = st.detalle;
     $("levanta").textContent = "Levanta el telefono para que te vean.";
     quieto = true;
+    cuerpo.classList.add("pidiendo");
   } else if (estado.humorElegido === -1){
     $("avisoEnfermo").textContent = "Uroscopia";
     $("sintomaNombre").textContent = "Tu frasco";
@@ -11893,6 +12267,7 @@ function pintarFicha(s){
   $("pasoQuieto").hidden = !quieto;
   if (!cura && camara.viendo) cerrarCamara();
   cuerpo.classList.toggle("tratado", tratado && !recaida);
+  if (estado.tratamiento !== -1) cuerpo.classList.remove("pidiendo");
 }
 
 function pintarAmbiente(s){
@@ -12018,6 +12393,14 @@ function pintarExpediente(){
     }
   } else {
     h += fila("No caiste", "Ni en la primera ni en la segunda", "Mas de la mitad de la sala si.", false);
+    if (estado.manojos > 0){
+      h += fila("Quemaste", estado.manojos + " manojos de hierba",
+        "Para limpiar el aire. El aire no tenia nada.", false);
+    }
+    if (estado.enterrados > 0){
+      h += fila("Enterraste", estado.enterrados + (estado.enterrados === 1 ? " muerto" : " muertos"),
+        "Los que enterraban eran de los siguientes en caer.", false);
+    }
   }
 
   h += fila("Acabaste", enfermo ? "Muerto" : "Vivo",
@@ -12235,6 +12618,13 @@ document.addEventListener("visibilitychange", function(){
 });
 
 // el dedo sobre el lienzo del mini juego
+$("sanoLienzo").addEventListener("pointerdown", function(ev){
+  ev.preventDefault();
+  abrirAudio();
+  tocarSano(ev);
+});
+$("sanoLienzo").addEventListener("contextmenu", function(ev){ ev.preventDefault(); });
+
 $("juegoLienzo").addEventListener("pointerdown", function(ev){
   ev.preventDefault();
   if (jug && jug.cual === 2){ jug.dentro = true; return; }
@@ -12350,12 +12740,36 @@ window.correrJuego = function(pasos, msPorPaso){
 };
 window.verJuego = function(){ return jug; };
 
+// lo mismo para lo que hace el sano
+window.correrSano = function(pasos, msPorPaso){
+  if (!san) return "no hay tarea";
+  var ms = msPorPaso || 16;
+  for (var i=0;i<(pasos||60);i++){
+    san.ultimo = performance.now() - ms;
+    pasoSano(performance.now());
+  }
+  return { tarea: san.tarea, humo: +san.humo.toFixed(3), manojos: san.manojos,
+           enterrados: san.enterrados, cuerpos: san.cuerpos.length };
+};
+window.verSano = function(){ return san; };
+
+// para comprobar que la alarma se queda sonando hasta que llega el medico
+window.verAlarma = function(){ return alarmaBucle !== 0; };
+
 window.probarRatas = function(){ verPantalla("ratas"); soltarRatas(); chirrido(); };
 
 // para oir la tos, el grito y el estertor sin esperar al pase entero
 window.probarSonidos = function(cual){
   abrirAudio();
   if (ac && ac.state === "suspended") ac.resume();
+  if (cual === "chapoteo"){ chapoteo(); return "Audio " + (ac ? ac.state : "cerrado"); }
+  if (cual === "siseo"){ siseo(); return "Audio " + (ac ? ac.state : "cerrado"); }
+  if (cual === "plop"){ plop(0.8); return "Audio " + (ac ? ac.state : "cerrado"); }
+  if (cual === "bocanada"){ bocanada(); return "Audio " + (ac ? ac.state : "cerrado"); }
+  if (cual === "soplo"){ soplo(); return "Audio " + (ac ? ac.state : "cerrado"); }
+  if (cual === "tierra"){ tierra(); return "Audio " + (ac ? ac.state : "cerrado"); }
+  if (cual === "peor"){ peorAun(); return "Audio " + (ac ? ac.state : "cerrado"); }
+  if (cual === "alarma"){ alarma(); return "Audio " + (ac ? ac.state : "cerrado"); }
   if (cual === "tos"){ ataqueTos(0.55, false); }
   else if (cual === "lejos"){ tos(0, 0.18, true); }
   else if (cual === "grito"){ lamento(0); }
